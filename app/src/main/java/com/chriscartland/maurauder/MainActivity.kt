@@ -158,6 +158,7 @@ class MainActivity : AppCompatActivity() {
         "DD:AE:AB:74:C0:D6" -> "Car Keys"
         "F5:35:C6:2E:3A:0D" -> "Backpack"
         "EF:82:C5:3A:35:78" -> "Suitcase"
+        "DA:57:85:50:C1:0C" -> "Camera"
         else -> address
     }
 
