@@ -39,28 +39,58 @@
         android:layout_marginTop="16dp"
         android:scrollbars="vertical" />
 
+    <TextView
+        android:id="@+id/phoneLocationLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+
+        tools:text="@string/phoneLocationSpinnerLabel" />
+
     <Spinner
         android:id="@+id/phoneLocationSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+
+        android:layout_below="@id/phoneLocationLabel"
+
         android:entries="@array/locations" />
+
+    <TextView
+        android:id="@+id/tileDeviceLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/phoneLocationSpinner"
+
+        tools:text="@string/tileDeviceSpinnerLabel" />
 
     <Spinner
         android:id="@+id/tileDeviceSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/phoneLocationSpinner"
+        android:layout_below="@id/tileDeviceLabel"
         android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
         android:entries="@array/tile_devices" />
+
+    <TextView
+        android:id="@+id/tileLocationLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tileDeviceSpinner"
+
+        tools:text="@string/tileDeviceLocationSpinnerLabel" />
 
     <Spinner
         android:id="@+id/tileLocationSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tileDeviceSpinner"
+        android:layout_below="@id/tileLocationLabel"
         android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+
         android:entries="@array/locations" />
 
 </RelativeLayout>

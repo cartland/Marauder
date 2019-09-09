@@ -11,12 +11,17 @@
         discover beacons when in the background.
     </string>
 
+    <string name="phoneLocationSpinnerLabel">Phone Location</string>
+    <string name="tileDeviceSpinnerLabel">Tile Device</string>
+    <string name="tileDeviceLocationSpinnerLabel">Tile Location</string>
+
     <string-array name="locations">
+        <item>living_room</item>
         <item>stromme_bedroom</item>
         <item>nick_bedroom</item>
         <item>cartland_bedroom</item>
+        <item>hallway</item>
         <item>bathroom</item>
-        <item>living_room</item>
         <item>kitchen</item>
         <item>patio</item>
         <item>front_steps</item>
