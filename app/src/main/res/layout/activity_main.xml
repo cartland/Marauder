@@ -10,17 +10,15 @@
         android:paddingTop="@dimen/activity_vertical_margin"
         tools:context=".MainActivity">
 
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/main_activity_header" />
-
     <Button
             android:id="@+id/start_scan_button"
             android:layout_width="100dp"
             android:layout_height="50dp"
             android:text="@string/scan_button_text"
-            android:layout_marginTop="40dp"/>
+            android:layout_below="@id/tileLocationSpinner"
+        android:layout_marginTop="16dp"
+
+        />
 
     <Button
             android:id="@+id/stop_scan_button"
@@ -28,13 +26,41 @@
             android:layout_height="50dp"
             android:text="@string/stop_scanning_button_text"
             android:visibility="invisible"
-            android:layout_marginTop="40dp"/>
+            android:layout_below="@id/tileLocationSpinner"
+        android:layout_marginTop="16dp"
+        />
 
     <TextView
-            android:id="@+id/main_text_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="100dp"
-            android:scrollbars="vertical"
-            android:maxLines="30"/>
+        android:id="@+id/main_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/start_scan_button"
+        android:maxLines="30"
+        android:layout_marginTop="16dp"
+        android:scrollbars="vertical" />
+
+    <Spinner
+        android:id="@+id/phoneLocationSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="16dp"
+        android:entries="@array/locations" />
+
+    <Spinner
+        android:id="@+id/tileDeviceSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/phoneLocationSpinner"
+        android:layout_marginTop="16dp"
+        android:entries="@array/tile_devices" />
+
+    <Spinner
+        android:id="@+id/tileLocationSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tileDeviceSpinner"
+        android:layout_marginTop="16dp"
+        android:entries="@array/locations" />
+
 </RelativeLayout>

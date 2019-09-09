@@ -10,4 +10,20 @@
     <string name="permission_denied_message">Since location access has not been granted, this app will not be able to
         discover beacons when in the background.
     </string>
+
+    <string-array name="locations">
+        <item>stromme_bedroom</item>
+        <item>nick_bedroom</item>
+        <item>cartland_bedroom</item>
+        <item>bathroom</item>
+        <item>living_room</item>
+        <item>kitchen</item>
+        <item>patio</item>
+        <item>front_steps</item>
+        <item>alberto_bedroom</item>
+    </string-array>
+    <string-array name="tile_devices">
+        <item>Car Keys</item>
+        <item>Camera</item>
+    </string-array>
 </resources>

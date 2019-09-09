@@ -18,7 +18,11 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import java.util.*
+import android.widget.Spinner
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -42,6 +46,7 @@ class MainActivity : AppCompatActivity() {
          * https://developer.android.com/reference/android/bluetooth/le/ScanResult.html#getRssi()
          */
         private val rssiData = HashMap<String, ArrayList<Int>>()
+        private val db = FirebaseFirestore.getInstance()
 
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             if (TILE_BLUETOOTH_DEVICE_NAME != result.device.name) {
@@ -65,6 +70,27 @@ class MainActivity : AppCompatActivity() {
                 sb.append("\n")
             }
             mainTextView.text = sb.toString()
+
+
+            val phoneLocationSpinner = findViewById<Spinner>(R.id.phoneLocationSpinner)
+            val tileDeviceSpinner = findViewById<Spinner>(R.id.tileDeviceSpinner)
+            val tileLocationSpinner = findViewById<Spinner>(R.id.tileLocationSpinner)
+
+            val update = hashMapOf(
+                "device" to device,
+                "name" to name,
+                "friendlyName" to friendlyName,
+                "rssiMeasurement" to result.rssi,
+                "timestamp" to FieldValue.serverTimestamp(),
+                "phoneLocation" to phoneLocationSpinner.selectedItem.toString()
+            )
+
+            if (tileDeviceSpinner.selectedItem.toString().equals(friendlyName)) {
+                update["tileLocation"] = tileLocationSpinner.selectedItem.toString()
+            }
+
+            db.collection("updates").document().set(update)
+
 
             // Scroll the text to the bottom of the view.
             val lineTop = mainTextView.layout?.getLineTop(mainTextView.lineCount) ?: 0

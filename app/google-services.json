@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "565983619801",
+    "firebase_url": "https://marauder-129.firebaseio.com",
+    "project_id": "marauder-129",
+    "storage_bucket": "marauder-129.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:565983619801:android:b41359036d2673e3e4ecc8",
+        "android_client_info": {
+          "package_name": "com.chriscartland.maurauder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "565983619801-4bj1lmhrefn6d1rbjjpuv1lsf988qgef.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKiP7IYe6IpLePzXP1ZP3z05AF2l_jZmI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "565983619801-4bj1lmhrefn6d1rbjjpuv1lsf988qgef.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
