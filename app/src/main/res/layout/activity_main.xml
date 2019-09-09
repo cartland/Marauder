@@ -45,6 +45,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
 
+        android:text="@string/phoneLocationSpinnerLabel"
         tools:text="@string/phoneLocationSpinnerLabel" />
 
     <Spinner
@@ -64,6 +65,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/phoneLocationSpinner"
 
+        android:text="@string/tileDeviceSpinnerLabel"
         tools:text="@string/tileDeviceSpinnerLabel" />
 
     <Spinner
@@ -81,6 +83,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/tileDeviceSpinner"
 
+        android:text="@string/tileDeviceLocationSpinnerLabel"
         tools:text="@string/tileDeviceLocationSpinnerLabel" />
 
     <Spinner
