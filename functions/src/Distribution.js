@@ -1,4 +1,6 @@
 'use strict';
+var typeOf = require('./util.js').typeOf;
+var checkTypes = require('./util.js').checkTypes;
 
 /**
  * Distribution of probabilities.
@@ -109,19 +111,24 @@ class Distribution {
     return this;
   }
 
-}
-
-function typeOf( obj ) {
-  return ({}).toString.call( obj ).match(/\s(\w+)/)[1].toLowerCase();
-}
-
-function checkTypes( args, types ) {
-  args = [].slice.call( args );
-  for ( var i = 0; i < types.length; ++i ) {
-    if ( typeOf( args[i] ) != types[i] ) {
-      throw new TypeError( 'param '+ i +' must be of type '+ types[i] );
+  /**
+   * Multiply the distribution by the values in another distribution.
+   *
+   * The distribution keys from {this} will be used and the
+   * distributions will be updated.
+   *
+   * @param {Distribution} x
+   * @returns {Distribution} Updated Distribution object
+   */
+  multiply(x) {
+    const keys = this._map.keys();
+    for (let key of keys) {
+      const product = this.getValue(key) * x.getValue(key);
+      this.setValue(key, product);
     }
+    return this;
   }
+
 }
 
 module.exports = {

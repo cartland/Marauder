@@ -1,5 +1,6 @@
 'use strict';
 var Distribution = require('./Distribution.js').Distribution;
+var roundNumber = require('./util.js').roundNumber;
 var assert = require('assert');
 
 var d = new Distribution();
@@ -29,3 +30,15 @@ d.scale(2.0);
 assert.strictEqual(d.calculateSum(), 2.0, 'Sum should be scaled');
 assert.strictEqual(d.getValue(zero), 0.4, 'Distribution value did not scale');
 assert.strictEqual(d.getValue(one), 1.6, 'Distribution value did not scale');
+
+// Test multiply()
+var x = new Distribution();
+x.setValue(zero, 0.5);
+x.setValue(one, 0.25);
+d.multiply(x);
+assert.strictEqual(d.getValue(zero), 0.2, 'Value does not match after multiply');
+assert.strictEqual(d.getValue(one), 0.4, 'Value does not match after multiply');
+var multiplySum = d.calculateSum();
+var roundedNum = roundNumber(multiplySum, 8);
+assert.strictEqual(roundedNum, 0.6, 'Sum does not match after multiply');
+
