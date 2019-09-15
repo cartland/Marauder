@@ -59,14 +59,23 @@ assert.strictEqual(roundNumber(a.getValue(STATE_A), 8), 0.4, 'Value does not mat
 assert.strictEqual(roundNumber(a.getValue(STATE_B), 8), 0.6, 'Value does not match after addition');
 
 // Test observation update
-var prior = new Distribution();
-prior.setValue(STATE_A, 1.0);
-prior.setValue(STATE_B, 1.0);
+var observationPrior = new Distribution();
+observationPrior.setValue(STATE_A, 1.0);
+observationPrior.setValue(STATE_B, 1.0);
 var observation = new Distribution();
 observation.setValue(STATE_A, 0.2);
 observation.setValue(STATE_B, 1.0);
 var alpha = 0.5;
-var observationInference = inference.calculateObservationUpdate(prior, observation, alpha);
-assert.strictEqual(observationInference.getValue(STATE_A), 0.6, 'Value does not match after multiply');
-assert.strictEqual(observationInference.getValue(STATE_B), 1.0, 'Value does not match after multiply');
+var observationInference = inference.calculateObservationUpdate(observationPrior, observation, alpha);
+assert.strictEqual(roundNumber(observationInference.getValue(STATE_A), 8), 0.375, 'Value does not match after observation');
+assert.strictEqual(roundNumber(observationInference.getValue(STATE_B), 8), 0.625, 'Value does not match after observation');
+
+// Test time prediction update
+var predictionPrior = new Distribution();
+predictionPrior.setValue(STATE_A, 1.0);
+predictionPrior.setValue(STATE_B, 0.1);
+var predictor = new inference.ProbablyNotHerePredictor([STATE_A, STATE_B]);
+var predictionInference = inference.calculateTimeUpdate(predictionPrior, predictor);
+assert.strictEqual(roundNumber(predictionInference.getValue(STATE_A), 8), 0.82727273, 'Value does not match after observation');
+assert.strictEqual(roundNumber(predictionInference.getValue(STATE_B), 8), 0.17272727, 'Value does not match after observation');
 
