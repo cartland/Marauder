@@ -124,6 +124,24 @@ class Distribution {
   }
 
   /**
+   * Add the distribution from the values in another distribution.
+   *
+   * The distribution keys from both will be used and the
+   * distribution will be updated.
+   *
+   * @param {Distribution} x
+   * @returns {Distribution} Updated Distribution object
+   */
+  add(x) {
+    const keys = x._map.keys();
+    for (let key of keys) {
+      const sum = this.getValue(key) + x.getValue(key);
+      this.setValue(key, sum);
+    }
+    return this;
+  }
+
+  /**
    * Multiply the distribution by the values in another distribution.
    *
    * The distribution keys from {this} will be used and the
