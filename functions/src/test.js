@@ -16,6 +16,11 @@ d.addValue(one, 0.1);
 d.addValue(one, 0.3);
 assert.strictEqual(d.getValue(one), 0.4, 'Failed to add value to distribution');
 
+// Test copy()
+var copy = d.copy();
+assert.strictEqual(copy.getValue(zero), 0.1, 'Failed to set value in distribution');
+assert.strictEqual(copy.getValue(one), 0.4, 'Failed to add value to distribution');
+
 // Test calculateSum()
 assert.strictEqual(d.calculateSum(), 0.5, 'Distribution sum does not match');
 

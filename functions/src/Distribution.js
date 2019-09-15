@@ -10,7 +10,19 @@ var checkTypes = require('./util.js').checkTypes;
  */
 class Distribution {
   constructor() {
+    // Create an empty distribution.
     this._map = new Map();
+  }
+
+  /**
+   * Copy the distribution.
+   *
+   * @returns {Distribution} A new Distribution
+   */
+  copy() {
+    var newDistribution = new Distribution();
+    newDistribution._map = new Map(this._map);
+    return newDistribution;
   }
 
   /**
