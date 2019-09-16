@@ -54,15 +54,26 @@ neighborhood.set('stromme_bedroom', [ 'nick_bedroom', 'stromme_bedroom', 'hallwa
 neighborhood.set('hallway', [ 'living_room', 'nick_bedroom', 'stromme_bedroom', 'hallway' ]);
 var rssiNeighborhoodObserver = new inference.RssiNeighborhoodObserver(neighborhood);
 
+var lastUpdate = -1;
 for (var i = 0; i < data.length; i++) {
   var datum = data[i];
   var phoneLocation = datum['phoneLocation'];
   var rssiMeasurement = datum['rssiMeasurement'];
   var observation = rssiNeighborhoodObserver.observe(phoneLocation, rssiMeasurement);
-  var alpha = 0.5;
+  var alpha = 0.9;
+  var noise = 0.2;
   var observationInference = inference.calculateObservationUpdate(phoneLocationPredictions, observation, alpha);
-  observationInference = observationInference.add(createNoiseDistribution(states).scale(0.01)).normalize();
+  observationInference = observationInference.add(createNoiseDistribution(states).scale(noise)).normalize();
+  if (lastUpdate == -1) {
+    console.log('First update!');
+  } else {
+    console.log('Time since last update: ' + ((Date.parse(datum['timestamp']) - Date.parse(lastUpdate)) / 1000).toString() + ' seconds');
+  }
+  var date = new Date(Date.parse(datum['timestamp']));
+  console.log(date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds());
   console.log(phoneLocation + ': ' + rssiMeasurement);
-  console.log(observationInference);
+  console.log(observationInference.prettyPrint());
+  console.log();
   phoneLocationPredictions = observationInference
+  lastUpdate = datum['timestamp'];
 }

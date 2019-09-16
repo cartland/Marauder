@@ -1,5 +1,6 @@
 'use strict';
 var checkTypes = require('./util.js').checkTypes;
+var roundNumber  = require('./util.js').roundNumber;
 
 /**
  * Distribution of probabilities.
@@ -157,6 +158,28 @@ class Distribution {
     }
     return this;
   }
+
+  prettyPrint() {
+    const states = this._map.keys();
+    var maxStateLength = 0;
+    var outArray = [];
+    for (let state of states) {
+      var value = this.getValue(state) * 100;
+      outArray.push([state, value]);
+      maxStateLength = Math.max(maxStateLength, state.length);
+    }
+    var output = '';
+    for (var i = 0; i < outArray.length; i++) {
+      var state = outArray[i][0].padEnd(maxStateLength + 1);
+      var value = outArray[i][1];
+      output += state + ':' + roundNumber(value, 4).toString().padStart(5) + '*'.repeat(Math.ceil(value));
+      if (i + 1 < outArray.length) {
+        output += '\n';
+      }
+    }
+    return output;
+  }
+
 
 }
 
