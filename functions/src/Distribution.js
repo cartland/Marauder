@@ -160,6 +160,28 @@ class Distribution {
 
 }
 
+function createFlatDistribution(states) {
+  var distribution = new Distribution();
+  var distributionValue = 1.0 / states.length;
+  for (var i = 0; i < states.length; i++) {
+    var state = states[i];
+    distribution.setValue(state, distributionValue);
+  }
+  return distribution;
+}
+
+function createNoiseDistribution(states) {
+  var distribution = new Distribution();
+  for (var i = 0; i < states.length; i++) {
+    var state = states[i];
+    var value = Math.random();
+    distribution.setValue(state, value);
+  }
+  return distribution.normalize();
+}
+
 module.exports = {
-  Distribution: Distribution
+  Distribution: Distribution,
+  createFlatDistribution: createFlatDistribution,
+  createNoiseDistribution: createNoiseDistribution,
 }
