@@ -159,6 +159,15 @@ class Distribution {
     return this;
   }
 
+  keysSortedByValue() {
+    const states = Array.from(this._map.keys());
+    const that = this;
+    states.sort(function(a, b) {
+      return that.getValue(b) - that.getValue(a);
+    });
+    return states;
+  }
+
   prettyPrint() {
     const states = this._map.keys();
     var maxStateLength = 0;
@@ -172,7 +181,7 @@ class Distribution {
     for (var i = 0; i < outArray.length; i++) {
       var state = outArray[i][0].padEnd(maxStateLength + 1);
       var value = outArray[i][1];
-      output += state + ':' + roundNumber(value, 4).toString().padStart(5) + '*'.repeat(Math.ceil(value));
+      output += state + ':' + roundNumber(value, 2).toString().padStart(5) + '% ' + '*'.repeat(Math.ceil(value));
       if (i + 1 < outArray.length) {
         output += '\n';
       }

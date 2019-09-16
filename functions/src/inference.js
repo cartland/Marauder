@@ -86,6 +86,34 @@ function calculateTimeUpdate(predictionPrior, predictor) {
   return inference.normalize();
 }
 
+function makePrediction(distribution) {
+  return distribution.keysSortedByValue()[0];
+}
+
+class OneSecondPredictor {
+  constructor(states) {
+    this.allStates = states;
+  }
+
+  getAllStates() {
+    return this.allStates;
+  }
+
+  predict(origin) {
+    const prediction = new Distribution();
+    const stayingProbability = 0.99;
+    const otherStateValue = (1 - stayingProbability) / this.allStates.length;
+    for (let state of this.getAllStates()) {
+      if (state == origin) {
+        prediction.setValue(state, stayingProbability);
+      } else {
+        prediction.setValue(state, otherStateValue);
+      }
+    }
+    return prediction.normalize();
+  }
+}
+
 class ProbablyNotHerePredictor {
   constructor(states) {
     this.allStates = states;
@@ -111,6 +139,8 @@ class ProbablyNotHerePredictor {
 module.exports = {
   calculateObservationUpdate: calculateObservationUpdate,
   calculateTimeUpdate: calculateTimeUpdate,
+  makePrediction: makePrediction,
+  OneSecondPredictor: OneSecondPredictor,
   ProbablyNotHerePredictor: ProbablyNotHerePredictor,
   RssiNeighborhoodObserver: RssiNeighborhoodObserver
 }

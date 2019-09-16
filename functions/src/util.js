@@ -16,9 +16,8 @@ function roundNumber(number, decimals=8) {
   return Math.round(number * factor) / factor;
 }
 
-
 module.exports = {
   typeOf: typeOf,
   checkTypes: checkTypes,
-  roundNumber: roundNumber
+  roundNumber: roundNumber,
 }
