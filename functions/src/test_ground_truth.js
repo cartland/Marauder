@@ -62,6 +62,7 @@ var rssiNeighborhoodObserver = new inference.RssiNeighborhoodObserver(neighborho
 // Begin inference based on data.
 var totalGuesses = 0;
 var totalCorrect = 0;
+var confusionMatrix = new inference.ConfusionMatrix();
 console.log();
 console.log('BEGIN INFERENCE');
 var lastDataUpdateMillis = -1;
@@ -126,9 +127,12 @@ for (var i = 0; i < data.length; i++) {
     totalCorrect++;
   }
   totalGuesses++;
+  confusionMatrix.insert(guess, actualLocation);
 
   console.log('INFERENCE: ' + (correct ? 'CORRECT' : 'WRONG') + ' - actual: ' + actualLocation + ', guess: ' + guess);
   console.log();
 }
 console.log('TOTAL GUESSES:' + totalGuesses);
 console.log('TOTAL CORRECT:' + totalCorrect + ' (' + util.roundNumber(100 * totalCorrect / totalGuesses, 2) + '%)');
+var confusion = confusionMatrix.prettyPrint();
+console.log(confusion);

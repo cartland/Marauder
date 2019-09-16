@@ -90,6 +90,74 @@ function makePrediction(distribution) {
   return distribution.keysSortedByValue()[0];
 }
 
+class ConfusionMatrix {
+  constructor() {
+    this._matrix = new Map();
+  }
+
+  insert(guess, correct) {
+    if (!this._matrix.has(guess)) {
+      this._matrix.set(guess, new Map());
+    }
+    if (!this._matrix.has(correct)) {
+      this._matrix.set(correct, new Map());
+    }
+    var answers = this._matrix.get(guess);
+    if (!answers.has(correct)) {
+      answers.set(correct, 0);
+    }
+    var answerCount = answers.get(correct);
+    var newAnswerCount = answerCount + 1;
+    answers.set(correct, newAnswerCount);
+  }
+
+  prettyPrint() {
+    const states = Array.from(this._matrix.keys());
+    var outputs = Array(states.length);
+    for (var stateXIndex = 0; stateXIndex < states.length; stateXIndex++) {
+      outputs[stateXIndex] = Array(states.length);
+      for (var stateYIndex = 0; stateYIndex < states.length; stateYIndex++) {
+        outputs[stateXIndex][stateYIndex] = 0;
+      }
+    }
+    for (var x = 0; x < states.length; x++) {
+      for (var y = 0; y < states.length; y++) {
+         var correct = states[x];
+         var guess = states[y];
+         if (!this._matrix.has(guess)) {
+           outputs[x][y] = 0;
+         } else {
+           var answers = this._matrix.get(guess);
+           if (!answers.has(correct)) {
+             outputs[x][y] = 0;
+           } else {
+             outputs[x][y] = answers.get(correct);
+           }
+         }
+      }
+    }
+
+    var legend = 'guess↓ actual→';
+    var maxStateLength = legend.length;
+    for (var stateIndex = 0; stateIndex < states.length; stateIndex++) {
+      if (states[stateIndex].length > maxStateLength) {
+        maxStateLength = states[stateIndex].length;
+      }
+    }
+    var outputString = legend.padEnd(maxStateLength) + ' | ' + states.join(' | ') + '\n';
+    for (var y = 0; y < states.length; y++) {
+      outputString += states[y].padStart(maxStateLength) + ' | ';
+      for (var x = 0; x < states.length; x++) {
+        var columnWidth = states[x].length;
+        outputString += outputs[x][y].toString().padStart(columnWidth, ' ');
+        outputString += ' | ';
+      }
+      outputString += '\n';
+    }
+    return outputString;
+  }
+}
+
 class OneSecondPredictor {
   constructor(states) {
     this.allStates = states;
@@ -140,6 +208,7 @@ module.exports = {
   calculateObservationUpdate: calculateObservationUpdate,
   calculateTimeUpdate: calculateTimeUpdate,
   makePrediction: makePrediction,
+  ConfusionMatrix: ConfusionMatrix,
   OneSecondPredictor: OneSecondPredictor,
   ProbablyNotHerePredictor: ProbablyNotHerePredictor,
   RssiNeighborhoodObserver: RssiNeighborhoodObserver
