@@ -1,5 +1,4 @@
 'use strict';
-var typeOf = require('./util.js').typeOf;
 var checkTypes = require('./util.js').checkTypes;
 
 /**

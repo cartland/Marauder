@@ -4,15 +4,15 @@ var roundNumber = require('./util.js').roundNumber;
 var inference = require('./inference.js');
 var assert = require('assert');
 
+var STATE_A = 0;
+var STATE_B = 1;
 var d = new Distribution();
 
 // Test setValue()
-var STATE_A = 0;
 d.setValue(STATE_A, 0.1);
 assert.strictEqual(d.getValue(STATE_A), 0.1, 'Failed to set value in distribution');
 
 // Test addValue()
-var STATE_B = 1;
 d.addValue(STATE_B, 0.1);
 d.addValue(STATE_B, 0.3);
 assert.strictEqual(d.getValue(STATE_B), 0.4, 'Failed to add value to distribution');
@@ -78,4 +78,32 @@ var predictor = new inference.ProbablyNotHerePredictor([STATE_A, STATE_B]);
 var predictionInference = inference.calculateTimeUpdate(predictionPrior, predictor);
 assert.strictEqual(roundNumber(predictionInference.getValue(STATE_A), 8), 0.82727273, 'Value does not match after observation');
 assert.strictEqual(roundNumber(predictionInference.getValue(STATE_B), 8), 0.17272727, 'Value does not match after observation');
+
+// Test observation distribution
+// RSSI values: [-10, -55, -65, -75, -90]
+// Expected input will be negative, where higher values indicate higher probability of being close to the sensor.
+var neighborhood = new Map();
+neighborhood.set(STATE_A, [STATE_B]);
+neighborhood.set(STATE_B, [STATE_A]);
+var rssiNeighborhoodObserver = new inference.RssiNeighborhoodObserver(neighborhood);
+// -10 RSSI
+var observationDistribution = rssiNeighborhoodObserver.observe(STATE_A, -10);
+assert.ok(observationDistribution.getValue(STATE_A) > 0.7, '-10 RSSI observation should indicate state A (with high confidence)');
+assert.ok(observationDistribution.getValue(STATE_B) < 0.3, '-10 RSSI observation should NOT indicate state B (with high confidence)');
+// -55 RSSI
+observationDistribution = rssiNeighborhoodObserver.observe(STATE_A, -55);
+assert.ok(observationDistribution.getValue(STATE_A) > 0.55, '-55 RSSI observation should indicate state A (with low conficence)');
+assert.ok(observationDistribution.getValue(STATE_B) < 0.45, '-55 RSSI observation should NOT indicate state B (with low conficence)');
+// -65 RSSI
+observationDistribution = rssiNeighborhoodObserver.observe(STATE_A, -65);
+assert.ok(observationDistribution.getValue(STATE_A) > 0.35, '-65 RSSI observation can indicate state A (with extremely low conficence)');
+assert.ok(observationDistribution.getValue(STATE_B) < 0.65, '-65 RSSI observation can indicate state B (with extremely low conficence)');
+// -75 RSSI
+observationDistribution = rssiNeighborhoodObserver.observe(STATE_A, -75);
+assert.ok(observationDistribution.getValue(STATE_A) < 0.45, '-75 RSSI observation should NOT indicate state A (with low conficence)');
+assert.ok(observationDistribution.getValue(STATE_B) > 0.55, '-75 RSSI observation should indicate state B (with low conficence)');
+// -90 RSSI
+var observationDistribution = rssiNeighborhoodObserver.observe(STATE_A, -90);
+assert.ok(observationDistribution.getValue(STATE_A) < 0.3, '-90 RSSI observation should NOT indicate state A (with high conficence)');
+assert.ok(observationDistribution.getValue(STATE_B) > 0.7, '-90 RSSI observation should indicate state B (with high conficence)');
 
