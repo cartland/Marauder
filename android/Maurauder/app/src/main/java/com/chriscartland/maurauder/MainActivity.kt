@@ -15,13 +15,14 @@ import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import java.util.*
-import android.widget.Spinner
+import java.util.ArrayList
+import java.util.HashMap
 
 
 class MainActivity : AppCompatActivity() {
