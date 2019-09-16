@@ -21,6 +21,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import org.json.JSONObject
 import java.util.ArrayList
 import java.util.HashMap
 
@@ -29,7 +30,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var manager: BluetoothManager
     private lateinit var adapter: BluetoothAdapter
-    private lateinit var bleScanner: BluetoothLeScanner
+    private var bleScanner: BluetoothLeScanner? = null
     private lateinit var startScanButton: Button
     private lateinit var stopScanButton: Button
     private lateinit var mainTextView: TextView
@@ -91,6 +92,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             db.collection("updates").document().set(update)
+            Log.d(TAG, JSONObject(update).toString())
 
 
             // Scroll the text to the bottom of the view.
@@ -149,7 +151,11 @@ class MainActivity : AppCompatActivity() {
         when (requestCode) {
             PERMISSION_REQUEST_COARSE_LOCATION -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG, "Coarse location permission granted")
+                    Log.d(TAG, "onRequestPermissionsResult: Coarse location permission granted")
+                    if (bleScanner == null) {
+                        Log.d(TAG, "onRequestPermissionsResult: Retrieving BluetoothLeScanner")
+                        bleScanner = adapter.bluetoothLeScanner
+                    }
                 } else {
                     val builder = AlertDialog.Builder(this)
                     builder.setTitle(getString(R.string.permission_denied_title))
@@ -167,7 +173,12 @@ class MainActivity : AppCompatActivity() {
         mainTextView.text = ""
         startScanButton.visibility = View.INVISIBLE
         stopScanButton.visibility = View.VISIBLE
-        AsyncTask.execute { bleScanner.startScan(bleScanCallback) }
+        AsyncTask.execute {
+            bleScanner?.startScan(bleScanCallback)
+            if (bleScanner == null) {
+                Log.w(TAG, "startScanning: BluetoothLeScanner not available")
+            }
+        }
     }
 
     private fun stopScanning() {
@@ -175,7 +186,12 @@ class MainActivity : AppCompatActivity() {
         mainTextView.append("Stopped Scanning")
         startScanButton.visibility = View.VISIBLE
         stopScanButton.visibility = View.INVISIBLE
-        AsyncTask.execute { bleScanner.stopScan(bleScanCallback) }
+        AsyncTask.execute {
+            bleScanner?.stopScan(bleScanCallback)
+            if (bleScanner == null) {
+                Log.w(TAG, "stopScanning: BluetoothLeScanner not available")
+            }
+        }
     }
 
     /**
