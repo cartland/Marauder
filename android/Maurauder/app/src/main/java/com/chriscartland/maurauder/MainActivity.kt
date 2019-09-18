@@ -11,6 +11,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.AsyncTask
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.View
@@ -24,12 +25,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 import org.json.JSONObject
 import java.util.ArrayList
 import java.util.HashMap
+import java.util.UUID
 
 
 class MainActivity : AppCompatActivity() {
 
+    private var uuid: String? = null
     private lateinit var manager: BluetoothManager
-    private lateinit var adapter: BluetoothAdapter
+    private var adapter: BluetoothAdapter? = null
     private var bleScanner: BluetoothLeScanner? = null
     private lateinit var startScanButton: Button
     private lateinit var stopScanButton: Button
@@ -73,27 +76,30 @@ class MainActivity : AppCompatActivity() {
             }
             mainTextView.text = sb.toString()
 
-
             val phoneLocationSpinner = findViewById<Spinner>(R.id.phoneLocationSpinner)
             val tileDeviceSpinner = findViewById<Spinner>(R.id.tileDeviceSpinner)
             val tileLocationSpinner = findViewById<Spinner>(R.id.tileLocationSpinner)
 
             val update = hashMapOf(
-                "device" to device,
-                "name" to name,
-                "friendlyName" to friendlyName,
-                "rssiMeasurement" to result.rssi,
+                "appVersionCode" to BuildConfig.VERSION_CODE,
+                "appVersionName" to BuildConfig.VERSION_NAME,
+                "phoneUUID" to uuid,
+                "bleDevice" to device,
+                "bleName" to name,
+                "bleFriendlyName" to friendlyName,
+                "bleRssiMeasurement" to result.rssi,
                 "timestamp" to FieldValue.serverTimestamp(),
                 "phoneLocation" to phoneLocationSpinner.selectedItem.toString()
             )
 
-            if (tileDeviceSpinner.selectedItem.toString().equals(friendlyName)) {
-                update["tileLocation"] = tileLocationSpinner.selectedItem.toString()
+            val selectedTileLocation = tileDeviceSpinner.selectedItem.toString()
+            if (selectedTileLocation == friendlyName) {
+                Log.d(TAG, "Uploading tile")
+                val tileLocation = tileLocationSpinner.selectedItem.toString()
+                update["tileLocation"] = tileLocation
+                db.collection("updatesv2").document().set(update)
             }
-
-            db.collection("updates").document().set(update)
             Log.d(TAG, JSONObject(update).toString())
-
 
             // Scroll the text to the bottom of the view.
             val lineTop = mainTextView.layout?.getLineTop(mainTextView.lineCount) ?: 0
@@ -105,8 +111,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        Log.d(TAG, "onRestoreInstanceState")
+        uuid = savedInstanceState?.getString(Companion.UUID_KEY)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+        Log.d(TAG, "onSaveInstanceState")
+        outState?.run {
+            putString(Companion.UUID_KEY, uuid)
+        }
+        super.onSaveInstanceState(outState, outPersistentState)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (uuid == null) {
+            Log.d(TAG, "onRestoreInstanceState: randomUUID()")
+            uuid = UUID.randomUUID().toString()
+        }
+
         setContentView(R.layout.activity_main)
 
         mainTextView = findViewById(R.id.main_text_view)
@@ -119,10 +143,11 @@ class MainActivity : AppCompatActivity() {
 
         manager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         adapter = manager.adapter
-        bleScanner = adapter.bluetoothLeScanner
+        bleScanner = adapter?.bluetoothLeScanner
 
         // Bluetooth is disabled. Ask user to turn on Bluetooth.
-        if (!adapter.isEnabled) {
+        val finalAdapter = adapter
+        if (finalAdapter != null && !finalAdapter.isEnabled) {
             val enableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             startActivityForResult(enableIntent, REQUEST_ENABLE_BT)
         }
@@ -154,7 +179,7 @@ class MainActivity : AppCompatActivity() {
                     Log.d(TAG, "onRequestPermissionsResult: Coarse location permission granted")
                     if (bleScanner == null) {
                         Log.d(TAG, "onRequestPermissionsResult: Retrieving BluetoothLeScanner")
-                        bleScanner = adapter.bluetoothLeScanner
+                        bleScanner = adapter?.bluetoothLeScanner
                     }
                 } else {
                     val builder = AlertDialog.Builder(this)
@@ -210,5 +235,6 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_ENABLE_BT = 1
         private const val PERMISSION_REQUEST_COARSE_LOCATION = 1
         private const val TILE_BLUETOOTH_DEVICE_NAME = "Tile"
+        private const val UUID_KEY: String = "UUID_KEY"
     }
 }
