@@ -18,26 +18,31 @@ function main() {
   // Display the data for the UUID.
   // Get the unique UUIDs.
   // Then display the recent UUID.
-  // Then display the unique UUIDs.
-  getRecentUUID(updatesRef)
-    .then(function (phoneUUID) {
-      return getDataForUUID(updatesRef, phoneUUID)
-        .then(function (data) {
-          return new Promise(function (resolve, reject) {
-            console.log(data);
-            resolve();
+  getUniqueUUIDs()
+    .then(function(uniqueUUIDs) {
+      const uuidArray = Array.from(uniqueUUIDs);
+      var promises = [];
+      for (var i = 0; i < uuidArray.length; i++) {
+        var promise = getDataForUUID(updatesRef, phoneUUID)
+          .then(function (data) {
+            return new Promise(function (resolve, reject) {
+              console.log(phoneUUID);
+              console.log(data);
+              resolve();
+            });
           });
-        })
-        .then(function() {
-          return getUniqueUUIDs();
-        })
-        .then(function(uniqueUUIDs) {
-          return new Promise(function (resolve, reject) {
-            console.log('Recent UUID:', phoneUUID);
-            console.log('Unique UUIDs:', Array.from(uniqueUUIDs).join(', '));
-            resolve();
-          });
-        });
+        promises.push(promise);
+      }
+      return Promise.all(promises);
+    })
+    .then(function () {
+      return getUniqueUUIDs();
+    })
+    .then(function(uniqueUUIDs) {
+      return new Promise(function (resolve, reject) {
+        console.log('Unique UUIDs:', Array.from(uniqueUUIDs).join(', '));
+        resolve();
+      });
     });
 }
 
