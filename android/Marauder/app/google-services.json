@@ -8,6 +8,35 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:565983619801:android:e6bd5f5f3a07a38de4ecc8",
+        "android_client_info": {
+          "package_name": "com.chriscartland.marauder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "565983619801-4bj1lmhrefn6d1rbjjpuv1lsf988qgef.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKiP7IYe6IpLePzXP1ZP3z05AF2l_jZmI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "565983619801-4bj1lmhrefn6d1rbjjpuv1lsf988qgef.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:565983619801:android:b41359036d2673e3e4ecc8",
         "android_client_info": {
           "package_name": "com.chriscartland.maurauder"

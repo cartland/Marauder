@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Maurauder\'s Map</string>
+    <string name="app_name">Marauder\'s Map</string>
     <string name="main_activity_header">Let\'s experiment!</string>
     <string name="scan_button_text">Scan</string>
     <string name="stop_scanning_button_text">Stop Scanning</string>

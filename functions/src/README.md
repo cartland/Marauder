@@ -9,7 +9,7 @@ Install Node.js and then run the commands from the `src/` directory.
 # Example Output
 
 Output from running inference test.
-[Source](https://github.com/cartland/Maurauder/tree/c74042630446dc5f7cad5036a2b18b2202d6644c/functions/src)
+[Source](https://github.com/cartland/Marauder/tree/c74042630446dc5f7cad5036a2b18b2202d6644c/functions/src)
 
     node test_ground_truth.js
 

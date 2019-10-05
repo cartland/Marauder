@@ -1,4 +1,4 @@
-package com.chriscartland.maurauder
+package com.chriscartland.marauder
 
 import org.junit.Test
 

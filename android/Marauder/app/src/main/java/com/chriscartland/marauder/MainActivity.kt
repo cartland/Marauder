@@ -1,4 +1,4 @@
-package com.chriscartland.maurauder
+package com.chriscartland.marauder
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
