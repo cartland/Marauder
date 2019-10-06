@@ -12,10 +12,11 @@
     </string>
 
     <string name="phoneLocationSpinnerLabel">Phone Location</string>
-    <string name="tileDeviceSpinnerLabel">Tile Device</string>
+    <string name="knownBleDevicesLabel">Known Devices</string>
     <string name="tileDeviceLocationSpinnerLabel">Tile Location</string>
 
     <string-array name="locations">
+        <item>unknown</item>
         <item>living_room</item>
         <item>stromme_bedroom</item>
         <item>nick_bedroom</item>
