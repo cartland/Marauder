@@ -63,9 +63,17 @@ class Canvas extends React.Component {
       },
     }
 
-    setTimeout(() => {
-      this.changeRoom('stromme', 'kitchen');
-    }, 2000);
+    let randomRoomChange = () => {
+      let peopleKeys = Object.keys(this.people);
+      let randomPerson = peopleKeys[Math.floor(Math.random() * peopleKeys.length)];
+      let newRoomOptions = Object.keys(rooms[this.people[randomPerson].room].doors);
+      let newRoom = newRoomOptions[Math.floor(Math.random() * newRoomOptions.length)];
+
+      this.changeRoom(randomPerson, newRoom);
+      setTimeout(randomRoomChange, 10*1000);
+    };
+
+    setTimeout(randomRoomChange, 2000);
 
     this.canvas = React.createRef();
     this.image = React.createRef();
@@ -126,11 +134,8 @@ class Canvas extends React.Component {
 
     if (choice < 4) {
       return this.newStandingStillWaypoint(startingLocation, 1000*(5*Math.random()+2), room);
-    } else if (choice < 8) {
-      return this.newRandomLocationWaypoint(startingLocation, room);
     } else {
       return this.newRandomLocationWaypoint(startingLocation, room);
-
     }
   }
 
@@ -142,6 +147,7 @@ class Canvas extends React.Component {
   }
 
   changeRoom = (person, newRoom) => {
+    console.log(`changeRoom: moving ${person} to ${newRoom}`);
     let doorLocation = rooms[this.people[person].room].doors[newRoom];
 
     let speed = 560 / 10; // cross the living room in 10 seconds
