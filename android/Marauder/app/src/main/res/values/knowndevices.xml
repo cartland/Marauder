@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="devices_of_interest">
+        <item>DD:AE:AB:74:C0:D6->Car Keys</item>
+        <item>F5:35:C6:2E:3A:0D->Backpack</item>
+        <item>EF:82:C5:3A:35:78->Suitcase</item>
+        <item>DA:57:85:50:C1:0C->Camera</item>
+    </string-array>
+</resources>

@@ -9,12 +9,14 @@ import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.os.AsyncTask
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.PersistableBundle
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.Spinner
 import android.widget.TextView
@@ -36,28 +38,35 @@ class MainActivity : AppCompatActivity() {
     private var bleScanner: BluetoothLeScanner? = null
     private lateinit var startScanButton: Button
     private lateinit var stopScanButton: Button
+    private lateinit var clearButton: Button
+    private lateinit var devicesOfInterestList: TextView
     private lateinit var mainTextView: TextView
+    private val devicesOfInterest: MutableMap<String, String> = HashMap()
+
+    /**
+     * RSSI data provides a measure of the signal strength.
+     *
+     * Lower numbers usually suggest that the device is farther away.
+     * Higher numbers usually suggest that the device is closer.
+     *
+     * Returns the received signal strength in dBm. The valid range is [-127, 126].
+     * https://developer.android.com/reference/android/bluetooth/le/ScanResult.html#getRssi()
+     */
+    val rssiData = HashMap<String, ArrayList<Int>>()
 
     // Bluetooth device scan callback.
     private val bleScanCallback = object : ScanCallback() {
 
-        /**
-         * RSSI data provides a measure of the signal strength.
-         *
-         * Lower numbers usually suggest that the device is farther away.
-         * Higher numbers usually suggest that the device is closer.
-         *
-         * Returns the received signal strength in dBm. The valid range is [-127, 126].
-         * https://developer.android.com/reference/android/bluetooth/le/ScanResult.html#getRssi()
-         */
-        private val rssiData = HashMap<String, ArrayList<Int>>()
         private val db = FirebaseFirestore.getInstance()
 
         override fun onScanResult(callbackType: Int, result: ScanResult) {
+            Log.d(TAG, "onScanResult")
             if (TILE_BLUETOOTH_DEVICE_NAME != result.device.name) {
+                Log.d(TAG, "onScanResult: Not Tile '${result.device.name}'")
                 // We only care about Tile devices.
                 return
             }
+            Log.d(TAG, "onScanResult: Tile!")
             // Extract device information.
             val device = result.device
             val name = device.name
@@ -77,12 +86,12 @@ class MainActivity : AppCompatActivity() {
             mainTextView.text = sb.toString()
 
             val phoneLocationSpinner = findViewById<Spinner>(R.id.phoneLocationSpinner)
-            val tileDeviceSpinner = findViewById<Spinner>(R.id.tileDeviceSpinner)
             val tileLocationSpinner = findViewById<Spinner>(R.id.tileLocationSpinner)
 
             val update = hashMapOf(
                 "appVersionCode" to BuildConfig.VERSION_CODE,
                 "appVersionName" to BuildConfig.VERSION_NAME,
+                "phoneModel" to android.os.Build.MODEL,
                 "phoneUUID" to uuid,
                 "bleDevice" to device,
                 "bleName" to name,
@@ -92,8 +101,7 @@ class MainActivity : AppCompatActivity() {
                 "phoneLocation" to phoneLocationSpinner.selectedItem.toString()
             )
 
-            val selectedTileLocation = tileDeviceSpinner.selectedItem.toString()
-            if (selectedTileLocation == friendlyName) {
+            if (devicesOfInterest.values.contains(friendlyName)) {
                 Log.d(TAG, "Uploading tile")
                 val tileLocation = tileLocationSpinner.selectedItem.toString()
                 update["tileLocation"] = tileLocation
@@ -118,10 +126,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
         Log.d(TAG, "onSaveInstanceState")
-        outState?.run {
+        val out = outState ?: Bundle()
+        val persistableOut = outPersistentState ?: PersistableBundle()
+        out.run {
             putString(Companion.UUID_KEY, uuid)
         }
-        super.onSaveInstanceState(outState, outPersistentState)
+        super.onSaveInstanceState(out, persistableOut)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -131,15 +141,31 @@ class MainActivity : AppCompatActivity() {
             uuid = UUID.randomUUID().toString()
         }
 
+        loadDevicesOfInterest(resources, devicesOfInterest)
+
         setContentView(R.layout.activity_main)
 
         mainTextView = findViewById(R.id.main_text_view)
         mainTextView.movementMethod = ScrollingMovementMethod()
 
         startScanButton = findViewById(R.id.start_scan_button)
-        startScanButton.setOnClickListener { startScanning() }
+        startScanButton.setOnClickListener {
+            restartPeriodically()
+        }
         stopScanButton = findViewById(R.id.stop_scan_button)
-        stopScanButton.setOnClickListener { stopScanning() }
+        stopScanButton.setOnClickListener {
+            restartScanHandler.removeCallbacksAndMessages(null)
+            restartOnStop = false
+            stopScanning()
+        }
+        clearButton = findViewById(R.id.clear_button)
+        clearButton.setOnClickListener {
+            mainTextView.text = ""
+            clearRssiData()
+        }
+
+        devicesOfInterestList = findViewById(R.id.listOfKnownBleDevices)
+        devicesOfInterestList.text = devicesOfInterest.toString()
 
         manager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         adapter = manager.adapter
@@ -165,6 +191,19 @@ class MainActivity : AppCompatActivity() {
                 )
             }
             builder.show()
+        } else {
+            restartPeriodically()
+        }
+    }
+
+    private fun loadDevicesOfInterest(resources: Resources, devicesOfInterest: MutableMap<String, String>) {
+        resources.getStringArray(R.array.devices_of_interest).let { listOfDeviceInfos ->
+            for (value in listOfDeviceInfos) {
+                val keyValue = value.split("->")
+                val key = keyValue[0] as String
+                val value = keyValue[1] as String
+                devicesOfInterest[key] = value
+            }
         }
     }
 
@@ -181,6 +220,7 @@ class MainActivity : AppCompatActivity() {
                         Log.d(TAG, "onRequestPermissionsResult: Retrieving BluetoothLeScanner")
                         bleScanner = adapter?.bluetoothLeScanner
                     }
+                    restartPeriodically()
                 } else {
                     val builder = AlertDialog.Builder(this)
                     builder.setTitle(getString(R.string.permission_denied_title))
@@ -193,42 +233,75 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun clearRssiData() {
+        rssiData.clear()
+    }
+
     private fun startScanning() {
         Log.d(TAG, "startScanning")
-        mainTextView.text = ""
-        startScanButton.visibility = View.INVISIBLE
-        stopScanButton.visibility = View.VISIBLE
         AsyncTask.execute {
             bleScanner?.startScan(bleScanCallback)
             if (bleScanner == null) {
                 Log.w(TAG, "startScanning: BluetoothLeScanner not available")
             }
+            onScanStarted()
         }
+    }
+
+    private fun onScanStarted() {
+        Log.w(TAG, "onScanStarted")
     }
 
     private fun stopScanning() {
         Log.d(TAG, "stopScanning")
-        mainTextView.append("Stopped Scanning")
-        startScanButton.visibility = View.VISIBLE
-        stopScanButton.visibility = View.INVISIBLE
         AsyncTask.execute {
             bleScanner?.stopScan(bleScanCallback)
             if (bleScanner == null) {
                 Log.w(TAG, "stopScanning: BluetoothLeScanner not available")
             }
+            onScanStopped()
         }
+    }
+
+    private var restartOnStop: Boolean = false
+
+    private fun onScanStopped() {
+        Log.w(TAG, "onScanStopped")
+        if (restartOnStop) {
+            restartOnStop = false
+            startScanning()
+        }
+    }
+
+    private fun restartScanning() {
+        Log.d(TAG, "restartScanning")
+        stopScanning()
+        restartOnStop = true
+    }
+
+    // TODO: Handle screen rotations (onDestroy, etc).
+    val restartScanHandler = Handler(Looper.getMainLooper())
+
+    private fun restartPeriodically(delayMillis : Long = 5L * 60L * 1000L /* 1 minute */) {
+        Log.d(TAG, "restartPeriodically: delayMillis $delayMillis")
+        restartScanning()
+        restartScanHandler.postDelayed(object : Runnable {
+            override fun run() {
+                restartScanning()
+                restartScanHandler.postDelayed(this, delayMillis)
+            }
+        }, delayMillis)
     }
 
     /**
      * Known Bluetooth addresses.
      */
-    private fun addressToName(address: String) = when (address) {
-        "DD:AE:AB:74:C0:D6" -> "Car Keys"
-        "F5:35:C6:2E:3A:0D" -> "Backpack"
-        "EF:82:C5:3A:35:78" -> "Suitcase"
-        "DA:57:85:50:C1:0C" -> "Camera"
-        else -> address
-    }
+    private fun addressToName(address: String): String =
+        if (devicesOfInterest.containsKey(address)) {
+            devicesOfInterest[address] ?: address
+        } else {
+            address
+        }
 
     companion object {
         private val TAG = MainActivity::class.java.simpleName
