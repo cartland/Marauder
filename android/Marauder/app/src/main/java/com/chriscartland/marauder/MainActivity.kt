@@ -62,9 +62,11 @@ class MainActivity : AppCompatActivity() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             Log.d(TAG, "onScanResult")
             if (TILE_BLUETOOTH_DEVICE_NAME != result.device.name) {
+                Log.d(TAG, "onScanResult: Not Tile '${result.device.name}'")
                 // We only care about Tile devices.
                 return
             }
+            Log.d(TAG, "onScanResult: Tile!")
             // Extract device information.
             val device = result.device
             val name = device.name
@@ -280,7 +282,7 @@ class MainActivity : AppCompatActivity() {
     // TODO: Handle screen rotations (onDestroy, etc).
     val restartScanHandler = Handler(Looper.getMainLooper())
 
-    private fun restartPeriodically(delayMillis : Long = 1L * 60L * 1000L /* 1 minute */) {
+    private fun restartPeriodically(delayMillis : Long = 5L * 60L * 1000L /* 1 minute */) {
         Log.d(TAG, "restartPeriodically: delayMillis $delayMillis")
         restartScanning()
         restartScanHandler.postDelayed(object : Runnable {
