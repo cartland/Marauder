@@ -43,22 +43,24 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mainTextView: TextView
     private val devicesOfInterest: MutableMap<String, String> = HashMap()
 
+    /**
+     * RSSI data provides a measure of the signal strength.
+     *
+     * Lower numbers usually suggest that the device is farther away.
+     * Higher numbers usually suggest that the device is closer.
+     *
+     * Returns the received signal strength in dBm. The valid range is [-127, 126].
+     * https://developer.android.com/reference/android/bluetooth/le/ScanResult.html#getRssi()
+     */
+    val rssiData = HashMap<String, ArrayList<Int>>()
+
     // Bluetooth device scan callback.
     private val bleScanCallback = object : ScanCallback() {
 
-        /**
-         * RSSI data provides a measure of the signal strength.
-         *
-         * Lower numbers usually suggest that the device is farther away.
-         * Higher numbers usually suggest that the device is closer.
-         *
-         * Returns the received signal strength in dBm. The valid range is [-127, 126].
-         * https://developer.android.com/reference/android/bluetooth/le/ScanResult.html#getRssi()
-         */
-        private val rssiData = HashMap<String, ArrayList<Int>>()
         private val db = FirebaseFirestore.getInstance()
 
         override fun onScanResult(callbackType: Int, result: ScanResult) {
+            Log.d(TAG, "onScanResult")
             if (TILE_BLUETOOTH_DEVICE_NAME != result.device.name) {
                 // We only care about Tile devices.
                 return
@@ -157,6 +159,7 @@ class MainActivity : AppCompatActivity() {
         clearButton = findViewById(R.id.clear_button)
         clearButton.setOnClickListener {
             mainTextView.text = ""
+            clearRssiData()
         }
 
         devicesOfInterestList = findViewById(R.id.listOfKnownBleDevices)
@@ -226,6 +229,10 @@ class MainActivity : AppCompatActivity() {
                 return
             }
         }
+    }
+
+    private fun clearRssiData() {
+        rssiData.clear()
     }
 
     private fun startScanning() {
