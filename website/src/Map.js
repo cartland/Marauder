@@ -6,6 +6,18 @@ window.easeInOutQuad = easeInOutQuad
 
 
 let rooms = {
+  alberto_room: {
+    topLeft: {
+      x: 201,
+      y: 439,
+    },
+    height: 285,
+    width: 285,
+    name: 'Alberto\'s Room',
+    doors: {
+      kitchen: [285, 62],
+    },
+  },
   kitchen: {
     topLeft: {
       x: 486,
@@ -16,6 +28,8 @@ let rooms = {
     name: 'Kitchen',
     doors: {
       living_room: [386, 480],
+      alberto_room: [0, 62],
+      patio: [327, 563],
     },
   },
   living_room: {
@@ -28,6 +42,73 @@ let rooms = {
     name: 'Living Room',
     doors: {
       kitchen: [0, 480],
+      hallway: [420, 62],
+    },
+  },
+  hallway: {
+    topLeft: {
+      x: 1292,
+      y: 439,
+    },
+    height: 172,
+    width: 992,
+    name: 'Hallway',
+    doors: {
+      living_room: [0, 62],
+      cartland_room: [442, 172],
+      nick_room: [726, 172],
+      stromme_room: [838, 172],
+    },
+  },
+  cartland_room: {
+    topLeft: {
+      x: 1504,
+      y: 611,
+    },
+    height: 495,
+    width: 285,
+    name: 'Cartland\'s Room',
+    doors: {
+      hallway: [230, 0],
+    },
+  },
+
+  nick_room: {
+    topLeft: {
+      x: 1789,
+      y: 611,
+    },
+    height: 495,
+    width: 285,
+    name: 'Nick\'s Room',
+    doors: {
+      hallway: [229, 0],
+    },
+  },
+
+  stromme_room: {
+    topLeft: {
+      x: 2074,
+      y: 611,
+    },
+    height: 391,
+    width: 374,
+    name: 'Stromme\'s Room',
+    doors: {
+      hallway: [56, 0],
+    },
+  },
+
+  patio: {
+    topLeft: {
+      x: 487,
+      y: 1002,
+    },
+    height: 104,
+    width: 1018,
+    name: 'Patio',
+    doors: {
+      kitchen: [327, 0],
     },
   },
 }
@@ -42,23 +123,44 @@ class Canvas extends React.Component {
     this.people = {
       stromme: {
         name: 'Stromme',
-        room: 'living_room',
+        room: 'stromme_room',
         waypoints: [
-          this.newStandingStillWaypoint([300, 300], 2*1000, 'living_room'),
+          this.newStandingStillWaypoint([300, 300], 2*1000, 'stromme_room'),
         ],
       },
       alberto: {
         name: 'Alberto',
-        room: 'kitchen',
+        room: 'alberto_room',
         waypoints: [
-          this.newStandingStillWaypoint([0, 0], 2*1000, 'kitchen'),
+          this.newStandingStillWaypoint([0, 0], 2*1000, 'alberto_room'),
         ],
       },
       cartland: {
         name: 'Cartland',
-        room: 'living_room',
+        room: 'cartland_room',
         waypoints: [
-          this.newStandingStillWaypoint([0, 0], 2*1000, 'living_room'),
+          this.newStandingStillWaypoint([0, 0], 2*1000, 'cartland_room'),
+        ],
+      },
+      nick: {
+        name: 'Nick',
+        room: 'nick_room',
+        waypoints: [
+          this.newStandingStillWaypoint([0, 0], 2*1000, 'nick_room'),
+        ],
+      },
+      the_womping_willow: {
+        name: 'The Womping Willow',
+        room: 'stromme_room',
+        waypoints: [
+          this.newStandingStillWaypoint([300, 300], 2*1000, 'stromme_room'),
+        ],
+      },
+      dumbledore: {
+        name: 'Dumbledore',
+        room: 'patio',
+        waypoints: [
+          this.newStandingStillWaypoint([50, 50], 2*1000, 'patio'),
         ],
       },
     }
@@ -84,8 +186,8 @@ class Canvas extends React.Component {
   }
 
   newRandomLocationWaypoint = (startingLocation, roomId) => {
-    let endingX = Math.random() * rooms[roomId].width;
-    let endingY = Math.random() * rooms[roomId].height;
+    let endingX = Math.random() * (rooms[roomId].width - 30) + 15;
+    let endingY = Math.random() * (rooms[roomId].height - 30) + 15;
 
     let distance = Math.sqrt(Math.pow(startingLocation[0]-endingX, 2) +
                              Math.pow(startingLocation[1]-endingY, 2));
@@ -166,6 +268,9 @@ class Canvas extends React.Component {
     )
 
     let otherSideDoorLocation = rooms[newRoom].doors[this.people[person].room];
+    if (otherSideDoorLocation === undefined) {
+      throw new Error(`room ${newRoom} does not have a door to ${this.people[person].room}`)
+    }
 
     this.people[person].waypoints.push(
       this.newRandomLocationWaypoint(
@@ -243,7 +348,7 @@ class Canvas extends React.Component {
       context.beginPath();
       context.arc(personX, personY, 10, 0, 2*Math.PI, true);
       context.fill();
-      context.fillText(person, personX+10, personY+35);
+      context.fillText(this.people[person].name, personX+10, personY+35);
       context.restore()
     })
 
