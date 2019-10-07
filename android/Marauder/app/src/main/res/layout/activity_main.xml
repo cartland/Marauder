@@ -34,12 +34,12 @@
             tools:text="@string/phoneLocationSpinnerLabel" />
 
     <Spinner
-    android:id="@+id/phoneLocationSpinner"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="16dp"
-    android:layout_marginBottom="16dp"
-    android:entries="@array/locations" />
+            android:id="@+id/phoneLocationSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:entries="@array/locations" />
 
     <TextView
             android:id="@+id/tileLocationLabel"
@@ -56,19 +56,32 @@
             android:layout_marginBottom="16dp"
             android:entries="@array/locations" />
 
-    <Button
-            android:id="@+id/start_scan_button"
-            android:layout_width="100dp"
-            android:layout_height="50dp"
-            android:text="@string/scan_button_text"
-            android:layout_marginTop="16dp" />
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
 
-    <Button
-            android:id="@+id/stop_scan_button"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:text="@string/stop_scanning_button_text"
-            android:layout_marginTop="16dp" />
+        <Button
+                android:id="@+id/start_scan_button"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:text="@string/scan_button_text"
+                android:layout_marginTop="16dp" />
+
+        <Button
+                android:id="@+id/stop_scan_button"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:text="@string/stop_scanning_button_text"
+                android:layout_marginTop="16dp" />
+
+        <Button
+                android:id="@+id/clear_button"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:text="@string/clear_button_text"
+                android:layout_marginTop="16dp" />
+    </LinearLayout>
 
     <TextView
             android:id="@+id/main_text_view"
@@ -77,5 +90,4 @@
             android:maxLines="30"
             android:layout_marginTop="16dp"
             android:scrollbars="vertical" />
-
 </LinearLayout>

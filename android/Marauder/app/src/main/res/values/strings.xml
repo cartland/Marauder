@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">Marauder\'s Map</string>
     <string name="main_activity_header">Let\'s experiment!</string>
-    <string name="scan_button_text">Scan</string>
-    <string name="stop_scanning_button_text">Stop Scanning</string>
+    <string name="scan_button_text">Start</string>
+    <string name="stop_scanning_button_text">Stop</string>
+    <string name="clear_button_text">Clear</string>
     <string name="permission_title">Bluetooth requires location permission</string>
     <string name="permission_message">Please allow this app to view location so this app can detect Bluetooth devices.
     </string>
