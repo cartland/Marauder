@@ -14,6 +14,9 @@ let rooms = {
     height: 563,
     width: 386,
     name: 'Kitchen',
+    doors: {
+      living_room: [386, 480],
+    },
   },
   living_room: {
     topLeft: {
@@ -23,6 +26,9 @@ let rooms = {
     height: 563,
     width: 420,
     name: 'Living Room',
+    doors: {
+      kitchen: [0, 480],
+    },
   },
 }
 
@@ -38,24 +44,28 @@ class Canvas extends React.Component {
         name: 'Stromme',
         room: 'living_room',
         waypoints: [
-          this.newStandingStillWaypoint([0, 0], 2*1000),
+          this.newStandingStillWaypoint([300, 300], 2*1000, 'living_room'),
         ],
       },
       alberto: {
         name: 'Alberto',
         room: 'kitchen',
         waypoints: [
-          this.newStandingStillWaypoint([0, 0], 2*1000),
+          this.newStandingStillWaypoint([0, 0], 2*1000, 'kitchen'),
         ],
       },
       cartland: {
         name: 'Cartland',
         room: 'living_room',
         waypoints: [
-          this.newStandingStillWaypoint([0, 0], 2*1000),
+          this.newStandingStillWaypoint([0, 0], 2*1000, 'living_room'),
         ],
       },
     }
+
+    setTimeout(() => {
+      this.changeRoom('stromme', 'kitchen');
+    }, 2000);
 
     this.canvas = React.createRef();
     this.image = React.createRef();
@@ -87,33 +97,74 @@ class Canvas extends React.Component {
       startingLocation,
       [endingX, endingY],
       duration,
+      roomId
     )
   }
 
-  newWaypointToLocation(startingLocation, endingLocation, duration) {
+  newWaypointToLocation(startingLocation, endingLocation, duration, room) {
     return {
       startingLocation: startingLocation,
       endingLocation: endingLocation,
       duration: duration,
       startedAt: undefined,
+      room: room,
     }
   }
 
-  newStandingStillWaypoint(location, duration) {
+  newStandingStillWaypoint(location, duration, room) {
     return {
       startingLocation: location,
       endingLocation: location,
       duration: duration,
       startedAt: undefined,
+      room: room,
     }
   }
 
   nextWaypoint = (startingLocation, room) => {
     if (Math.floor(Math.random() * 2) === 0) {
-      return this.newStandingStillWaypoint(startingLocation, 1000*(5*Math.random()+2));
+      return this.newStandingStillWaypoint(startingLocation, 1000*(5*Math.random()+2), room);
     } else {
       return this.newRandomLocationWaypoint(startingLocation, room);
     }
+  }
+
+  getDuration = (location1, location2, speed) => {
+    let distance = Math.sqrt(Math.pow(location1[0]-location2[0], 2) +
+                             Math.pow(location1[1]-location2[0], 2));
+
+    return distance / speed;
+  }
+
+  changeRoom = (person, newRoom) => {
+    let doorLocation = rooms[this.people[person].room].doors[newRoom];
+
+    let speed = 560 / 10; // cross the living room in 10 seconds
+
+    let startingLocation = this.people[person].waypoints[this.people[person].waypoints.length-1].endingLocation;
+
+    let duration = 1000 * this.getDuration(startingLocation, doorLocation, speed);
+
+    this.people[person].waypoints.push(
+      this.newWaypointToLocation(
+        startingLocation,
+        doorLocation,
+        duration,
+        this.people[person].room
+      )
+    )
+
+    let otherSideDoorLocation = rooms[newRoom].doors[this.people[person].room];
+
+    this.people[person].waypoints.push(
+      this.newStandingStillWaypoint(
+        otherSideDoorLocation,
+        1000 * 1,
+        newRoom
+      )
+    )
+
+    this.people[person].room = newRoom;
   }
 
   updateWaypoints = person => {
@@ -159,11 +210,6 @@ class Canvas extends React.Component {
     context.fillText("Make Your Mischief", 210, 75);
 
     Object.keys(this.people).map(person => {
-      context.save()
-      let roomDetails = rooms[this.people[person].room];
-
-      context.translate(roomDetails.topLeft.x, roomDetails.topLeft.y);
-
       let currentWaypoint = this.updateWaypoints(person);
       let elapsed = new Date() - currentWaypoint.startedAt;
 
@@ -179,6 +225,11 @@ class Canvas extends React.Component {
         currentWaypoint.endingLocation[1]-currentWaypoint.startingLocation[1],
         currentWaypoint.duration);
 
+
+      let roomDetails = rooms[currentWaypoint.room];
+
+      context.save()
+      context.translate(roomDetails.topLeft.x, roomDetails.topLeft.y);
       context.beginPath();
       context.arc(personX, personY, 10, 0, 2*Math.PI, true);
       context.fill();
