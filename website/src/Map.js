@@ -122,10 +122,15 @@ class Canvas extends React.Component {
   }
 
   nextWaypoint = (startingLocation, room) => {
-    if (Math.floor(Math.random() * 2) === 0) {
+    let choice = Math.floor(Math.random() * 10);
+
+    if (choice < 4) {
       return this.newStandingStillWaypoint(startingLocation, 1000*(5*Math.random()+2), room);
+    } else if (choice < 8) {
+      return this.newRandomLocationWaypoint(startingLocation, room);
     } else {
       return this.newRandomLocationWaypoint(startingLocation, room);
+
     }
   }
 
@@ -157,9 +162,8 @@ class Canvas extends React.Component {
     let otherSideDoorLocation = rooms[newRoom].doors[this.people[person].room];
 
     this.people[person].waypoints.push(
-      this.newStandingStillWaypoint(
+      this.newRandomLocationWaypoint(
         otherSideDoorLocation,
-        1000 * 1,
         newRoom
       )
     )
