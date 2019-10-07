@@ -38,24 +38,21 @@ class Canvas extends React.Component {
         name: 'Stromme',
         room: 'living_room',
         waypoints: [
-          {
-            startingLocation: [0, 0],
-            endingLocation: [300, 300],
-            duration: 4 * 1000,
-            startedAt: undefined,
-          },
-          {
-            startingLocation: [300, 300],
-            endingLocation: [300, 300],
-            duration: 2 * 1000,
-            startedAt: undefined,
-          },
-          {
-            startingLocation: [300, 300],
-            endingLocation: [420, 563],
-            duration: 1 * 1000,
-            startedAt: undefined,
-          },
+          this.newStandingStillWaypoint([0, 0], 2*1000),
+        ],
+      },
+      alberto: {
+        name: 'Alberto',
+        room: 'kitchen',
+        waypoints: [
+          this.newStandingStillWaypoint([0, 0], 2*1000),
+        ],
+      },
+      cartland: {
+        name: 'Cartland',
+        room: 'living_room',
+        waypoints: [
+          this.newStandingStillWaypoint([0, 0], 2*1000),
         ],
       },
     }
@@ -68,18 +65,54 @@ class Canvas extends React.Component {
     this.draw()
   }
 
-  createNewWaypoint = (person) => {
-    if (person.waypoints.length === 0) {
-      throw new Error(`person ${person.name} has no waypoints`);
+  newRandomLocationWaypoint = (startingLocation, roomId) => {
+    let endingX = Math.random() * rooms[roomId].width;
+    let endingY = Math.random() * rooms[roomId].height;
+
+    let distance = Math.sqrt(Math.pow(startingLocation[0]-endingX, 2) +
+                             Math.pow(startingLocation[1]-endingY, 2));
+
+    let maxSpeed = 560 / 10; // cross the living room in 10 seconds
+    let minSpeed = 560 / 30; // cross the living room in 20 seconds
+
+    let speed = Math.random() * (maxSpeed - minSpeed) + minSpeed;
+    let duration = distance / speed;
+    console.log(`speed: ${speed}, distance: ${distance}, duration: ${duration}`)
+
+
+    // convert from seconds to ms
+    duration *= 1000;
+
+    return this.newWaypointToLocation(
+      startingLocation,
+      [endingX, endingY],
+      duration,
+    )
+  }
+
+  newWaypointToLocation(startingLocation, endingLocation, duration) {
+    return {
+      startingLocation: startingLocation,
+      endingLocation: endingLocation,
+      duration: duration,
+      startedAt: undefined,
     }
+  }
 
-    let maxSpeed = 560 / 4; // cross the living room in 4 seconds
-    let minSpeed = 560 / 20; // cross the living room in 20 seconds
+  newStandingStillWaypoint(location, duration) {
+    return {
+      startingLocation: location,
+      endingLocation: location,
+      duration: duration,
+      startedAt: undefined,
+    }
+  }
 
-    let lastWaypoint = person.waypoints[person.waypoints.length-1];
-
-
-    let newWaypoint = {
+  nextWaypoint = (startingLocation, room) => {
+    if (Math.floor(Math.random() * 2) === 0) {
+      return this.newStandingStillWaypoint(startingLocation, 1000*(5*Math.random()+2));
+    } else {
+      return this.newRandomLocationWaypoint(startingLocation, room);
     }
   }
 
@@ -96,30 +129,19 @@ class Canvas extends React.Component {
     } else { // case: we are ongoing
       let elapsed = new Date() - personState.waypoints[0].startedAt;
       while (elapsed > personState.waypoints[0].duration) {
-        console.log('elapsed > personState.waypoints[0].duration');
 
         // if there are future waypoints, we move on to those
         if (personState.waypoints.length > 1) {
-          console.log('personState.waypoints.length > 1');
           personState.waypoints[1].startedAt =
             new Date(personState.waypoints[0].startedAt.getTime() + personState.waypoints[0].duration);
 
-          console.log('personState.waypoints[1].startedAt', personState.waypoints[1].startedAt);
-          console.log('currentTime', new Date());
-          console.log('oldElapsed', elapsed);
-
           elapsed -= personState.waypoints[0].duration;
-          console.log('newElapsed', elapsed);
-
           personState.waypoints.shift();
+          console.log('moving to waypoint', personState.waypoints[0]);
         } else { // otherwise we randomly create them
-          personState.waypoints.push({
-            startingLocation: personState.waypoints[0].endingLocation,
-            endingLocation: personState.waypoints[0].endingLocation,
-            duration: 5 * 1000,
-            startedAt: undefined,
-          })
-          console.log('newWaypoints', personState.waypoints)
+          let newWaypoint = this.nextWaypoint(personState.waypoints[0].endingLocation, personState.room);
+          personState.waypoints.push(newWaypoint);
+          console.log('added waypoint', newWaypoint);
         }
       }
     }
