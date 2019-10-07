@@ -12,10 +12,11 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.os.AsyncTask
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.PersistableBundle
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.Spinner
 import android.widget.TextView
@@ -37,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     private var bleScanner: BluetoothLeScanner? = null
     private lateinit var startScanButton: Button
     private lateinit var stopScanButton: Button
+    private lateinit var clearButton: Button
     private lateinit var devicesOfInterestList: TextView
     private lateinit var mainTextView: TextView
     private val devicesOfInterest: MutableMap<String, String> = HashMap()
@@ -143,9 +145,19 @@ class MainActivity : AppCompatActivity() {
         mainTextView.movementMethod = ScrollingMovementMethod()
 
         startScanButton = findViewById(R.id.start_scan_button)
-        startScanButton.setOnClickListener { startScanning() }
+        startScanButton.setOnClickListener {
+            restartPeriodically()
+        }
         stopScanButton = findViewById(R.id.stop_scan_button)
-        stopScanButton.setOnClickListener { stopScanning() }
+        stopScanButton.setOnClickListener {
+            restartScanHandler.removeCallbacksAndMessages(null)
+            restartOnStop = false
+            stopScanning()
+        }
+        clearButton = findViewById(R.id.clear_button)
+        clearButton.setOnClickListener {
+            mainTextView.text = ""
+        }
 
         devicesOfInterestList = findViewById(R.id.listOfKnownBleDevices)
         devicesOfInterestList.text = devicesOfInterest.toString()
@@ -174,6 +186,8 @@ class MainActivity : AppCompatActivity() {
                 )
             }
             builder.show()
+        } else {
+            restartPeriodically()
         }
     }
 
@@ -201,6 +215,7 @@ class MainActivity : AppCompatActivity() {
                         Log.d(TAG, "onRequestPermissionsResult: Retrieving BluetoothLeScanner")
                         bleScanner = adapter?.bluetoothLeScanner
                     }
+                    restartPeriodically()
                 } else {
                     val builder = AlertDialog.Builder(this)
                     builder.setTitle(getString(R.string.permission_denied_title))
@@ -215,28 +230,58 @@ class MainActivity : AppCompatActivity() {
 
     private fun startScanning() {
         Log.d(TAG, "startScanning")
-        mainTextView.text = ""
-        startScanButton.visibility = View.GONE
-        stopScanButton.visibility = View.VISIBLE
         AsyncTask.execute {
             bleScanner?.startScan(bleScanCallback)
             if (bleScanner == null) {
                 Log.w(TAG, "startScanning: BluetoothLeScanner not available")
             }
+            onScanStarted()
         }
+    }
+
+    private fun onScanStarted() {
+        Log.w(TAG, "onScanStarted")
     }
 
     private fun stopScanning() {
         Log.d(TAG, "stopScanning")
-        mainTextView.append("Stopped Scanning")
-        startScanButton.visibility = View.VISIBLE
-        stopScanButton.visibility = View.GONE
         AsyncTask.execute {
             bleScanner?.stopScan(bleScanCallback)
             if (bleScanner == null) {
                 Log.w(TAG, "stopScanning: BluetoothLeScanner not available")
             }
+            onScanStopped()
         }
+    }
+
+    private var restartOnStop: Boolean = false
+
+    private fun onScanStopped() {
+        Log.w(TAG, "onScanStopped")
+        if (restartOnStop) {
+            restartOnStop = false
+            startScanning()
+        }
+    }
+
+    private fun restartScanning() {
+        Log.d(TAG, "restartScanning")
+        stopScanning()
+        restartOnStop = true
+    }
+
+    // TODO: Handle screen rotations (onDestroy, etc).
+    val restartScanHandler = Handler(Looper.getMainLooper())
+
+    private fun restartPeriodically(delayMillis : Long = 1L * 60L * 1000L /* 1 minute */) {
+        Log.d(TAG, "restartPeriodically: delayMillis $delayMillis")
+        restartScanning()
+        restartScanHandler.postDelayed(object : Runnable {
+            override fun run() {
+                restartScanning()
+                restartScanHandler.postDelayed(this, delayMillis)
+            }
+        }, delayMillis)
     }
 
     /**
