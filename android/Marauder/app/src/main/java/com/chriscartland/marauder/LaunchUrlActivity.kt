@@ -20,6 +20,7 @@ class LaunchUrlActivity : AppCompatActivity() {
     lateinit var nfcUriTextView: TextView
     lateinit var nfcTagIdTextView: TextView
     lateinit var nfcLogicalIdTextView: TextView
+    lateinit var nfcReaderLocationTextView: TextView
     lateinit var timestampTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,9 +31,11 @@ class LaunchUrlActivity : AppCompatActivity() {
         nfcUriTextView = findViewById(R.id.nfc_uri)
         nfcTagIdTextView = findViewById(R.id.nfc_tag_id)
         nfcLogicalIdTextView = findViewById(R.id.nfc_logical_id)
+        nfcReaderLocationTextView = findViewById(R.id.nfc_reader_location_text)
         timestampTextView = findViewById(R.id.timestamp)
-
+        // Restore basic state.
         restoreInstanceState(savedInstanceState)
+        // Handle the Intent with NFC data.
         onNewIntent(intent)
     }
 
@@ -77,11 +80,12 @@ class LaunchUrlActivity : AppCompatActivity() {
         val nfcUri: String? = data?.toString()
         val nfcTagId = data?.getQueryParameter("tagid")
         val nfcLogicalId = data?.getQueryParameter("logicalid")
+        val nfcReaderLocation = spinnerNfcReaderLocation.selectedItem
         val nfcData = hashMapOf(
             "nfcUri" to nfcUri,
             "nfcTagId" to nfcTagId,
             "nfcLogicalId" to nfcLogicalId,
-            "nfcReaderLocation" to spinnerNfcReaderLocation.selectedItem
+            "nfcReaderLocation" to nfcReaderLocation
         )
         // Debug app data.
         val zPhone = hashMapOf(
@@ -108,6 +112,7 @@ class LaunchUrlActivity : AppCompatActivity() {
         nfcUriTextView.text = "NFC URI: $nfcUri"
         nfcTagIdTextView.text = "NFC Tag ID: $nfcTagId"
         nfcLogicalIdTextView.text = "NFC Logical ID: $nfcLogicalId"
+        nfcReaderLocationTextView.text = "NFC Reader Location: $nfcReaderLocation"
         timestampTextView.text = "Timestamp: $timestamp"
     }
 
