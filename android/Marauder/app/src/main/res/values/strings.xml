@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">Marauder\'s Map</string>
+    <string name="nfc_label">NFC URI: %1$s</string>
+    <string name="nfc_logical_label">NFC Logical ID: %1$s</string>
+    <string name="nfc_reader_label">NFC Reader Location: %1$s</string>
+    <string name="timestamp_label">Timestamp: %1$s</string>
 
     <string-array name="locations">
         <item>unknown</item>

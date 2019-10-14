@@ -96,7 +96,6 @@ class NfcUrlActivity : AppCompatActivity() {
         db.collection("nfcUpdates").document().set(update)
         Log.d(TAG, JSONObject(update).toString())
         // Update views.
-
         displayData(update)
     }
 
@@ -112,10 +111,11 @@ class NfcUrlActivity : AppCompatActivity() {
             nfcLogicalId = this["nfcLogicalId"]
             nfcReaderLocation = this["nfcReaderLocation"]
         }
-        (this.findViewById(R.id.nfc_uri) as TextView).text = "NFC URI: $nfcUri"
-        (this.findViewById(R.id.nfc_logical_id) as TextView).text = "NFC Logical ID: $nfcLogicalId"
-        (this.findViewById(R.id.nfc_reader_location_text) as TextView).text = "NFC Reader Location: $nfcReaderLocation"
-        (this.findViewById(R.id.timestamp) as TextView).text = "Timestamp: $timestamp"
+        (this.findViewById(R.id.nfc_uri) as TextView).text = getString(R.string.nfc_label, nfcUri)
+        (this.findViewById(R.id.nfc_logical_id) as TextView).text = getString(R.string.nfc_logical_label, nfcLogicalId)
+        (this.findViewById(R.id.nfc_reader_location_text) as TextView).text =
+            getString(R.string.nfc_reader_label, nfcReaderLocation)
+        (this.findViewById(R.id.timestamp) as TextView).text = getString(R.string.timestamp_label, timestamp)
     }
 
     companion object {
