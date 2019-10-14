@@ -92,9 +92,19 @@ class NfcUrlActivity : AppCompatActivity() {
             "zApp" to zApp, // Debug app data.
             "zPhone" to zPhone // Debug phone data.
         )
-        // Publish update to Firebase.
-        db.collection("nfcUpdates").document().set(update)
         Log.d(TAG, JSONObject(update).toString())
+        // Publish update to Firebase.
+        Log.d(TAG, "publishNfcUpdate: Write to Firestore")
+        db.collection("nfcUpdates").document().set(update)
+            .addOnSuccessListener {
+                Log.d(TAG, "publishNfcUpdate: DocumentSnapshot successfully written!")
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "publishNfcUpdate: Error writing document", e)
+            }
+            .addOnCanceledListener {
+                Log.w(TAG, "publishNfcUpdate: Write canceled")
+            }
         // Update views.
         displayData(update)
     }
