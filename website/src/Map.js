@@ -178,6 +178,14 @@ class Canvas extends React.Component {
           this.newStandingStillWaypoint([50, 50], 2*1000, 'patio'),
         ],
       },
+
+      tal: {
+        name: 'Tal',
+        room: 'patio',
+        waypoints: [
+          this.newStandingStillWaypoint([50, 50], 2*1000, 'patio'),
+        ],
+      },
     }
 
     let randomRoomChange = () => {
