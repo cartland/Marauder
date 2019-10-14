@@ -27,6 +27,7 @@
 
         <activity
                 android:name=".LaunchUrlActivity"
+                android:screenOrientation="portrait"
                 android:launchMode="singleTask">
 
             <tools:validation testUrl="https://marauder-129.web.app/?wid=wand_id123"/>

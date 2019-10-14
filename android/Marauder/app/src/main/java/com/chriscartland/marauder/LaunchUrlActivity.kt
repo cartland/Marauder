@@ -18,7 +18,6 @@ class LaunchUrlActivity : AppCompatActivity() {
     private var uuid: String? = null
     lateinit var spinnerNfcReaderLocation: Spinner
     lateinit var nfcUriTextView: TextView
-    lateinit var nfcTagIdTextView: TextView
     lateinit var nfcLogicalIdTextView: TextView
     lateinit var nfcReaderLocationTextView: TextView
     lateinit var timestampTextView: TextView
@@ -29,7 +28,6 @@ class LaunchUrlActivity : AppCompatActivity() {
         // Find views.
         spinnerNfcReaderLocation = findViewById(R.id.spinner_nfc_reader_location)
         nfcUriTextView = findViewById(R.id.nfc_uri)
-        nfcTagIdTextView = findViewById(R.id.nfc_tag_id)
         nfcLogicalIdTextView = findViewById(R.id.nfc_logical_id)
         nfcReaderLocationTextView = findViewById(R.id.nfc_reader_location_text)
         timestampTextView = findViewById(R.id.timestamp)
@@ -78,12 +76,10 @@ class LaunchUrlActivity : AppCompatActivity() {
         // Extract NFC data.
         val data = intent.data
         val nfcUri: String? = data?.toString()
-        val nfcTagId = data?.getQueryParameter("tagid")
         val nfcLogicalId = data?.getQueryParameter("logicalid")
         val nfcReaderLocation = spinnerNfcReaderLocation.selectedItem
         val nfcData = hashMapOf(
             "nfcUri" to nfcUri,
-            "nfcTagId" to nfcTagId,
             "nfcLogicalId" to nfcLogicalId,
             "nfcReaderLocation" to nfcReaderLocation
         )
@@ -110,7 +106,6 @@ class LaunchUrlActivity : AppCompatActivity() {
         // Update views.
         val timestamp = update["timestamp"]?.toString()
         nfcUriTextView.text = "NFC URI: $nfcUri"
-        nfcTagIdTextView.text = "NFC Tag ID: $nfcTagId"
         nfcLogicalIdTextView.text = "NFC Logical ID: $nfcLogicalId"
         nfcReaderLocationTextView.text = "NFC Reader Location: $nfcReaderLocation"
         timestampTextView.text = "Timestamp: $timestamp"
