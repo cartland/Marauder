@@ -1,9 +1,11 @@
 import React, {Component} from 'react';
 import { easeInOutQuad } from 'js-easing-functions';
 
+import * as firebase from "firebase/app";
+import "firebase/firestore";
+
 /* global window */
 window.easeInOutQuad = easeInOutQuad
-
 
 let rooms = {
   alberto_room: {
@@ -119,6 +121,19 @@ class Canvas extends React.Component {
 
   constructor(props) {
     super(props);
+
+    firebase.firestore().collection('nfcUpdates')
+      .where('timestamp', '>', new Date())
+      .onSnapshot((snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          let room = change.doc.get('nfcData').nfcReaderLocation;
+          let person = change.doc.get('nfcData').nfcLogicalId;
+
+          this.wandTapped(room, person);
+        }
+      });
+    });
 
     this.people = {
       stromme: {
@@ -315,6 +330,20 @@ class Canvas extends React.Component {
     return this.people[person].waypoints[0];
   }
 
+  wandTapped = (room, person) => {
+    console.log('wandTapped', room, person);
+
+    if (!person) {
+      return;
+    }
+
+    this.people[person].showName = true;
+
+    setTimeout(() => {
+      this.people[person].showName = false;
+    }, 5*1000);
+  }
+
   draw = () => {
     // console.log(this.canvas, this.image)
 
@@ -348,7 +377,9 @@ class Canvas extends React.Component {
       context.beginPath();
       context.arc(personX, personY, 10, 0, 2*Math.PI, true);
       context.fill();
-      context.fillText(this.people[person].name, personX+10, personY+35);
+      if (this.people[person].showName === true) {
+        context.fillText(this.people[person].name, personX+10, personY+35);
+      }
       context.restore()
     })
 
