@@ -14,11 +14,12 @@ import java.util.UUID
 
 class NfcUrlActivity : AppCompatActivity() {
 
-    private val db = FirebaseFirestore.getInstance()
+    private val nfcUpdates = FirebaseFirestore.getInstance().collection("nfcUpdates")
     private var uuid: String? = null
     lateinit var spinnerNfcReaderLocation: Spinner
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(TAG, "onCreate")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_nfc_url)
         // Find views.
@@ -59,12 +60,21 @@ class NfcUrlActivity : AppCompatActivity() {
             Log.d(TAG, "onNewIntent: No Intent")
         } else {
             Log.d(TAG, "onNewIntent: Found Intent")
-            publishNfcUpdate(intent)
+            val update = extractData(intent)
+            val nfcUri = (update["nfcData"] as HashMap<String, String?>)["nfcUri"]
+            if (nfcUri == null) {
+                Log.d(TAG, "onNewIntent: No URI found, will not publish data")
+            } else {
+                Log.d(TAG, "onNewIntent: Publishing data for URI: $nfcUri")
+                publishData(update)
+            }
+            // Update views.
+            displayData(update)
         }
     }
 
-    private fun publishNfcUpdate(intent: Intent) {
-        Log.d(TAG, "publishNfcUpdate")
+    private fun extractData(intent: Intent): HashMap<String, Any?> {
+        Log.d(TAG, "extractData")
         // Extract NFC data.
         val data = intent.data
         val nfcUri: String? = data?.toString()
@@ -92,35 +102,31 @@ class NfcUrlActivity : AppCompatActivity() {
             "zApp" to zApp, // Debug app data.
             "zPhone" to zPhone // Debug phone data.
         )
-        Log.d(TAG, JSONObject(update).toString())
+        return update
+    }
+
+    private fun publishData(update: HashMap<String, Any?>) {
         // Publish update to Firebase.
-        Log.d(TAG, "publishNfcUpdate: Write to Firestore")
-        db.collection("nfcUpdates").document().set(update)
+        Log.d(TAG, "publishData: Write to Firestore")
+        nfcUpdates.document().set(update)
             .addOnSuccessListener {
-                Log.d(TAG, "publishNfcUpdate: DocumentSnapshot successfully written!")
+                Log.d(TAG, "publishData: DocumentSnapshot successfully written!")
             }
             .addOnFailureListener { e ->
-                Log.e(TAG, "publishNfcUpdate: Error writing document", e)
+                Log.e(TAG, "publishData: Error writing document", e)
             }
             .addOnCanceledListener {
-                Log.w(TAG, "publishNfcUpdate: Write canceled")
+                Log.w(TAG, "publishData: Write canceled")
             }
-        // Update views.
-        displayData(update)
     }
 
     private fun displayData(update: HashMap<String, Any?>) {
-        var nfcUri: String? = null // ["nfcUri"]
-        var nfcLogicalId: String? = null // update["nfcData"]["nfcLogicalId"]
-        var nfcReaderLocation: String? = null // spinnerNfcReaderLocation.selectedItem
+        Log.d(TAG, "displayData")
+        Log.d(TAG, JSONObject(update).toString())
+        val nfcUri: String? = (update["nfcData"] as HashMap<String, String?>)["nfcUri"]
+        val nfcLogicalId: String? = (update["nfcData"] as HashMap<String, String?>)["nfcLogicalId"]
+        val nfcReaderLocation: String? = (update["nfcData"] as HashMap<String, String?>)["nfcReaderLocation"]
         val timestamp: String? = update["timestamp"]?.toString()
-
-        val nfcData = update["nfcData"] as HashMap<String, String?>?
-        nfcData?.run {
-            nfcUri = this["nfcUri"]
-            nfcLogicalId = this["nfcLogicalId"]
-            nfcReaderLocation = this["nfcReaderLocation"]
-        }
         (this.findViewById(R.id.nfc_uri) as TextView).text = getString(R.string.nfc_label, nfcUri)
         (this.findViewById(R.id.nfc_logical_id) as TextView).text = getString(R.string.nfc_logical_label, nfcLogicalId)
         (this.findViewById(R.id.nfc_reader_location_text) as TextView).text =
