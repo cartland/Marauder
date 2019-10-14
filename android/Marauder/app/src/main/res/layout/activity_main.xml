@@ -1,93 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        android:orientation="vertical"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:keepScreenOn="true"
         tools:context=".MainActivity">
 
-    <TextView
-            android:id="@+id/knownBleDevicesLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/knownBleDevicesLabel"
-            tools:text="@string/knownBleDevicesLabel" />
-
-    <TextView
-            android:id="@+id/listOfKnownBleDevices"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp" />
-
-    <TextView
-            android:id="@+id/phoneLocationLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/phoneLocationSpinnerLabel"
-            tools:text="@string/phoneLocationSpinnerLabel" />
-
-    <Spinner
-            android:id="@+id/phoneLocationSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            android:entries="@array/locations" />
-
-    <TextView
-            android:id="@+id/tileLocationLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/tileDeviceLocationSpinnerLabel"
-            tools:text="@string/tileDeviceLocationSpinnerLabel" />
-
-    <Spinner
-            android:id="@+id/tileLocationSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            android:entries="@array/locations" />
-
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-        <Button
-                android:id="@+id/start_scan_button"
-                android:layout_width="100dp"
-                android:layout_height="50dp"
-                android:text="@string/scan_button_text"
-                android:layout_marginTop="16dp" />
-
-        <Button
-                android:id="@+id/stop_scan_button"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:text="@string/stop_scanning_button_text"
-                android:layout_marginTop="16dp" />
-
-        <Button
-                android:id="@+id/clear_button"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:text="@string/clear_button_text"
-                android:layout_marginTop="16dp" />
-    </LinearLayout>
-
-    <TextView
-            android:id="@+id/main_text_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:maxLines="30"
-            android:layout_marginTop="16dp"
-            android:scrollbars="vertical" />
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
