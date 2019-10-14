@@ -4,9 +4,15 @@ service cloud.firestore {
     match /{document=**} {
       allow read, write: if false;
     }
-    
+
     match /updates/{updateId} {
     	allow create: if true;
+    }
+    match /updatesv2/{updateId} {
+      allow create: if true;
+    }
+    match /nfcUpdates/{updateId} {
+      allow create: if true;
     }
   }
 }
