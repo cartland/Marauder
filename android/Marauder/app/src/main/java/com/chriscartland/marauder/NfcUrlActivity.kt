@@ -12,25 +12,17 @@ import com.google.firebase.firestore.FirebaseFirestore
 import org.json.JSONObject
 import java.util.UUID
 
-class LaunchUrlActivity : AppCompatActivity() {
+class NfcUrlActivity : AppCompatActivity() {
 
     private val db = FirebaseFirestore.getInstance()
     private var uuid: String? = null
     lateinit var spinnerNfcReaderLocation: Spinner
-    lateinit var nfcUriTextView: TextView
-    lateinit var nfcLogicalIdTextView: TextView
-    lateinit var nfcReaderLocationTextView: TextView
-    lateinit var timestampTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_launch_url)
+        setContentView(R.layout.activity_nfc_url)
         // Find views.
         spinnerNfcReaderLocation = findViewById(R.id.spinner_nfc_reader_location)
-        nfcUriTextView = findViewById(R.id.nfc_uri)
-        nfcLogicalIdTextView = findViewById(R.id.nfc_logical_id)
-        nfcReaderLocationTextView = findViewById(R.id.nfc_reader_location_text)
-        timestampTextView = findViewById(R.id.timestamp)
         // Restore basic state.
         restoreInstanceState(savedInstanceState)
         // Handle the Intent with NFC data.
@@ -104,15 +96,30 @@ class LaunchUrlActivity : AppCompatActivity() {
         db.collection("nfcUpdates").document().set(update)
         Log.d(TAG, JSONObject(update).toString())
         // Update views.
-        val timestamp = update["timestamp"]?.toString()
-        nfcUriTextView.text = "NFC URI: $nfcUri"
-        nfcLogicalIdTextView.text = "NFC Logical ID: $nfcLogicalId"
-        nfcReaderLocationTextView.text = "NFC Reader Location: $nfcReaderLocation"
-        timestampTextView.text = "Timestamp: $timestamp"
+
+        displayData(update)
+    }
+
+    private fun displayData(update: HashMap<String, Any?>) {
+        var nfcUri: String? = null // ["nfcUri"]
+        var nfcLogicalId: String? = null // update["nfcData"]["nfcLogicalId"]
+        var nfcReaderLocation: String? = null // spinnerNfcReaderLocation.selectedItem
+        val timestamp: String? = update["timestamp"]?.toString()
+
+        val nfcData = update["nfcData"] as HashMap<String, String?>?
+        nfcData?.run {
+            nfcUri = this["nfcUri"]
+            nfcLogicalId = this["nfcLogicalId"]
+            nfcReaderLocation = this["nfcReaderLocation"]
+        }
+        (this.findViewById(R.id.nfc_uri) as TextView).text = "NFC URI: $nfcUri"
+        (this.findViewById(R.id.nfc_logical_id) as TextView).text = "NFC Logical ID: $nfcLogicalId"
+        (this.findViewById(R.id.nfc_reader_location_text) as TextView).text = "NFC Reader Location: $nfcReaderLocation"
+        (this.findViewById(R.id.timestamp) as TextView).text = "Timestamp: $timestamp"
     }
 
     companion object {
-        const val TAG = "LaunchUrlActivity"
+        const val TAG = "NfcUrlActivity"
         const val UUID_KEY: String = "com.chriscartland.marauder.UUID_KEY"
         const val NFC_READER_LOCATION_KEY: String = "com.chriscartland.marauder.NFC_READER_LOCATION_KEY"
     }
