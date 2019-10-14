@@ -1,20 +1,5 @@
 <resources>
     <string name="app_name">Marauder\'s Map</string>
-    <string name="main_activity_header">Let\'s experiment!</string>
-    <string name="scan_button_text">Start</string>
-    <string name="stop_scanning_button_text">Stop</string>
-    <string name="clear_button_text">Clear</string>
-    <string name="permission_title">Bluetooth requires location permission</string>
-    <string name="permission_message">Please allow this app to view location so this app can detect Bluetooth devices.
-    </string>
-    <string name="permission_denied_title">Location permission has not been allowed</string>
-    <string name="permission_denied_message">Since location access has not been granted, this app will not be able to
-        discover beacons when in the background.
-    </string>
-
-    <string name="phoneLocationSpinnerLabel">Phone Location</string>
-    <string name="knownBleDevicesLabel">Known Devices</string>
-    <string name="tileDeviceLocationSpinnerLabel">Tile Location</string>
 
     <string-array name="locations">
         <item>unknown</item>
@@ -28,9 +13,5 @@
         <item>patio</item>
         <item>front_steps</item>
         <item>alberto_bedroom</item>
-    </string-array>
-    <string-array name="tile_devices">
-        <item>Car Keys</item>
-        <item>Camera</item>
     </string-array>
 </resources>
