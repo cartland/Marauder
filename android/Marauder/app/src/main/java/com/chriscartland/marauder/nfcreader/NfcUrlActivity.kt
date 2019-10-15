@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -17,6 +18,7 @@ import com.chriscartland.marauder.databinding.ActivityNfcUrlBinding
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.UUID
+
 
 class NfcUrlActivity : AppCompatActivity() {
 
@@ -43,10 +45,19 @@ class NfcUrlActivity : AppCompatActivity() {
         })
         setLocationButton = findViewById(R.id.set_location_button)
         setLocationButton.setOnClickListener {
-            nfcUpdateViewModel.setCurrentLocation(CurrentLocation(
-                    location = spinnerNfcReaderLocation.selectedItem as String?,
-                    spinnerIndex = spinnerNfcReaderLocation.selectedItemPosition
-            ))
+            val selectedSpinnerLocation = spinnerNfcReaderLocation.selectedItem as String?
+            val selectedSpinnerIndex = spinnerNfcReaderLocation.selectedItemPosition
+            AlertDialog.Builder(this)
+                .setTitle("Confirm Location Change")
+                .setMessage("Do you want to change location to $selectedSpinnerLocation?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes) { _, _ ->
+                    nfcUpdateViewModel.setCurrentLocation(CurrentLocation(
+                        location = selectedSpinnerLocation,
+                        spinnerIndex = selectedSpinnerIndex
+                    ))
+                }
+                .setNegativeButton(android.R.string.no, null).show()
         }
         // Restore basic state.
         restoreInstanceState(savedInstanceState)
@@ -98,7 +109,7 @@ class NfcUrlActivity : AppCompatActivity() {
         val nfcUpdate = NfcUpdate(
             nfcUri = data?.toString(),
             nfcLogicalId = data?.getQueryParameter("logicalid"),
-            nfcReaderLocation = spinnerNfcReaderLocation.selectedItem as String?
+            nfcReaderLocation = nfcUpdateViewModel.currentLocationLabel.value
         )
         val nfcData = hashMapOf(
             "nfcUri" to nfcUpdate.nfcUri,
@@ -125,12 +136,17 @@ class NfcUrlActivity : AppCompatActivity() {
         return update
     }
 
-    private fun publishData(update: HashMap<String, Any?>) {
-        // Publish update to Firebase.
+    private fun publishData(updateData: HashMap<String, Any?>) {
+        // Publish updateData to Firebase.
         Log.d(TAG, "publishData: Write to Firestore")
-        nfcUpdates.document().set(update)
+        val id = nfcUpdates.document().id
+        nfcUpdates.document(id).set(updateData)
             .addOnSuccessListener {
                 Log.d(TAG, "publishData: DocumentSnapshot successfully written!")
+                nfcUpdates.document(id).get().addOnSuccessListener { doc ->
+                    val timestamp: String? = doc?.data?.get("timestamp")?.toString()
+                    (this.findViewById(R.id.timestamp) as TextView).text = getString(R.string.timestamp_label, timestamp)
+                }
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "publishData: Error writing document", e)
@@ -138,10 +154,8 @@ class NfcUrlActivity : AppCompatActivity() {
             .addOnCanceledListener {
                 Log.w(TAG, "publishData: Write canceled")
             }
-        val nfcUpdate = update.toNfcUpdate()
+        val nfcUpdate = updateData.toNfcUpdate()
         nfcUpdateViewModel.setNfcUpdate(nfcUpdate)
-        val timestamp: String? = update["timestamp"]?.toString()
-        (this.findViewById(R.id.timestamp) as TextView).text = getString(R.string.timestamp_label, timestamp)
     }
 
     companion object {
