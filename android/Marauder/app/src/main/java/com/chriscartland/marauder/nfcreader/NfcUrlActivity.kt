@@ -7,6 +7,8 @@ import android.util.Log
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import com.chriscartland.marauder.BuildConfig
 import com.chriscartland.marauder.R
 import com.google.firebase.firestore.FieldValue
@@ -17,6 +19,7 @@ import java.util.UUID
 class NfcUrlActivity : AppCompatActivity() {
 
     private val nfcUpdates = FirebaseFirestore.getInstance().collection("nfcUpdates")
+    private lateinit var readerLocationViewModel: ReaderLocationViewModel
     private var uuid: String? = null
     lateinit var spinnerNfcReaderLocation: Spinner
 
@@ -24,6 +27,7 @@ class NfcUrlActivity : AppCompatActivity() {
         Log.d(TAG, "onCreate")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_nfc_url)
+        readerLocationViewModel = ViewModelProviders.of(this)[ReaderLocationViewModel::class.java]
         // Find views.
         spinnerNfcReaderLocation = findViewById(R.id.spinner_nfc_reader_location)
         // Restore basic state.
