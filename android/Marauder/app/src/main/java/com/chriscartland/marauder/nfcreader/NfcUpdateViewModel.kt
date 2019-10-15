@@ -13,11 +13,16 @@ class NfcUpdateViewModel(
 
     val currentLocation = repository.currentLocation
 
+    val currentLocationLabel = MediatorLiveData<String?>()
+
     val nfcLocation = MediatorLiveData<String?>()
     val nfcLogicalId = MediatorLiveData<String?>()
     val nfcUri = MediatorLiveData<String?>()
 
     init {
+        currentLocationLabel.addSource(currentLocation) {
+            currentLocationLabel.value = currentLocation.value?.location
+        }
         nfcLocation.addSource(repository.nfcUpdate) {
             nfcLocation.value = it?.nfcReaderLocation
         }

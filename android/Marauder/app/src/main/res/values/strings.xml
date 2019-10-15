@@ -5,6 +5,8 @@
     <string name="nfc_reader_label">NFC Reader Location: %1$s</string>
     <string name="timestamp_label">Timestamp: %1$s</string>
     <string name="set_location">Set NFC Reader Location</string>
+    <string name="reader_location_text">NFC Reader Location</string>
+    <string name="labe_update_text">Last NFC Update</string>
 
     <string-array name="locations">
         <item>unknown</item>
