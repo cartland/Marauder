@@ -16,4 +16,13 @@ interface NfcUpdateDao {
 
     @Query("DELETE FROM nfc_update")
     fun delete()
+
+    @Query("SELECT * FROM current_location LIMIT 1")
+    fun getCurrentLocation(): LiveData<CurrentLocation?>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun setLocation(comments: CurrentLocation)
+
+    @Query("DELETE FROM current_location")
+    fun deleteLocation()
 }

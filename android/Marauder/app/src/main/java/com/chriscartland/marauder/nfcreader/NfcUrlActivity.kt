@@ -37,14 +37,6 @@ class NfcUrlActivity : AppCompatActivity() {
 
         // Find views.
         spinnerNfcReaderLocation = findViewById(R.id.spinner_nfc_reader_location)
-        spinnerNfcReaderLocation.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                nfcUpdateViewModel.setLocation(null)
-            }
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                nfcUpdateViewModel.setLocation(spinnerNfcReaderLocation.getItemAtPosition(position) as String)
-            }
-        }
         // Restore basic state.
         restoreInstanceState(savedInstanceState)
         // Handle the Intent with NFC data.
@@ -85,8 +77,6 @@ class NfcUrlActivity : AppCompatActivity() {
                 Log.d(TAG, "onNewIntent: Publishing data for URI: $nfcUri")
                 publishData(update)
             }
-            // Update views.
-            displayData(update)
         }
     }
 
@@ -97,7 +87,7 @@ class NfcUrlActivity : AppCompatActivity() {
         val nfcUpdate = NfcUpdate(
             nfcUri = data?.toString(),
             nfcLogicalId = data?.getQueryParameter("logicalid"),
-            nfcReaderLocation = nfcUpdateViewModel.location.value
+            nfcReaderLocation = spinnerNfcReaderLocation.selectedItem as String?
         )
         val nfcData = hashMapOf(
             "nfcUri" to nfcUpdate.nfcUri,
@@ -137,15 +127,11 @@ class NfcUrlActivity : AppCompatActivity() {
             .addOnCanceledListener {
                 Log.w(TAG, "publishData: Write canceled")
             }
-    }
-
-    private fun displayData(update: HashMap<String, Any?>) {
         val nfcUpdate = update.toNfcUpdate()
-        Log.d(TAG, "displayData")
-        Log.d(TAG, JSONObject(update).toString())
+        nfcUpdateViewModel.setNfcUpdate(nfcUpdate)
+        nfcUpdateViewModel.setLocation(nfcUpdate.nfcReaderLocation)
         val timestamp: String? = update["timestamp"]?.toString()
         (this.findViewById(R.id.timestamp) as TextView).text = getString(R.string.timestamp_label, timestamp)
-        nfcUpdateViewModel.setNfcUpdate(nfcUpdate)
     }
 
     companion object {

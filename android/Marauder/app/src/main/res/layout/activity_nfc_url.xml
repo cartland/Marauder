@@ -56,7 +56,7 @@
         <TextView
                 android:id="@+id/nfc_reader_location_text"
                 tools:text="Location"
-                android:text="@{nfcViewModel.location}"
+                android:text="@{nfcViewModel.nfcLocation}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"

@@ -11,13 +11,15 @@ class NfcUpdateViewModel(
 
     private val repository: NfcUpdateRepository = (application as MarauderApp).repository
 
-    val location = MediatorLiveData<String?>()
+    val currentLocation = repository.currentLocation
+
+    val nfcLocation = MediatorLiveData<String?>()
     val nfcLogicalId = MediatorLiveData<String?>()
     val nfcUri = MediatorLiveData<String?>()
 
     init {
-        location.addSource(repository.nfcUpdate) {
-            location.value = it?.nfcReaderLocation
+        nfcLocation.addSource(repository.nfcUpdate) {
+            nfcLocation.value = it?.nfcReaderLocation
         }
         nfcLogicalId.addSource(repository.nfcUpdate) {
             nfcLogicalId.value = it?.nfcLogicalId

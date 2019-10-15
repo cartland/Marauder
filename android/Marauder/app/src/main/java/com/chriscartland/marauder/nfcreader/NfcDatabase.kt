@@ -6,10 +6,10 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [(NfcUpdate::class)], version = 1)
+@Database(entities = [NfcUpdate::class, CurrentLocation::class], version = 2)
 abstract class NfcDatabase : RoomDatabase() {
 
-    abstract fun readerLocationDao(): NfcUpdateDao
+    abstract fun nfcUpdateDao(): NfcUpdateDao
 
     companion object {
 

@@ -7,15 +7,28 @@ class NfcUpdateSource private constructor(
     private val nfcDatabase: NfcDatabase
 ) {
 
-    val nfcUpdate = nfcDatabase.readerLocationDao().getNfcUpdate()
+    val nfcUpdate = nfcDatabase.nfcUpdateDao().getNfcUpdate()
+
+    val currentLocation = nfcDatabase.nfcUpdateDao().getCurrentLocation()
 
     fun setNfcUpdate(nfcUpdate: NfcUpdate) {
         executor.execute {
             nfcDatabase.runInTransaction {
                 // Delete existing data.
-                nfcDatabase.readerLocationDao().delete()
+                nfcDatabase.nfcUpdateDao().delete()
                 // Insert new data.
-                nfcDatabase.readerLocationDao().insert(nfcUpdate)
+                nfcDatabase.nfcUpdateDao().insert(nfcUpdate)
+            }
+        }
+    }
+
+    fun setLocation(location: CurrentLocation) {
+        executor.execute {
+            nfcDatabase.runInTransaction {
+                // Delete existing data.
+                nfcDatabase.nfcUpdateDao().deleteLocation()
+                // Insert new data.
+                nfcDatabase.nfcUpdateDao().setLocation(location)
             }
         }
     }
