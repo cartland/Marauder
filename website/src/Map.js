@@ -375,39 +375,45 @@ class Canvas extends React.Component {
         endingLocation,
         duration);
 
-      let personX = centerOfMassLocation[X];
-      let personY = centerOfMassLocation[Y];
-
       let roomDetails = rooms[currentWaypoint.room];
 
       context.save()
       context.translate(roomDetails.topLeft.x, roomDetails.topLeft.y);
-      this.drawPerson(context, personX, personY);
+      this.drawPerson(context, centerOfMassLocation);
       if (this.people[person].showName === true) {
-        context.fillText(this.people[person].name, personX+10, personY+35);
+        context.fillText(this.people[person].name, centerOfMassLocation[X] + 10, centerOfMassLocation[X] + 35);
       }
 
       // Draw steps from startingLocation to centerOfMassLocation.
+
+      // Length of a single step in pixels.
       let stepDistance = 50;
+      // Time it takes for a step to fade in milliseconds.
       let stepTime = 5000;
+      // Distance traveled since the starting location.
       let centerOfMassDistance = this.vectorDistance(startingLocation, centerOfMassLocation);
+      // Number of steps since the starting location
       let stepCount = Math.floor(centerOfMassDistance / stepDistance);
+      // Length and direction of a single step.
       let unitStepVector = this.scaleVector(
         this.normalizeVector([endingLocation[X] - startingLocation[X], endingLocation[Y] - startingLocation[Y]]),
         stepDistance
       );
+      // For each step since the starting location, draw it.
       for (let step = 0; step <= stepCount; step++) {
         let stepVector = this.addVector(
           startingLocation,
           this.scaleVector(unitStepVector, step)
         );
+        // Average speed that the person is traveling, pixels / millisecond.
         let speed = this.vectorDistance(startingLocation, endingLocation) / duration;
+        // Distance of person from this old step, pixels.
         let distanceFromStep = this.vectorDistance(stepVector, centerOfMassLocation);
+        // Approximate time elapsed since this step happened, milliseconds.
         let timeSinceStep = distanceFromStep / speed;
+        // Opacity is 1.0 if no time has passed fades to 0.0 if stepTime has passed.
         let opacity = Math.max(0, stepTime - timeSinceStep) / stepTime; // 0-1.0
-        let stepX = stepVector[X];
-        let stepY = stepVector[Y];
-        this.drawFoot(context, stepX, stepY, step, unitStepVector, opacity);
+        this.drawFoot(context, stepVector, step, unitStepVector, opacity);
       }
       context.restore()
     })
@@ -415,13 +421,26 @@ class Canvas extends React.Component {
     requestAnimationFrame(this.draw);
   }
 
-  drawPerson = (context, personX, personY) => {
+  /**
+   * Draw a person at coordinate X and Y.
+   */
+  drawPerson = (context, centerOfMassLocation) => {
+    let X = 0;
+    let Y = 1;
+    let personX = centerOfMassLocation[X];
+    let personY = centerOfMassLocation[Y];
     context.beginPath();
     context.arc(personX, personY, 10, 0, 2*Math.PI, true);
     context.fill();
   }
 
-  drawFoot = (context, stepX, stepY, step, unitStepVector, opacity) => {
+  /**
+   * Draw a foot near stepX, stepY.
+   * If step is even, step to the right.
+   * unitStepVector is the length and direction of a single step.
+   * Opacity allows the step to fade.
+   */
+  drawFoot = (context, stepVector, step, unitStepVector, opacity) => {
     let X = 0;
     let Y = 1;
     let leftOrthoVector = [unitStepVector[Y], -unitStepVector[X]];
@@ -433,10 +452,13 @@ class Canvas extends React.Component {
     sideVector = this.scaleVector(sideVector, 0.25); // Move footprint to the side 1/4 of a step.
     context.beginPath();
     context.fillStyle = "rgba(0, 0, 0, " + opacity + ")";
-    context.arc(sideVector[X] + stepX, sideVector[Y] + stepY, 10, 0, 2*Math.PI, true);
+    context.arc(stepVector[X] + sideVector[X], stepVector[Y] + sideVector[Y], 10, 0, 2*Math.PI, true);
     context.fill();
   }
 
+  /**
+   * Compute the location [x, y] based on a start, end, and easing function.
+   */
   easeLocation = (elapsed, startingLocation, endingLocation, duration) => {
     let loc = [];
     for (let index = 0; index < startingLocation.length; index++) {
@@ -449,6 +471,9 @@ class Canvas extends React.Component {
     return loc;
   }
 
+  /**
+   * Compute the distance between two points.
+   */
   vectorDistance = (a, b) => {
     let X = 0;
     let Y = 1;
@@ -458,6 +483,9 @@ class Canvas extends React.Component {
     );
   }
 
+  /**
+   * Return a new vector of length 1.
+   */
   normalizeVector = (vector) => {
     let X = 0;
     let Y = 1;
@@ -468,6 +496,9 @@ class Canvas extends React.Component {
     ];
   }
 
+  /**
+   * Return a new vector scaled by a factor.
+   */
   scaleVector = (vector, factor) => {
     let X = 0;
     let Y = 1;
@@ -477,6 +508,9 @@ class Canvas extends React.Component {
     ];
   }
 
+  /**
+   * Return a new vector that is the sum of the input vectors.
+   */
   addVector = (a, b) => {
     let X = 0;
     let Y = 1;
