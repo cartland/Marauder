@@ -7,7 +7,6 @@ import android.util.Log
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.chriscartland.marauder.BuildConfig
 import com.chriscartland.marauder.R
@@ -27,7 +26,7 @@ class NfcUrlActivity : AppCompatActivity() {
         Log.d(TAG, "onCreate")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_nfc_url)
-        readerLocationViewModel = ViewModelProviders.of(this)[ReaderLocationViewModel::class.java]
+        readerLocationViewModel = ViewModelProviders.of(this).get(ReaderLocationViewModel::class.java)
         // Find views.
         spinnerNfcReaderLocation = findViewById(R.id.spinner_nfc_reader_location)
         // Restore basic state.

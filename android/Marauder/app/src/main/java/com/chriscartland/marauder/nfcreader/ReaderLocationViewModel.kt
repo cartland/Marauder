@@ -5,11 +5,12 @@ import androidx.lifecycle.AndroidViewModel
 import com.chriscartland.marauder.MarauderApp
 
 class ReaderLocationViewModel(
-    application: Application,
-    private val repository: ReaderLocationRepository = (application as MarauderApp).repository
+    application: Application
 ) : AndroidViewModel(application) {
 
-    private val location = repository.location
+    private val repository: ReaderLocationRepository = (application as MarauderApp).repository
+
+    val location = repository.location
 
     fun setLocation(location: ReaderLocation) = repository.setLocation(location)
 }
