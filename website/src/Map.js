@@ -363,35 +363,118 @@ class Canvas extends React.Component {
 
     Object.keys(this.people).map(person => {
       let currentWaypoint = this.updateWaypoints(person);
-      let elapsed = new Date() - currentWaypoint.startedAt;
+      let startingLocation = currentWaypoint.startingLocation;
+      let endingLocation = currentWaypoint.endingLocation;
+      let duration = currentWaypoint.duration;
+      let currentTime = new Date();
+      let elapsed = currentTime - currentWaypoint.startedAt;
+      let X = 0;
+      let Y = 1;
+      let centerOfMassLocation = this.easeLocation(elapsed,
+        startingLocation,
+        endingLocation,
+        duration);
 
-      let personX = easeInOutQuad(
-        elapsed,
-        currentWaypoint.startingLocation[0],
-        currentWaypoint.endingLocation[0]-currentWaypoint.startingLocation[0],
-        currentWaypoint.duration);
-
-      let personY = easeInOutQuad(
-        elapsed,
-        currentWaypoint.startingLocation[1],
-        currentWaypoint.endingLocation[1]-currentWaypoint.startingLocation[1],
-        currentWaypoint.duration);
-
+      let personX = centerOfMassLocation[X];
+      let personY = centerOfMassLocation[Y];
 
       let roomDetails = rooms[currentWaypoint.room];
 
       context.save()
       context.translate(roomDetails.topLeft.x, roomDetails.topLeft.y);
-      context.beginPath();
-      context.arc(personX, personY, 10, 0, 2*Math.PI, true);
-      context.fill();
+      this.drawPerson(context, personX, personY);
       if (this.people[person].showName === true) {
         context.fillText(this.people[person].name, personX+10, personY+35);
+      }
+
+      // Draw steps from startingLocation to centerOfMassLocation.
+      let stepDistance = 50;
+      let stepTime = 5000;
+      let centerOfMassDistance = this.vectorDistance(startingLocation, centerOfMassLocation);
+      let stepCount = Math.floor(centerOfMassDistance / stepDistance);
+      let unitStepVector = this.scaleVector(
+        this.normalizeVector([endingLocation[X] - startingLocation[X], endingLocation[Y] - startingLocation[Y]]),
+        stepDistance
+      );
+      for (let step = 0; step <= stepCount; step++) {
+        let stepVector = this.addVector(
+          startingLocation,
+          this.scaleVector(unitStepVector, step)
+        );
+        let speed = this.vectorDistance(startingLocation, endingLocation) / duration;
+        let distanceFromStep = this.vectorDistance(stepVector, centerOfMassLocation);
+        let timeSinceStep = distanceFromStep / speed;
+        let opacity = Math.max(0, stepTime - timeSinceStep) / stepTime; // 0-1.0
+        let stepX = stepVector[X];
+        let stepY = stepVector[Y];
+        this.drawFoot(context, stepX, stepY, step, unitStepVector, opacity);
       }
       context.restore()
     })
 
     requestAnimationFrame(this.draw);
+  }
+
+  drawPerson = (context, personX, personY) => {
+    context.beginPath();
+    context.arc(personX, personY, 10, 0, 2*Math.PI, true);
+    context.fill();
+  }
+
+  drawFoot = (context, stepX, stepY, step, unitStepVector, opacity) => {
+    context.beginPath();
+    context.fillStyle = "rgba(0, 0, 0, " + opacity + ")";
+    context.arc(stepX, stepY, 10, 0, 2*Math.PI, true);
+    context.fill();
+  }
+
+  easeLocation = (elapsed, startingLocation, endingLocation, duration) => {
+    let loc = [];
+    for (let index = 0; index < startingLocation.length; index++) {
+      loc.push(easeInOutQuad(
+        elapsed,
+        startingLocation[index],
+        endingLocation[index] - startingLocation[index],
+        duration));
+    }
+    return loc;
+  }
+
+  vectorDistance = (a, b) => {
+    let X = 0;
+    let Y = 1;
+    return Math.hypot(
+      b[X] - a[X],
+      b[Y] - a[Y]
+    );
+  }
+
+  normalizeVector = (vector) => {
+    let X = 0;
+    let Y = 1;
+    let vectorSize = Math.hypot(vector[X], vector[Y]);
+    return [
+      vector[X] / vectorSize,
+      vector[Y] / vectorSize
+    ];
+  }
+
+  scaleVector = (vector, factor) => {
+    let X = 0;
+    let Y = 1;
+    return [
+      vector[X] * factor,
+      vector[Y] * factor
+    ];
+  }
+
+  addVector = (a, b) => {
+    let X = 0;
+    let Y = 1;
+    return [
+      a[X] + b[X],
+      a[Y] + b[Y]
+    ];
   }
 
   /*
