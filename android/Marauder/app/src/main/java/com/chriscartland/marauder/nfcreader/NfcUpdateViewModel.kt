@@ -3,9 +3,10 @@ package com.chriscartland.marauder.nfcreader
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
 import com.chriscartland.marauder.MarauderApp
 import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class NfcUpdateViewModel(
     application: Application
@@ -15,26 +16,28 @@ class NfcUpdateViewModel(
 
     val currentLocation = repository.currentLocation
 
-    val currentLocationLabel = MediatorLiveData<String?>()
+    val currentLocationString = MediatorLiveData<String?>()
 
-    val timestampString = MutableLiveData<String?>()
-
-    val nfcLocation = MediatorLiveData<String?>()
-    val nfcLogicalId = MediatorLiveData<String?>()
     val nfcUri = MediatorLiveData<String?>()
+    val nfcLogicalId = MediatorLiveData<String?>()
+    val nfcLocation = MediatorLiveData<String?>()
+    val timestampString = MediatorLiveData<String?>()
 
     init {
-        currentLocationLabel.addSource(currentLocation) {
-            currentLocationLabel.value = currentLocation.value?.location
+        currentLocationString.addSource(currentLocation) {
+            currentLocationString.value = currentLocation.value?.location
         }
-        nfcLocation.addSource(repository.nfcUpdate) {
-            nfcLocation.value = it?.nfcReaderLocation
+        nfcUri.addSource(repository.nfcUpdate) {
+            nfcUri.value = it?.nfcUri
         }
         nfcLogicalId.addSource(repository.nfcUpdate) {
             nfcLogicalId.value = it?.nfcLogicalId
         }
-        nfcUri.addSource(repository.nfcUpdate) {
-            nfcUri.value = it?.nfcUri
+        nfcLocation.addSource(repository.nfcUpdate) {
+            nfcLocation.value = it?.nfcReaderLocation
+        }
+        timestampString.addSource(repository.nfcUpdate) {
+            timestampString.value = it?.timestamp
         }
     }
 
@@ -43,6 +46,11 @@ class NfcUpdateViewModel(
     fun setCurrentLocation(location: CurrentLocation) = repository.setCurrentLocation(location)
 
     fun setTimestamp(timestamp: Timestamp?) {
-        timestampString.value = timestamp?.toDate().toString()
+        val ISO_8601_DATE = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US)
+        val date = timestamp?.toDate()
+        val formattedDate = ISO_8601_DATE.format(date)
+        val nfcUpdate = repository.nfcUpdate.value ?: NfcUpdate()
+        nfcUpdate.timestamp = formattedDate
+        setNfcUpdate(nfcUpdate)
     }
 }

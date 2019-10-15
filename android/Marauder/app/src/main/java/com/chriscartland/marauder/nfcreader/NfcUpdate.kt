@@ -9,5 +9,6 @@ data class NfcUpdate (
     var primaryKey: Int = 0,
     var nfcReaderLocation: String? = null,
     val nfcUri: String? = null,
-    val nfcLogicalId: String? = null
+    val nfcLogicalId: String? = null,
+    var timestamp: String? = null
 )

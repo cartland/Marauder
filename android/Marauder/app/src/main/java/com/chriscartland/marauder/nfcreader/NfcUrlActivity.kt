@@ -109,7 +109,7 @@ class NfcUrlActivity : AppCompatActivity() {
         val nfcUpdate = NfcUpdate(
             nfcUri = data?.toString(),
             nfcLogicalId = data?.getQueryParameter("logicalid"),
-            nfcReaderLocation = nfcUpdateViewModel.currentLocationLabel.value
+            nfcReaderLocation = nfcUpdateViewModel.currentLocationString.value
         )
         val nfcData = hashMapOf(
             "nfcUri" to nfcUpdate.nfcUri,
