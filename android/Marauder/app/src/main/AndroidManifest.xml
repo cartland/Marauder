@@ -18,7 +18,7 @@
             tools:ignore="GoogleAppIndexingWarning">
 
         <activity
-                android:name=".NfcUrlActivity"
+                android:name=".nfcreader.NfcUrlActivity"
                 android:screenOrientation="portrait"
                 android:launchMode="singleTask">
 

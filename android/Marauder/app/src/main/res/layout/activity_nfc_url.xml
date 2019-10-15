@@ -6,7 +6,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:keepScreenOn="true"
-        tools:context=".NfcUrlActivity">
+        tools:context=".nfcreader.NfcUrlActivity">
 
     <Spinner
             android:id="@+id/spinner_nfc_reader_location"

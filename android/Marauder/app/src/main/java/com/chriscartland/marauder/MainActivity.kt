@@ -3,6 +3,7 @@ package com.chriscartland.marauder
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.chriscartland.marauder.nfcreader.NfcUrlActivity
 
 class MainActivity : AppCompatActivity() {
 
