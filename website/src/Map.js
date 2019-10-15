@@ -422,9 +422,18 @@ class Canvas extends React.Component {
   }
 
   drawFoot = (context, stepX, stepY, step, unitStepVector, opacity) => {
+    let X = 0;
+    let Y = 1;
+    let leftOrthoVector = [unitStepVector[Y], -unitStepVector[X]];
+    let rightOrthoVector = this.scaleVector(leftOrthoVector, -1);
+    let sideVector = leftOrthoVector;
+    if (step % 2 == 0) {
+      sideVector = rightOrthoVector;
+    }
+    sideVector = this.scaleVector(sideVector, 0.25); // Move footprint to the side 1/4 of a step.
     context.beginPath();
     context.fillStyle = "rgba(0, 0, 0, " + opacity + ")";
-    context.arc(stepX, stepY, 10, 0, 2*Math.PI, true);
+    context.arc(sideVector[X] + stepX, sideVector[Y] + stepY, 10, 0, 2*Math.PI, true);
     context.fill();
   }
 
