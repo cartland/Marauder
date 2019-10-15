@@ -22,13 +22,13 @@ class NfcUpdateSource private constructor(
         }
     }
 
-    fun setLocation(location: CurrentLocation) {
+    fun setCurrentLocation(location: CurrentLocation) {
         executor.execute {
             nfcDatabase.runInTransaction {
                 // Delete existing data.
-                nfcDatabase.nfcUpdateDao().deleteLocation()
+                nfcDatabase.nfcUpdateDao().deleteCurrentLocation()
                 // Insert new data.
-                nfcDatabase.nfcUpdateDao().setLocation(location)
+                nfcDatabase.nfcUpdateDao().setCurrentLocation(location)
             }
         }
     }

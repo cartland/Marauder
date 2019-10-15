@@ -31,5 +31,5 @@ class NfcUpdateViewModel(
 
     fun setNfcUpdate(nfcUpdate: NfcUpdate) = repository.setNfcUpdate(nfcUpdate)
 
-    fun setLocation(location: String?) = repository.setLocation(location)
+    fun setCurrentLocation(location: CurrentLocation) = repository.setCurrentLocation(location)
 }

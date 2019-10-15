@@ -4,19 +4,18 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.util.Log
-import android.view.View
-import android.widget.AdapterView
+import android.widget.Button
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.chriscartland.marauder.BuildConfig
 import com.chriscartland.marauder.R
 import com.chriscartland.marauder.databinding.ActivityNfcUrlBinding
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import org.json.JSONObject
 import java.util.UUID
 
 class NfcUrlActivity : AppCompatActivity() {
@@ -25,6 +24,7 @@ class NfcUrlActivity : AppCompatActivity() {
     private lateinit var nfcUpdateViewModel: NfcUpdateViewModel
     private var uuid: String? = null
     lateinit var spinnerNfcReaderLocation: Spinner
+    lateinit var setLocationButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "onCreate")
@@ -34,9 +34,20 @@ class NfcUrlActivity : AppCompatActivity() {
         val binding: ActivityNfcUrlBinding = DataBindingUtil.setContentView(this, R.layout.activity_nfc_url)
         binding.setLifecycleOwner(this)
         binding.nfcViewModel = nfcUpdateViewModel
-
         // Find views.
         spinnerNfcReaderLocation = findViewById(R.id.spinner_nfc_reader_location)
+        nfcUpdateViewModel.currentLocation.observe(this, Observer<CurrentLocation?> {
+            it?.spinnerIndex?.let {
+                spinnerNfcReaderLocation.setSelection(it)
+            }
+        })
+        setLocationButton = findViewById(R.id.set_location_button)
+        setLocationButton.setOnClickListener {
+            nfcUpdateViewModel.setCurrentLocation(CurrentLocation(
+                    location = spinnerNfcReaderLocation.selectedItem as String?,
+                    spinnerIndex = spinnerNfcReaderLocation.selectedItemPosition
+            ))
+        }
         // Restore basic state.
         restoreInstanceState(savedInstanceState)
         // Handle the Intent with NFC data.
@@ -129,7 +140,6 @@ class NfcUrlActivity : AppCompatActivity() {
             }
         val nfcUpdate = update.toNfcUpdate()
         nfcUpdateViewModel.setNfcUpdate(nfcUpdate)
-        nfcUpdateViewModel.setLocation(nfcUpdate.nfcReaderLocation)
         val timestamp: String? = update["timestamp"]?.toString()
         (this.findViewById(R.id.timestamp) as TextView).text = getString(R.string.timestamp_label, timestamp)
     }

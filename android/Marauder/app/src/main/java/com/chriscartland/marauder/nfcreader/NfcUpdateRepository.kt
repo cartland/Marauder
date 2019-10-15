@@ -10,10 +10,7 @@ class NfcUpdateRepository private constructor(
 
     fun setNfcUpdate(nfcUpdate: NfcUpdate) = nfcUpdateSource.setNfcUpdate(nfcUpdate)
 
-    fun setLocation(location: String?) {
-        val currentLocation = CurrentLocation(location = location)
-        nfcUpdateSource.setLocation(currentLocation)
-    }
+    fun setCurrentLocation(location: CurrentLocation) = nfcUpdateSource.setCurrentLocation(location)
 
     companion object {
 

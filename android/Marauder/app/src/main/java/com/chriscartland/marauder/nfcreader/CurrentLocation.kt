@@ -7,5 +7,6 @@ import androidx.room.PrimaryKey
 data class CurrentLocation (
     @PrimaryKey(autoGenerate = true)
     var primaryKey: Int = 0,
-    var location: String? = null
+    var location: String? = null,
+    var spinnerIndex: Int? = null
 )
