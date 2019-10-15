@@ -7,13 +7,13 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
 @Dao
-interface ReaderLocationDao {
-    @Query("SELECT * FROM reader_location LIMIT 1")
-    fun getLocation(): LiveData<ReaderLocation?>
+interface NfcUpdateDao {
+    @Query("SELECT * FROM nfc_update LIMIT 1")
+    fun getNfcUpdate(): LiveData<NfcUpdate?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(comments: ReaderLocation)
+    fun insert(comments: NfcUpdate)
 
-    @Query("DELETE FROM reader_location")
+    @Query("DELETE FROM nfc_update")
     fun delete()
 }

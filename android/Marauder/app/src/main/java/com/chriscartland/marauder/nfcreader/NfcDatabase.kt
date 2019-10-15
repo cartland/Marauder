@@ -6,20 +6,20 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [(ReaderLocation::class)], version = 1)
-abstract class ReaderLocationDatabase : RoomDatabase() {
+@Database(entities = [(NfcUpdate::class)], version = 1)
+abstract class NfcDatabase : RoomDatabase() {
 
-    abstract fun readerLocationDao(): ReaderLocationDao
+    abstract fun readerLocationDao(): NfcUpdateDao
 
     companion object {
 
         @Volatile
-        private var INSTANCE: ReaderLocationDatabase? = null
+        private var INSTANCE: NfcDatabase? = null
 
         @VisibleForTesting
-        private val DATABASE_NAME = "reader_location-db"
+        private val DATABASE_NAME = "nfc_update-db"
 
-        fun getInstance(context: Context): ReaderLocationDatabase =
+        fun getInstance(context: Context): NfcDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: buildDatabase(context.applicationContext).also {
                     INSTANCE = it
@@ -30,8 +30,8 @@ abstract class ReaderLocationDatabase : RoomDatabase() {
          * Set up the database configuration.
          * The SQLite database is only created when it's accessed for the first time.
          */
-        private fun buildDatabase(appContext: Context): ReaderLocationDatabase {
-            return Room.databaseBuilder(appContext, ReaderLocationDatabase::class.java, DATABASE_NAME)
+        private fun buildDatabase(appContext: Context): NfcDatabase {
+            return Room.databaseBuilder(appContext, NfcDatabase::class.java, DATABASE_NAME)
                 .fallbackToDestructiveMigration()
                 .build()
         }

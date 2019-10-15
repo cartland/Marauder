@@ -2,8 +2,8 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
         <variable
-                name="locationViewModel"
-                type="com.chriscartland.marauder.nfcreader.ReaderLocationViewModel" />
+                name="nfcViewModel"
+                type="com.chriscartland.marauder.nfcreader.NfcUpdateViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -16,17 +16,21 @@
 
         <Spinner
                 android:id="@+id/spinner_nfc_reader_location"
+                android:entries="@array/locations"
+                android:spinnerMode="dropdown"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:entries="@array/locations"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginStart="8dp" android:spinnerMode="dropdown" android:layout_marginBottom="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginStart="8dp"
+                android:layout_marginBottom="8dp"/>
 
         <TextView
                 android:id="@+id/nfc_uri"
-                tools:text="NFC URI"
+                tools:text="URI"
+                android:text="@{nfcViewModel.nfcUri}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -38,7 +42,8 @@
 
         <TextView
                 android:id="@+id/nfc_logical_id"
-                tools:text="NFC Logical ID"
+                tools:text="Logical ID"
+                android:text="@{nfcViewModel.nfcLogicalId}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -50,7 +55,8 @@
 
         <TextView
                 android:id="@+id/nfc_reader_location_text"
-                tools:text="@{locationViewModel.location"
+                tools:text="Location"
+                android:text="@{nfcViewModel.location}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"

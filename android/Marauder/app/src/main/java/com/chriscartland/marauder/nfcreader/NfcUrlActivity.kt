@@ -4,12 +4,16 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.util.Log
+import android.view.View
+import android.widget.AdapterView
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
 import com.chriscartland.marauder.BuildConfig
 import com.chriscartland.marauder.R
+import com.chriscartland.marauder.databinding.ActivityNfcUrlBinding
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import org.json.JSONObject
@@ -18,7 +22,7 @@ import java.util.UUID
 class NfcUrlActivity : AppCompatActivity() {
 
     private val nfcUpdates = FirebaseFirestore.getInstance().collection("nfcUpdates")
-    private lateinit var readerLocationViewModel: ReaderLocationViewModel
+    private lateinit var nfcUpdateViewModel: NfcUpdateViewModel
     private var uuid: String? = null
     lateinit var spinnerNfcReaderLocation: Spinner
 
@@ -26,9 +30,21 @@ class NfcUrlActivity : AppCompatActivity() {
         Log.d(TAG, "onCreate")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_nfc_url)
-        readerLocationViewModel = ViewModelProviders.of(this).get(ReaderLocationViewModel::class.java)
+        nfcUpdateViewModel = ViewModelProviders.of(this).get(NfcUpdateViewModel::class.java)
+        val binding: ActivityNfcUrlBinding = DataBindingUtil.setContentView(this, R.layout.activity_nfc_url)
+        binding.setLifecycleOwner(this)
+        binding.nfcViewModel = nfcUpdateViewModel
+
         // Find views.
         spinnerNfcReaderLocation = findViewById(R.id.spinner_nfc_reader_location)
+        spinnerNfcReaderLocation.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                nfcUpdateViewModel.setLocation(null)
+            }
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                nfcUpdateViewModel.setLocation(spinnerNfcReaderLocation.getItemAtPosition(position) as String)
+            }
+        }
         // Restore basic state.
         restoreInstanceState(savedInstanceState)
         // Handle the Intent with NFC data.
@@ -38,9 +54,6 @@ class NfcUrlActivity : AppCompatActivity() {
     fun restoreInstanceState(savedInstanceState: Bundle?) {
         Log.d(TAG, "onRestoreInstanceState")
         uuid = savedInstanceState?.getString(UUID_KEY)
-        savedInstanceState?.getInt(NFC_READER_LOCATION_KEY)?.let {
-            spinnerNfcReaderLocation.setSelection(it)
-        }
         if (uuid == null) {
             Log.d(TAG, "onRestoreInstanceState: randomUUID()")
             uuid = UUID.randomUUID().toString()
@@ -53,7 +66,6 @@ class NfcUrlActivity : AppCompatActivity() {
         val persistableOut = outPersistentState ?: PersistableBundle()
         out.run {
             putString(UUID_KEY, uuid)
-            putInt(NFC_READER_LOCATION_KEY, spinnerNfcReaderLocation.selectedItemPosition)
         }
         super.onSaveInstanceState(out, persistableOut)
     }
@@ -82,13 +94,15 @@ class NfcUrlActivity : AppCompatActivity() {
         Log.d(TAG, "extractData")
         // Extract NFC data.
         val data = intent.data
-        val nfcUri: String? = data?.toString()
-        val nfcLogicalId = data?.getQueryParameter("logicalid")
-        val nfcReaderLocation = spinnerNfcReaderLocation.selectedItem
+        val nfcUpdate = NfcUpdate(
+            nfcUri = data?.toString(),
+            nfcLogicalId = data?.getQueryParameter("logicalid"),
+            nfcReaderLocation = nfcUpdateViewModel.location.value
+        )
         val nfcData = hashMapOf(
-            "nfcUri" to nfcUri,
-            "nfcLogicalId" to nfcLogicalId,
-            "nfcReaderLocation" to nfcReaderLocation
+            "nfcUri" to nfcUpdate.nfcUri,
+            "nfcLogicalId" to nfcUpdate.nfcLogicalId,
+            "nfcReaderLocation" to nfcUpdate.nfcReaderLocation
         )
         // Debug app data.
         val zPhone = hashMapOf(
@@ -126,22 +140,28 @@ class NfcUrlActivity : AppCompatActivity() {
     }
 
     private fun displayData(update: HashMap<String, Any?>) {
+        val nfcUpdate = update.toNfcUpdate()
         Log.d(TAG, "displayData")
         Log.d(TAG, JSONObject(update).toString())
-        val nfcUri: String? = (update["nfcData"] as HashMap<String, String?>)["nfcUri"]
-        val nfcLogicalId: String? = (update["nfcData"] as HashMap<String, String?>)["nfcLogicalId"]
-        val nfcReaderLocation: String? = (update["nfcData"] as HashMap<String, String?>)["nfcReaderLocation"]
         val timestamp: String? = update["timestamp"]?.toString()
-        (this.findViewById(R.id.nfc_uri) as TextView).text = getString(R.string.nfc_label, nfcUri)
-        (this.findViewById(R.id.nfc_logical_id) as TextView).text = getString(R.string.nfc_logical_label, nfcLogicalId)
-        (this.findViewById(R.id.nfc_reader_location_text) as TextView).text =
-            getString(R.string.nfc_reader_label, nfcReaderLocation)
         (this.findViewById(R.id.timestamp) as TextView).text = getString(R.string.timestamp_label, timestamp)
+        nfcUpdateViewModel.setNfcUpdate(nfcUpdate)
     }
 
     companion object {
         const val TAG = "NfcUrlActivity"
         const val UUID_KEY: String = "com.chriscartland.marauder.UUID_KEY"
-        const val NFC_READER_LOCATION_KEY: String = "com.chriscartland.marauder.NFC_READER_LOCATION_KEY"
     }
+}
+
+private fun <K, V> java.util.HashMap<K, V>.toNfcUpdate(): NfcUpdate {
+    val update = this as? HashMap<String, HashMap<String, String?>>
+    val nfcUri: String? = update?.get("nfcData")?.get("nfcUri")
+    val nfcLogicalId: String? = update?.get("nfcData")?.get("nfcLogicalId")
+    val nfcReaderLocation: String? = update?.get("nfcData")?.get("nfcReaderLocation")
+    return NfcUpdate(
+        nfcUri = nfcUri,
+        nfcLogicalId = nfcLogicalId,
+        nfcReaderLocation = nfcReaderLocation
+    )
 }

@@ -3,9 +3,11 @@ package com.chriscartland.marauder.nfcreader
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "reader_location")
-data class ReaderLocation (
+@Entity(tableName = "nfc_update")
+data class NfcUpdate (
     @PrimaryKey(autoGenerate = true)
     var primaryKey: Int = 0,
-    var readerLocation: String? = null
+    var nfcReaderLocation: String? = null,
+    val nfcUri: String? = null,
+    val nfcLogicalId: String? = null
 )
