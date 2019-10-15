@@ -6,7 +6,6 @@ import android.os.PersistableBundle
 import android.util.Log
 import android.widget.Button
 import android.widget.Spinner
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -15,6 +14,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.chriscartland.marauder.BuildConfig
 import com.chriscartland.marauder.R
 import com.chriscartland.marauder.databinding.ActivityNfcUrlBinding
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.UUID
@@ -144,8 +144,8 @@ class NfcUrlActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 Log.d(TAG, "publishData: DocumentSnapshot successfully written!")
                 nfcUpdates.document(id).get().addOnSuccessListener { doc ->
-                    val timestamp: String? = doc?.data?.get("timestamp")?.toString()
-                    (this.findViewById(R.id.timestamp) as TextView).text = getString(R.string.timestamp_label, timestamp)
+                    val timestamp = doc?.data?.get("timestamp") as Timestamp?
+                    nfcUpdateViewModel.setTimestamp(timestamp)
                 }
             }
             .addOnFailureListener { e ->

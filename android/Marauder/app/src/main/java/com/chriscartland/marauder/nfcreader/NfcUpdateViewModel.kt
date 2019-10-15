@@ -3,7 +3,9 @@ package com.chriscartland.marauder.nfcreader
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
 import com.chriscartland.marauder.MarauderApp
+import com.google.firebase.Timestamp
 
 class NfcUpdateViewModel(
     application: Application
@@ -14,6 +16,8 @@ class NfcUpdateViewModel(
     val currentLocation = repository.currentLocation
 
     val currentLocationLabel = MediatorLiveData<String?>()
+
+    val timestampString = MutableLiveData<String?>()
 
     val nfcLocation = MediatorLiveData<String?>()
     val nfcLogicalId = MediatorLiveData<String?>()
@@ -37,4 +41,8 @@ class NfcUpdateViewModel(
     fun setNfcUpdate(nfcUpdate: NfcUpdate) = repository.setNfcUpdate(nfcUpdate)
 
     fun setCurrentLocation(location: CurrentLocation) = repository.setCurrentLocation(location)
+
+    fun setTimestamp(timestamp: Timestamp?) {
+        timestampString.value = timestamp?.toDate().toString()
+    }
 }
