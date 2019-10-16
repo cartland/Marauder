@@ -5,7 +5,7 @@
 
     <uses-feature
             android:name="android.hardware.nfc"
-            android:required="true" />
+            android:required="true"/>
 
     <application
             android:name=".MarauderApp"
@@ -19,10 +19,17 @@
             tools:ignore="GoogleAppIndexingWarning">
 
         <activity
-                android:name=".nfcreader.NfcUrlActivity"
-                android:screenOrientation="portrait"
-                android:launchMode="singleTask">
+                android:name=".webview.WebActivity"
+                android:launchMode="singleTask"
+                android:screenOrientation="landscape"
+        >
+        </activity>
 
+        <activity
+                android:name=".nfcreader.NfcUrlActivity"
+                android:launchMode="singleTask"
+                android:screenOrientation="portrait"
+        >
             <tools:validation testUrl="https://marauder-129.web.app/?logicalid=id123"/>
             <tools:validation testUrl="https://marauder-129.web.app/"/>
             <tools:validation testUrl="https://marauder-129.web.app"/>
@@ -30,24 +37,25 @@
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
                 <action android:name="android.intent.action.VIEW"/>
+
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
+
                 <data
-                        android:scheme="https"
                         android:host="marauder-129.web.app"
-                />
+                        android:scheme="https"/>
                 <data
-                        android:scheme="marauder"
                         android:host="marauder-129.web.app"
-                />
+                        android:scheme="marauder"/>
             </intent-filter>
         </activity>
-
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
     </application>
+
 </manifest>

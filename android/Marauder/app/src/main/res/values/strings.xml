@@ -7,6 +7,7 @@
     <string name="set_location">Set NFC Reader Location</string>
     <string name="reader_location_text">NFC Reader Location</string>
     <string name="labe_update_text">Last NFC Update</string>
+    <string name="marauder_web_app_url">https://marauder-129.web.app</string>
 
     <string-array name="locations">
         <item>unknown</item>
