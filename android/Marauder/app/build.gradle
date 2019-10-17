@@ -12,13 +12,13 @@ android {
         applicationId "com.chriscartland.marauder"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 17
-        versionName "2.1.0"
+        versionCode 18
+        versionName "2.1.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
