@@ -430,7 +430,7 @@ class Canvas extends React.Component {
     let personX = centerOfMassLocation[X];
     let personY = centerOfMassLocation[Y];
     context.beginPath();
-    context.arc(personX, personY, 10, 0, 2*Math.PI, true);
+    context.arc(personX, personY, 4, 0, 2*Math.PI, true);
     context.fill();
   }
 
