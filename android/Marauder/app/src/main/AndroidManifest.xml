@@ -21,7 +21,7 @@
         <activity
                 android:name=".webview.WebActivity"
                 android:launchMode="singleTask"
-                android:screenOrientation="landscape"
+                android:screenOrientation="userLandscape"
         >
         </activity>
 
