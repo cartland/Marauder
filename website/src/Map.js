@@ -22,6 +22,8 @@ window.easeInOutQuad = easeInOutQuad
 const STEP_DISTANCE = 50;
 // Left and right feet are offset by a factor of the STEP_DISTANCE.
 const STEP_WIDTH_FACTOR = 0.25;
+// Time it takes for a step to fade in milliseconds.
+const STEP_FADE_DURATION = 7 * 1000; // 7 seconds.
 
 let rooms = {
   alberto_room: {
@@ -502,12 +504,10 @@ class Canvas extends React.Component {
 
   drawFootsteps(context) {
     let currentTime = new Date();
-    // Time it takes for a step to fade in milliseconds.
-    let stepDuration = 5000;
     for (const [key, footstep] of Object.entries(this.footsteps)) {
-      // Opacity is 1.0 if no time has passed fades to 0.0 if stepDuration has passed.
+      // Opacity is 1.0 if no time has passed fades to 0.0 if STEP_FADE_DURATION has passed.
       let timeSinceStep = currentTime - footstep.stepBeginTime;
-      let opacity = Math.max(0, stepDuration - timeSinceStep) / stepDuration; // 0-1.0
+      let opacity = Math.max(0, STEP_FADE_DURATION - timeSinceStep) / STEP_FADE_DURATION; // 0-1.0
       if (opacity <= 0) {
         this.deleteFootstep(key);
       }
