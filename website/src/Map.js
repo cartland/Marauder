@@ -263,13 +263,23 @@ class Canvas extends React.Component {
     var fullScreenStyle;
     if (aspectRatio <= mapAspectRatio) {
       this.setState({
-        fullScreenStyle: {height: '100vh'},
+        fullScreenStyle: {
+          height: viewport.height,
+          width: viewport.height * mapAspectRatio,
+        },
       })
     } else {
       this.setState({
-        fullScreenStyle: {width: '100vw'},
+        fullScreenStyle: {
+          height: viewport.width / mapAspectRatio,
+          width: viewport.width,
+        },
       })
     }
+
+    setTimeout(() => {
+      window.scrollTo(viewport.width/2, viewport.height/2);
+    }, 500);
   }
 
   handleOnLoadImage = (e) => {
