@@ -8,6 +8,8 @@ import FootstepLeft from './assets/footstep-left.svg';
 import FootstepRight from './assets/footstep-right.svg';
 import { V } from './Vector2.js';
 
+import getViewport from './getViewport.js';
+
 let footstepLeftImg = new Image();
 footstepLeftImg.src = FootstepLeft;
 
@@ -152,6 +154,9 @@ class Footstep {
 
 class Canvas extends React.Component {
   state = {
+    // not 4k, but is the same size as the base image
+    mapWidth: 2560,
+    mapHeight: 1440,
   }
 
   constructor(props) {
@@ -239,6 +244,32 @@ class Canvas extends React.Component {
 
     this.canvas = React.createRef();
     this.image = React.createRef();
+  }
+
+  componentDidMount() {
+    this.updateDimensions();
+    window.addEventListener("resize", this.updateDimensions);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.updateDimensions);
+  }
+
+  updateDimensions = () => {
+    let viewport = getViewport();
+    let aspectRatio = viewport.width / viewport.height;
+    let mapAspectRatio = this.state.mapWidth / this.state.mapHeight;
+
+    var fullScreenStyle;
+    if (aspectRatio <= mapAspectRatio) {
+      this.setState({
+        fullScreenStyle: {height: '100vh'},
+      })
+    } else {
+      this.setState({
+        fullScreenStyle: {width: '100vw'},
+      })
+    }
   }
 
   handleOnLoadImage = (e) => {
@@ -546,8 +577,8 @@ class Canvas extends React.Component {
 
   render() {
     return(
-      <div style={{height: '100vh'}}>
-        <canvas ref={this.canvas} style={{height: '100vh'}} width={2560} height={1440} />
+      <div style={this.state.fullScreenStyle}>
+        <canvas ref={this.canvas} style={this.state.fullScreenStyle} width={this.state.mapWidth} height={this.state.mapHeight} />
         <img onLoad={this.handleOnLoadImage} ref={this.image} src={process.env.PUBLIC_URL + '/129OctaviaTopDownView.png'} className="hidden" />
       </div>
     )
@@ -555,4 +586,3 @@ class Canvas extends React.Component {
 }
 
 export default Canvas
-
