@@ -6,7 +6,7 @@ import "firebase/firestore";
 
 import FootstepLeft from './assets/footstep-left.svg';
 import FootstepRight from './assets/footstep-right.svg';
-import Vector2 from './Vector2.js';
+import { V } from './Vector2.js';
 
 let footstepLeftImg = new Image();
 footstepLeftImg.src = FootstepLeft;
@@ -20,108 +20,108 @@ window.easeInOutQuad = easeInOutQuad
 
 let rooms = {
   alberto_room: {
-    topLeft: {
-      x: 201,
-      y: 439,
-    },
+    topLeft: V(
+      201,
+      439,
+    ),
     height: 285,
     width: 285,
     name: 'Alberto\'s Room',
     doors: {
-      kitchen: [285, 62],
+      kitchen: V(285, 62),
     },
   },
   kitchen: {
-    topLeft: {
-      x: 486,
-      y: 439,
-    },
+    topLeft: V(
+      486,
+      439,
+    ),
     height: 563,
     width: 386,
     name: 'Kitchen',
     doors: {
-      living_room: [386, 480],
-      alberto_room: [0, 62],
-      patio: [327, 563],
+      living_room: V(386, 480),
+      alberto_room: V(0, 62),
+      patio: V(327, 563),
     },
   },
   living_room: {
-    topLeft: {
-      x: 872,
-      y: 439,
-    },
+    topLeft: V(
+      872,
+      439,
+    ),
     height: 563,
     width: 420,
     name: 'Living Room',
     doors: {
-      kitchen: [0, 480],
-      hallway: [420, 62],
+      kitchen: V(0, 480),
+      hallway: V(420, 62),
     },
   },
   hallway: {
-    topLeft: {
-      x: 1292,
-      y: 439,
-    },
+    topLeft: V(
+      1292,
+      439,
+    ),
     height: 172,
     width: 992,
     name: 'Hallway',
     doors: {
-      living_room: [0, 62],
-      cartland_room: [442, 172],
-      nick_room: [726, 172],
-      stromme_room: [838, 172],
+      living_room: V(0, 62),
+      cartland_room: V(442, 172),
+      nick_room: V(726, 172),
+      stromme_room: V(838, 172),
     },
   },
   cartland_room: {
-    topLeft: {
-      x: 1504,
-      y: 611,
-    },
+    topLeft: V(
+      1504,
+      611,
+    ),
     height: 495,
     width: 285,
     name: 'Cartland\'s Room',
     doors: {
-      hallway: [230, 0],
+      hallway: V(230, 0),
     },
   },
 
   nick_room: {
-    topLeft: {
-      x: 1789,
-      y: 611,
-    },
+    topLeft: V(
+      1789,
+      611,
+    ),
     height: 495,
     width: 285,
     name: 'Nick\'s Room',
     doors: {
-      hallway: [229, 0],
+      hallway: V(229, 0),
     },
   },
 
   stromme_room: {
-    topLeft: {
-      x: 2074,
-      y: 611,
-    },
+    topLeft: V(
+      2074,
+      611,
+    ),
     height: 391,
     width: 374,
     name: 'Stromme\'s Room',
     doors: {
-      hallway: [56, 0],
+      hallway: V(56, 0),
     },
   },
 
   patio: {
-    topLeft: {
-      x: 487,
-      y: 1002,
-    },
+    topLeft: V(
+      487,
+      1002,
+    ),
     height: 104,
     width: 1018,
     name: 'Patio',
     doors: {
-      kitchen: [327, 0],
+      kitchen: V(327, 0),
     },
   },
 }
@@ -151,42 +151,42 @@ class Canvas extends React.Component {
         name: 'Stromme',
         room: 'stromme_room',
         waypoints: [
-          this.newStandingStillWaypoint([300, 300], 2*1000, 'stromme_room'),
+          this.newStandingStillWaypoint(V(300, 300), 2*1000, 'stromme_room'),
         ],
       },
       alberto: {
         name: 'Alberto',
         room: 'alberto_room',
         waypoints: [
-          this.newStandingStillWaypoint([0, 0], 2*1000, 'alberto_room'),
+          this.newStandingStillWaypoint(V(0, 0), 2*1000, 'alberto_room'),
         ],
       },
       cartland: {
         name: 'Cartland',
         room: 'cartland_room',
         waypoints: [
-          this.newStandingStillWaypoint([0, 0], 2*1000, 'cartland_room'),
+          this.newStandingStillWaypoint(V(0, 0), 2*1000, 'cartland_room'),
         ],
       },
       nick: {
         name: 'Nick',
         room: 'nick_room',
         waypoints: [
-          this.newStandingStillWaypoint([0, 0], 2*1000, 'nick_room'),
+          this.newStandingStillWaypoint(V(0, 0), 2*1000, 'nick_room'),
         ],
       },
       the_womping_willow: {
         name: 'The Womping Willow',
         room: 'stromme_room',
         waypoints: [
-          this.newStandingStillWaypoint([300, 300], 2*1000, 'stromme_room'),
+          this.newStandingStillWaypoint(V(300, 300), 2*1000, 'stromme_room'),
         ],
       },
       dumbledore: {
         name: 'Dumbledore',
         room: 'patio',
         waypoints: [
-          this.newStandingStillWaypoint([50, 50], 2*1000, 'patio'),
+          this.newStandingStillWaypoint(V(50, 50), 2*1000, 'patio'),
         ],
       },
 
@@ -194,7 +194,7 @@ class Canvas extends React.Component {
         name: 'Tal',
         room: 'patio',
         waypoints: [
-          this.newStandingStillWaypoint([50, 50], 2*1000, 'patio'),
+          this.newStandingStillWaypoint(V(50, 50), 2*1000, 'patio'),
         ],
       },
     }
@@ -223,8 +223,10 @@ class Canvas extends React.Component {
     let endingX = Math.random() * (rooms[roomId].width - 30) + 15;
     let endingY = Math.random() * (rooms[roomId].height - 30) + 15;
 
-    let distance = Math.sqrt(Math.pow(startingLocation[0]-endingX, 2) +
-                             Math.pow(startingLocation[1]-endingY, 2));
+    let ending = V(endingX, endingY);
+    let distance = ending.sub(startingLocation).size();
+    // let distance = Math.sqrt(Math.pow(startingLocation[0]-endingX, 2) +
+    //                          Math.pow(startingLocation[1]-endingY, 2));
 
     let maxSpeed = 560 / 10; // cross the living room in 10 seconds
     let minSpeed = 560 / 30; // cross the living room in 20 seconds
@@ -239,7 +241,7 @@ class Canvas extends React.Component {
 
     return this.newWaypointToLocation(
       startingLocation,
-      [endingX, endingY],
+      ending,
       duration,
       roomId
     )
@@ -276,9 +278,9 @@ class Canvas extends React.Component {
   }
 
   getDuration = (location1, location2, speed) => {
-    let distance = Math.sqrt(Math.pow(location1[0]-location2[0], 2) +
-                             Math.pow(location1[1]-location2[0], 2));
-
+    let distance = location2.sub(location1).size();
+    // let distance = Math.sqrt(Math.pow(location1[0]-location2[0], 2) +
+    //                          Math.pow(location1[1]-location2[0], 2));
     return distance / speed;
   }
 
@@ -371,18 +373,12 @@ class Canvas extends React.Component {
 
     Object.keys(this.people).map(person => {
       let currentWaypoint = this.updateWaypoints(person);
-      let startingLocation = new Vector2(
-        currentWaypoint.startingLocation[0],
-        currentWaypoint.startingLocation[1]
-      );
-      let endingLocation = new Vector2(
-        currentWaypoint.endingLocation[0],
-        currentWaypoint.endingLocation[1]
-      );
+      let startingLocation = currentWaypoint.startingLocation;
+      let endingLocation = currentWaypoint.endingLocation;
       let duration = currentWaypoint.duration;
       let currentTime = new Date();
       let elapsed = currentTime - currentWaypoint.startedAt;
-      let centerOfMassLocation = new Vector2(
+      let centerOfMassLocation = V(
         easeInOutQuad(
           elapsed,
           startingLocation.x,

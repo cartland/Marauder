@@ -34,4 +34,9 @@ class Vector2 {
   }
 }
 
+export function V(x, y) {
+  return new Vector2(x, y);
+}
+
 export default Vector2
+
