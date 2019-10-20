@@ -532,8 +532,8 @@ class Canvas extends React.Component {
 
   render() {
     return(
-      <div>
-        <canvas ref={this.canvas} style={{width: 640, height: 360}} width={2560} height={1440} />
+      <div style={{height: '100vh'}}>
+        <canvas ref={this.canvas} style={{height: '100vh'}} width={2560} height={1440} />
         <img onLoad={this.handleOnLoadImage} ref={this.image} src={process.env.PUBLIC_URL + '/129OctaviaTopDownView.png'} className="hidden" />
       </div>
     )
