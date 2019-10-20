@@ -6,6 +6,7 @@ import "firebase/firestore";
 
 import FootstepLeft from './assets/footstep-left.svg';
 import FootstepRight from './assets/footstep-right.svg';
+import Vector2 from './Vector2.js';
 
 let footstepLeftImg = new Image();
 footstepLeftImg.src = FootstepLeft;
@@ -359,12 +360,10 @@ class Canvas extends React.Component {
 
     setTimeout(() => {
       this.people[person].showName = false;
-    }, 5*1000);
+    }, 30*1000);
   }
 
   draw = () => {
-    // console.log(this.canvas, this.image)
-
     let context = this.canvas.current.getContext("2d")
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     context.drawImage(this.image.current, 0, 0);
@@ -372,25 +371,41 @@ class Canvas extends React.Component {
 
     Object.keys(this.people).map(person => {
       let currentWaypoint = this.updateWaypoints(person);
-      let startingLocation = currentWaypoint.startingLocation;
-      let endingLocation = currentWaypoint.endingLocation;
+      let startingLocation = new Vector2(
+        currentWaypoint.startingLocation[0],
+        currentWaypoint.startingLocation[1]
+      );
+      let endingLocation = new Vector2(
+        currentWaypoint.endingLocation[0],
+        currentWaypoint.endingLocation[1]
+      );
       let duration = currentWaypoint.duration;
       let currentTime = new Date();
       let elapsed = currentTime - currentWaypoint.startedAt;
-      let X = 0;
-      let Y = 1;
-      let centerOfMassLocation = this.easeLocation(elapsed,
-        startingLocation,
-        endingLocation,
-        duration);
+      let centerOfMassLocation = new Vector2(
+        easeInOutQuad(
+          elapsed,
+          startingLocation.x,
+          endingLocation.x - startingLocation.x,
+          duration
+        ),
+        easeInOutQuad(
+          elapsed,
+          startingLocation.y,
+          endingLocation.y - startingLocation.y,
+          duration
+        )
+      );
 
       let roomDetails = rooms[currentWaypoint.room];
 
       context.save()
       context.translate(roomDetails.topLeft.x, roomDetails.topLeft.y);
       this.drawPerson(context, centerOfMassLocation);
+      this.drawPerson(context, startingLocation);
+      this.drawPerson(context, endingLocation);
       if (this.people[person].showName === true) {
-        context.fillText(this.people[person].name, centerOfMassLocation[X] + 10, centerOfMassLocation[X] + 35);
+        context.fillText(this.people[person].name, centerOfMassLocation.x + 10, centerOfMassLocation.y + 35);
       }
 
       // Draw steps from startingLocation to centerOfMassLocation.
@@ -400,24 +415,18 @@ class Canvas extends React.Component {
       // Time it takes for a step to fade in milliseconds.
       let stepTime = 5000;
       // Distance traveled since the starting location.
-      let centerOfMassDistance = this.vectorDistance(startingLocation, centerOfMassLocation);
+      let centerOfMassDistance = centerOfMassLocation.sub(startingLocation).size();
       // Number of steps since the starting location
       let stepCount = Math.floor(centerOfMassDistance / stepDistance);
       // Length and direction of a single step.
-      let unitStepVector = this.scaleVector(
-        this.normalizeVector([endingLocation[X] - startingLocation[X], endingLocation[Y] - startingLocation[Y]]),
-        stepDistance
-      );
+      let unitStepVector = endingLocation.sub(startingLocation).normalize().scale(stepDistance);
       // For each step since the starting location, draw it.
       for (let step = 0; step <= stepCount; step++) {
-        let stepVector = this.addVector(
-          startingLocation,
-          this.scaleVector(unitStepVector, step)
-        );
+        let stepVector = startingLocation.add(unitStepVector.scale(step));
         // Average speed that the person is traveling, pixels / millisecond.
-        let speed = this.vectorDistance(startingLocation, endingLocation) / duration;
+        let speed = endingLocation.sub(startingLocation).size() / duration;
         // Distance of person from this old step, pixels.
-        let distanceFromStep = this.vectorDistance(stepVector, centerOfMassLocation);
+        let distanceFromStep = centerOfMassLocation.sub(stepVector).size();
         // Approximate time elapsed since this step happened, milliseconds.
         let timeSinceStep = distanceFromStep / speed;
         // Opacity is 1.0 if no time has passed fades to 0.0 if stepTime has passed.
@@ -435,13 +444,6 @@ class Canvas extends React.Component {
    */
   drawPerson = (context, centerOfMassLocation) => {
     // DO NOTHING. PERSON IS INVISIBLE.
-    // let X = 0;
-    // let Y = 1;
-    // let personX = centerOfMassLocation[X];
-    // let personY = centerOfMassLocation[Y];
-    // context.beginPath();
-    // context.arc(personX, personY, 4, 0, 2*Math.PI, true);
-    // context.fill();
   }
 
   /**
@@ -451,88 +453,19 @@ class Canvas extends React.Component {
    * Opacity allows the step to fade.
    */
   drawFoot = (context, stepVector, step, unitStepVector, opacity) => {
-    let X = 0;
-    let Y = 1;
-    let leftOrthoVector = [unitStepVector[Y], -unitStepVector[X]];
-    let rightOrthoVector = this.scaleVector(leftOrthoVector, -1);
-    let sideVector = leftOrthoVector;
+    let sideVector = unitStepVector.orthogonalLeft();
     let img = footstepLeftImg
     if (step % 2 == 0) {
-      sideVector = rightOrthoVector;
+      sideVector = unitStepVector.orthogonalRight();
       img = footstepRightImg;
     }
-    sideVector = this.scaleVector(sideVector, 0.25); // Move footprint to the side 1/4 of a step.
+    sideVector = sideVector.scale(0.25); // Move footprint to the side 1/4 of a step.
     context.save()
-    context.translate(stepVector[X], stepVector[Y]);
-    context.translate(sideVector[X], sideVector[Y]);
-    context.rotate(Math.atan2(unitStepVector[Y], unitStepVector[X]) + 90 * Math.PI / 180)
+    context.translate(stepVector.x, stepVector.y);
+    context.rotate(Math.atan2(unitStepVector.y, unitStepVector.x) + 90 * Math.PI / 180)
     context.globalAlpha = opacity;
     context.drawImage(img, 0, 0, 12, 12 * img.height / img.width);
     context.restore()
-  }
-
-  /**
-   * Compute the location [x, y] based on a start, end, and easing function.
-   */
-  easeLocation = (elapsed, startingLocation, endingLocation, duration) => {
-    let loc = [];
-    for (let index = 0; index < startingLocation.length; index++) {
-      loc.push(easeInOutQuad(
-        elapsed,
-        startingLocation[index],
-        endingLocation[index] - startingLocation[index],
-        duration));
-    }
-    return loc;
-  }
-
-  /**
-   * Compute the distance between two points.
-   */
-  vectorDistance = (a, b) => {
-    let X = 0;
-    let Y = 1;
-    return Math.hypot(
-      b[X] - a[X],
-      b[Y] - a[Y]
-    );
-  }
-
-  /**
-   * Return a new vector of length 1.
-   */
-  normalizeVector = (vector) => {
-    let X = 0;
-    let Y = 1;
-    let vectorSize = Math.hypot(vector[X], vector[Y]);
-    return [
-      vector[X] / vectorSize,
-      vector[Y] / vectorSize
-    ];
-  }
-
-  /**
-   * Return a new vector scaled by a factor.
-   */
-  scaleVector = (vector, factor) => {
-    let X = 0;
-    let Y = 1;
-    return [
-      vector[X] * factor,
-      vector[Y] * factor
-    ];
-  }
-
-  /**
-   * Return a new vector that is the sum of the input vectors.
-   */
-  addVector = (a, b) => {
-    let X = 0;
-    let Y = 1;
-    return [
-      a[X] + b[X],
-      a[Y] + b[Y]
-    ];
   }
 
   /*
@@ -555,3 +488,4 @@ class Canvas extends React.Component {
 }
 
 export default Canvas
+
