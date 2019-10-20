@@ -126,6 +126,23 @@ let rooms = {
   },
 }
 
+class Footstep {
+
+  constructor(location, direction, stepNumber, stepBeginTime) {
+    this.location = location;
+    this.direction = direction;
+    this.stepNumber = stepNumber;
+    this.stepBeginTime = stepBeginTime;
+  }
+
+  key() {
+    return this.location.x.toPrecision(5) + ","
+      + this.location.y.toPrecision(5) + ","
+      + this.direction.x.toPrecision(5) + ","
+      + this.direction.y.toPrecision(5);
+  }
+}
+
 class Canvas extends React.Component {
   state = {
   }
@@ -145,6 +162,8 @@ class Canvas extends React.Component {
         }
       });
     });
+
+    this.footsteps = {};
 
     this.people = {
       stromme: {
@@ -403,34 +422,13 @@ class Canvas extends React.Component {
       if (this.people[person].showName === true) {
         context.fillText(this.people[person].name, centerOfMassLocation.x + 10, centerOfMassLocation.y + 35);
       }
-
-      // Draw steps from startingLocation to centerOfMassLocation.
-
-      // Length of a single step in pixels.
-      let stepDistance = 50;
-      // Time it takes for a step to fade in milliseconds.
-      let stepTime = 5000;
-      // Distance traveled since the starting location.
-      let centerOfMassDistance = centerOfMassLocation.sub(startingLocation).size();
-      // Number of steps since the starting location
-      let stepCount = Math.floor(centerOfMassDistance / stepDistance);
-      // Length and direction of a single step.
-      let unitStepVector = endingLocation.sub(startingLocation).normalize().scale(stepDistance);
-      // For each step since the starting location, draw it.
-      for (let step = 0; step <= stepCount; step++) {
-        let stepVector = startingLocation.add(unitStepVector.scale(step));
-        // Average speed that the person is traveling, pixels / millisecond.
-        let speed = endingLocation.sub(startingLocation).size() / duration;
-        // Distance of person from this old step, pixels.
-        let distanceFromStep = centerOfMassLocation.sub(stepVector).size();
-        // Approximate time elapsed since this step happened, milliseconds.
-        let timeSinceStep = distanceFromStep / speed;
-        // Opacity is 1.0 if no time has passed fades to 0.0 if stepTime has passed.
-        let opacity = Math.max(0, stepTime - timeSinceStep) / stepTime; // 0-1.0
-        this.drawFoot(context, stepVector, step, unitStepVector, opacity);
-      }
+      this.createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, duration, currentTime);
       context.restore()
     })
+
+    context.save();
+    this.drawFootsteps(context);
+    context.restore();
 
     requestAnimationFrame(this.draw);
   }
@@ -442,22 +440,86 @@ class Canvas extends React.Component {
     // DO NOTHING. PERSON IS INVISIBLE.
   }
 
+  createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, duration, currentTime) {
+    // Length of a single step in pixels.
+    let stepDistance = 50;
+    // Distance traveled since the starting location.
+    let centerOfMassDistance = centerOfMassLocation.sub(startingLocation).size();
+    // Number of steps since the starting location
+    let stepCount = Math.floor(centerOfMassDistance / stepDistance);
+    // Length and direction of a single step.
+    let unitStepVector = centerOfMassLocation.sub(startingLocation).normalize().scale(stepDistance);
+    // For each step since the starting location, draw it.
+    for (let stepNumber = 0; stepNumber <= stepCount; stepNumber++) {
+      let sideVector = unitStepVector.orthogonalLeft();
+      if (stepNumber % 2 == 0) {
+        sideVector = unitStepVector.orthogonalRight();
+      }
+      sideVector = sideVector.scale(0.25); // Move footprint to the side 1/4 of a step.
+
+      let stepLocation = startingLocation.add(unitStepVector.scale(stepNumber));
+      // Average speed that the person is traveling, pixels / millisecond.
+      let speed = endingLocation.sub(startingLocation).size() / duration;
+      // Distance of person from this old step, pixels.
+      let distanceFromStep = centerOfMassLocation.sub(stepLocation).size();
+      // Approximate time elapsed since this step happened, milliseconds.
+      let timeSinceStep = distanceFromStep / speed;
+      let stepBeginTime = currentTime - timeSinceStep;
+
+      stepLocation = stepLocation.add(sideVector);
+      stepLocation = stepLocation.add(V(roomDetails.topLeft.x, roomDetails.topLeft.y));
+      let footstep = new Footstep(stepLocation, unitStepVector, stepNumber, stepBeginTime);
+      let key = footstep.key();
+      if (key in this.footsteps) {
+        // Do nothing.
+      } else {
+        this.addFootstep(key, footstep);
+      }
+    }
+  }
+
+  addFootstep(key, footstep) {
+    this.footsteps[key] = footstep;
+  }
+
+  deleteFootstep(key) {
+    delete this.footsteps[key];
+  }
+
+  drawFootsteps(context) {
+    let currentTime = new Date();
+    // Time it takes for a step to fade in milliseconds.
+    let stepDuration = 5000;
+    for (const [key, footstep] of Object.entries(this.footsteps)) {
+      // Opacity is 1.0 if no time has passed fades to 0.0 if stepDuration has passed.
+      let timeSinceStep = currentTime - footstep.stepBeginTime;
+      let opacity = Math.max(0, stepDuration - timeSinceStep) / stepDuration; // 0-1.0
+      if (opacity <= 0) {
+        this.deleteFootstep(key);
+      }
+      this.drawFoot(context, footstep, opacity);
+    }
+  }
+
   /**
    * Draw a foot near stepX, stepY.
    * If step is even, step to the right.
    * unitStepVector is the length and direction of a single step.
    * Opacity allows the step to fade.
    */
-  drawFoot = (context, stepVector, step, unitStepVector, opacity) => {
+  drawFoot = (context, footstep, opacity) => {
+    let unitStepVector = footstep.direction;
+
     let sideVector = unitStepVector.orthogonalLeft();
     let img = footstepLeftImg
-    if (step % 2 == 0) {
+    if (footstep.stepNumber % 2 == 0) {
       sideVector = unitStepVector.orthogonalRight();
       img = footstepRightImg;
     }
     sideVector = sideVector.scale(0.25); // Move footprint to the side 1/4 of a step.
+    let stepLocation = footstep.location;
     context.save()
-    context.translate(stepVector.x, stepVector.y);
+    context.translate(stepLocation.x, stepLocation.y);
     context.rotate(Math.atan2(unitStepVector.y, unitStepVector.x) + 90 * Math.PI / 180)
     context.globalAlpha = opacity;
     context.drawImage(img, 0, 0, 12, 12 * img.height / img.width);
