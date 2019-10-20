@@ -18,6 +18,11 @@ footstepRightImg.src = FootstepRight;
 /* global window */
 window.easeInOutQuad = easeInOutQuad
 
+// Length of a single step in pixels.
+const STEP_DISTANCE = 50;
+// Left and right feet are offset by a factor of the STEP_DISTANCE.
+const STEP_WIDTH_FACTOR = 0.25;
+
 let rooms = {
   alberto_room: {
     topLeft: V(
@@ -422,7 +427,7 @@ class Canvas extends React.Component {
       if (this.people[person].showName === true) {
         context.fillText(this.people[person].name, centerOfMassLocation.x + 10, centerOfMassLocation.y + 35);
       }
-      this.createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, duration, currentTime);
+      this.createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime);
       context.restore()
     })
 
@@ -440,45 +445,54 @@ class Canvas extends React.Component {
     // DO NOTHING. PERSON IS INVISIBLE.
   }
 
-  createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, duration, currentTime) {
-    // Length of a single step in pixels.
-    let stepDistance = 50;
+  createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime) {
+    // Direction of a single step.
+    let footstepDirection = endingLocation.sub(startingLocation).normalize();
+    if (footstepDirection == null) {
+      // Do not create footsteps when standing still.
+      return;
+    }
     // Distance traveled since the starting location.
     let centerOfMassDistance = centerOfMassLocation.sub(startingLocation).size();
-    // Number of steps since the starting location
-    let stepCount = Math.floor(centerOfMassDistance / stepDistance);
-    // Length and direction of a single step.
-    let unitStepVector = centerOfMassLocation.sub(startingLocation).normalize().scale(stepDistance);
+    let scaledStepVector = footstepDirection.scale(STEP_DISTANCE);
+
+    // Number of steps since the starting location.
+    let stepCount = Math.floor(centerOfMassDistance / STEP_DISTANCE);
     // For each step since the starting location, draw it.
     for (let stepNumber = 0; stepNumber <= stepCount; stepNumber++) {
-      let sideVector = unitStepVector.orthogonalLeft();
+      let stepLocation = startingLocation.add(scaledStepVector.scale(stepNumber));
+      let stepBeginTime = currentTime;
+
+      // Global coordinates.
+      let globalStepLocation = stepLocation.add(V(roomDetails.topLeft.x, roomDetails.topLeft.y));
+
+      let leftFootstepLocation = globalStepLocation.add(scaledStepVector.orthogonalLeft().scale(STEP_WIDTH_FACTOR));
+      let rightFootstepLocation = globalStepLocation.add(scaledStepVector.orthogonalRight().scale(STEP_WIDTH_FACTOR));
+
       if (stepNumber % 2 == 0) {
-        sideVector = unitStepVector.orthogonalRight();
+        this.createFootstep(rightFootstepLocation, footstepDirection, stepNumber, stepBeginTime);
       }
-      sideVector = sideVector.scale(0.25); // Move footprint to the side 1/4 of a step.
-
-      let stepLocation = startingLocation.add(unitStepVector.scale(stepNumber));
-      // Average speed that the person is traveling, pixels / millisecond.
-      let speed = endingLocation.sub(startingLocation).size() / duration;
-      // Distance of person from this old step, pixels.
-      let distanceFromStep = centerOfMassLocation.sub(stepLocation).size();
-      // Approximate time elapsed since this step happened, milliseconds.
-      let timeSinceStep = distanceFromStep / speed;
-      let stepBeginTime = currentTime - timeSinceStep;
-
-      stepLocation = stepLocation.add(sideVector);
-      stepLocation = stepLocation.add(V(roomDetails.topLeft.x, roomDetails.topLeft.y));
-      let footstep = new Footstep(stepLocation, unitStepVector, stepNumber, stepBeginTime);
-      let key = footstep.key();
-      if (key in this.footsteps) {
-        // Do nothing.
-      } else {
-        this.addFootstep(key, footstep);
+      if (stepNumber % 2 == 1) {
+        this.createFootstep(leftFootstepLocation, footstepDirection, stepNumber, stepBeginTime);
       }
     }
   }
 
-  addFootstep(key, footstep) {
+  createFootstep(footstepLocation, footstepDirection, stepNumber, stepBeginTime) {
+    let footstep = new Footstep(footstepLocation, footstepDirection, stepNumber, stepBeginTime);
+    let key = footstep.key();
+    if (this.containsFootstep(key)) {
+      // Do nothing.
+    } else {
+      this.addFootstepToMap(key, footstep);
+    }
+  }
+
+   containsFootstep(key) {
+    return key in this.footsteps;
+  }
+
+  addFootstepToMap(key, footstep) {
     this.footsteps[key] = footstep;
   }
 
@@ -503,24 +517,19 @@ class Canvas extends React.Component {
 
   /**
    * Draw a foot near stepX, stepY.
-   * If step is even, step to the right.
-   * unitStepVector is the length and direction of a single step.
+   * footstepDirection is the direction of a single step.
    * Opacity allows the step to fade.
    */
   drawFoot = (context, footstep, opacity) => {
-    let unitStepVector = footstep.direction;
-
-    let sideVector = unitStepVector.orthogonalLeft();
     let img = footstepLeftImg
     if (footstep.stepNumber % 2 == 0) {
-      sideVector = unitStepVector.orthogonalRight();
       img = footstepRightImg;
     }
-    sideVector = sideVector.scale(0.25); // Move footprint to the side 1/4 of a step.
     let stepLocation = footstep.location;
+    let footstepDirection = footstep.direction;
     context.save()
     context.translate(stepLocation.x, stepLocation.y);
-    context.rotate(Math.atan2(unitStepVector.y, unitStepVector.x) + 90 * Math.PI / 180)
+    context.rotate(Math.atan2(footstepDirection.y, footstepDirection.x) + 90 * Math.PI / 180)
     context.globalAlpha = opacity;
     context.drawImage(img, 0, 0, 12, 12 * img.height / img.width);
     context.restore()
