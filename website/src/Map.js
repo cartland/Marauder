@@ -358,8 +358,7 @@ class Canvas extends React.Component {
     let context = this.canvas.current.getContext("2d")
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     context.drawImage(this.image.current, 0, 0);
-    context.font = "40px Courier";
-    context.fillText("Make Your Mischief", 210, 75);
+    context.font = "40px Roboto";
 
     Object.keys(this.people).map(person => {
       let currentWaypoint = this.updateWaypoints(person);
