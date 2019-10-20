@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="172px" height="396px" viewBox="0 0 172 396" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 59 (86127) - https://sketch.com -->
+    <title>footstep-right</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Footprint" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="footstep-right" transform="translate(86.000000, 198.000000) scale(-1, 1) translate(-86.000000, -198.000000) " fill="#000000" fill-rule="nonzero">
+            <path d="M149.752,225.463 C157.359,195.817 161.112,146.368 154.661,111.143 C142.919,47.067 117.931,9.924 84.11,1.105 C11.975,-9.463 2.919,57.981 1.093,109.399 C-2.938,138.167 21.387,249.201 51.004,270.11 C80.153,262.757 108.775,255.552 137.7,249.032 C145.162,245.069 142.798,246.352 149.752,225.463 Z M58.029,293.132 C71.576,464.366 233.499,396.363 145.659,266.705 C117.854,276.228 93.304,282.292 58.029,293.132 Z" id="Shape"></path>
+        </g>
+    </g>
+</svg>
