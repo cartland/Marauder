@@ -425,13 +425,14 @@ class Canvas extends React.Component {
    * Draw a person at coordinate X and Y.
    */
   drawPerson = (context, centerOfMassLocation) => {
-    let X = 0;
-    let Y = 1;
-    let personX = centerOfMassLocation[X];
-    let personY = centerOfMassLocation[Y];
-    context.beginPath();
-    context.arc(personX, personY, 4, 0, 2*Math.PI, true);
-    context.fill();
+    // DO NOTHING. PERSON IS INVISIBLE.
+    // let X = 0;
+    // let Y = 1;
+    // let personX = centerOfMassLocation[X];
+    // let personY = centerOfMassLocation[Y];
+    // context.beginPath();
+    // context.arc(personX, personY, 4, 0, 2*Math.PI, true);
+    // context.fill();
   }
 
   /**
