@@ -3,9 +3,11 @@
           xmlns:tools="http://schemas.android.com/tools"
           package="com.chriscartland.marauder">
 
-    <uses-feature android:name="android.hardware.nfc" android:required="false"/>
+    <uses-feature android:name="android.hardware.nfc" android:required="false" />
     <uses-feature android:name="android.software.leanback" android:required="false" />
-    <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-feature android:name="android.hardware.screen.portrait" android:required="false" />
+    <uses-feature android:name="android.hardware.screen.landscape" android:required="false" />
 
     <application
             android:name=".MarauderApp"
@@ -31,30 +33,31 @@
                 android:launchMode="singleTask"
                 android:screenOrientation="portrait"
         >
-            <tools:validation testUrl="https://marauder-129.web.app/?logicalid=id123"/>
-            <tools:validation testUrl="https://marauder-129.web.app/"/>
-            <tools:validation testUrl="https://marauder-129.web.app"/>
+            <tools:validation testUrl="https://marauder-129.web.app/?logicalid=id123" />
+            <tools:validation testUrl="https://marauder-129.web.app/" />
+            <tools:validation testUrl="https://marauder-129.web.app" />
 
             <intent-filter>
-                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
-                <action android:name="android.intent.action.VIEW"/>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+                <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
                         android:host="marauder-129.web.app"
-                        android:scheme="https"/>
+                        android:scheme="https" />
                 <data
                         android:host="marauder-129.web.app"
-                        android:scheme="marauder"/>
+                        android:scheme="marauder" />
             </intent-filter>
         </activity>
+
         <activity android:name=".MainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
 
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
