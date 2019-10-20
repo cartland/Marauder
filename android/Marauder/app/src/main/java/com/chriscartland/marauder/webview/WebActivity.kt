@@ -1,26 +1,41 @@
 package com.chriscartland.marauder.webview
 
+import android.graphics.Point
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.webkit.WebView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.chriscartland.marauder.R
+
 
 class WebActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
+    private lateinit var dimensionText: TextView
     private val HIDE_SYSTEM_UI_DELAY_MS: Long = 3000
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "onCreate")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_web)
-        // WebView
         webView = findViewById(R.id.webview)
+        dimensionText = findViewById(R.id.dimension_text)
+        logWindowDimensions()
         configureWebView()
+    }
+
+    private fun logWindowDimensions() {
+        val display = windowManager.defaultDisplay
+        val size = Point()
+        display.getSize(size)
+        val width = size.x
+        val height = size.y
+        dimensionText.text = "Width: $width, Height: $height"
+        Log.d(TAG, "logWindowDimensions: width $width, height $height")
     }
 
     private val hideSystemUiHandler = Handler()
