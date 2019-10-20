@@ -4,6 +4,16 @@ import { easeInOutQuad } from 'js-easing-functions';
 import * as firebase from "firebase/app";
 import "firebase/firestore";
 
+import FootstepLeft from './assets/footstep-left.svg';
+import FootstepRight from './assets/footstep-right.svg';
+
+let footstepLeftImg = new Image();
+footstepLeftImg.src = FootstepLeft;
+
+let footstepRightImg = new Image();
+footstepRightImg.src = FootstepRight;
+
+
 /* global window */
 window.easeInOutQuad = easeInOutQuad
 
@@ -446,14 +456,19 @@ class Canvas extends React.Component {
     let leftOrthoVector = [unitStepVector[Y], -unitStepVector[X]];
     let rightOrthoVector = this.scaleVector(leftOrthoVector, -1);
     let sideVector = leftOrthoVector;
+    let img = footstepLeftImg
     if (step % 2 == 0) {
       sideVector = rightOrthoVector;
+      img = footstepRightImg;
     }
     sideVector = this.scaleVector(sideVector, 0.25); // Move footprint to the side 1/4 of a step.
-    context.beginPath();
-    context.fillStyle = "rgba(0, 0, 0, " + opacity + ")";
-    context.arc(stepVector[X] + sideVector[X], stepVector[Y] + sideVector[Y], 10, 0, 2*Math.PI, true);
-    context.fill();
+    context.save()
+    context.translate(stepVector[X], stepVector[Y]);
+    context.translate(sideVector[X], sideVector[Y]);
+    context.rotate(Math.atan2(unitStepVector[Y], unitStepVector[X]) + 90 * Math.PI / 180)
+    context.globalAlpha = opacity;
+    context.drawImage(img, 0, 0, 12, 12 * img.height / img.width);
+    context.restore()
   }
 
   /**
