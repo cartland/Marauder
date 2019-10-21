@@ -30,6 +30,7 @@ class NfcUrlActivity : AppCompatActivity() {
     lateinit var spinnerNfcReaderLocation: Spinner
     lateinit var setLocationButton: Button
     private val HIDE_SYSTEM_UI_DELAY_MS: Long = 3000
+    private var dialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "onCreate")
@@ -50,7 +51,7 @@ class NfcUrlActivity : AppCompatActivity() {
         setLocationButton.setOnClickListener {
             val selectedSpinnerLocation = spinnerNfcReaderLocation.selectedItem as String?
             val selectedSpinnerIndex = spinnerNfcReaderLocation.selectedItemPosition
-            AlertDialog.Builder(this)
+            dialog = AlertDialog.Builder(this)
                 .setTitle("Confirm Location Change")
                 .setMessage("Do you want to change location to $selectedSpinnerLocation?")
                 .setIcon(android.R.drawable.ic_dialog_alert)
@@ -62,7 +63,7 @@ class NfcUrlActivity : AppCompatActivity() {
                 }
                 .setNegativeButton(android.R.string.no, null).show()
         }
-        val contentView: View = findViewById(R.id.content)
+        val contentView: View = findViewById(R.id.constraint_layout)
         contentView.setOnClickListener {
             delayHideUI()
         }
@@ -94,6 +95,12 @@ class NfcUrlActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent?) {
         Log.d(TAG, "onNewIntent")
         super.onNewIntent(intent)
+        dialog?.dismiss()
+        nfcUpdateViewModel.currentLocation.value?.let {
+            it.spinnerIndex?.let {
+                spinnerNfcReaderLocation.setSelection(it)
+            }
+        }
         if (intent == null) {
             Log.d(TAG, "onNewIntent: No Intent")
         } else {
