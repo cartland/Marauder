@@ -264,15 +264,15 @@ class Canvas extends React.Component {
     if (aspectRatio <= mapAspectRatio) {
       this.setState({
         fullScreenStyle: {
-          height: viewport.height,
-          width: viewport.height * mapAspectRatio,
+          height: '100vh',
+          width: `${100*mapAspectRatio}vh`,
         },
       })
     } else {
       this.setState({
         fullScreenStyle: {
-          height: viewport.width / mapAspectRatio,
-          width: viewport.width,
+          height: `${100/mapAspectRatio}vw`,
+          width: '100vw',
         },
       })
     }
