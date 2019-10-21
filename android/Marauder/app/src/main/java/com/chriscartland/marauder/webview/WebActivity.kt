@@ -38,8 +38,6 @@ class WebActivity : AppCompatActivity() {
         Log.d(TAG, "logWindowDimensions: width $width, height $height")
     }
 
-    private val hideSystemUiHandler = Handler()
-
     private fun configureWebView() {
         Log.d(TAG, "configureWebView")
         webView.loadUrl(getString(R.string.marauder_web_app_url))
@@ -47,14 +45,20 @@ class WebActivity : AppCompatActivity() {
         webView.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(v: View, event: MotionEvent): Boolean {
                 Log.d(TAG, "configureWebView: onTouch")
-                // Always hide the system UI after 3 seconds.
-                hideSystemUiHandler.removeCallbacksAndMessages(null)
-                hideSystemUiHandler.postDelayed({
-                    hideSystemUI()
-                }, HIDE_SYSTEM_UI_DELAY_MS)
+                delayHideUI()
                 return false
             }
         })
+    }
+
+    private val hideSystemUiHandler = Handler()
+
+    private fun delayHideUI() {
+        // Always hide the system UI after 3 seconds.
+        hideSystemUiHandler.removeCallbacksAndMessages(null)
+        hideSystemUiHandler.postDelayed({
+            hideSystemUI()
+        }, HIDE_SYSTEM_UI_DELAY_MS)
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
