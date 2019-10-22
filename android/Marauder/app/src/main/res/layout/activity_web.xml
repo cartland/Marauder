@@ -12,8 +12,10 @@
             android:layout_height="match_parent"
     />
 
+    <!-- Dimensions of the screen for debugging purposes -->
     <TextView
             android:id="@+id/dimension_text"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 </FrameLayout>
