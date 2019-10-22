@@ -10,6 +10,5 @@
         <item name="android:windowAllowReturnTransitionOverlap">true</item>
         <item name="android:windowAllowEnterTransitionOverlap">true</item>
         <item name="android:textColorPrimary">@color/common_google_signin_btn_text_dark</item>
-        <item name="android:background">@color/dark</item>
     </style>
 </resources>
