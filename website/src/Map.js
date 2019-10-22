@@ -35,6 +35,7 @@ let rooms = {
     ),
     height: 285,
     width: 285,
+    spawnLocation: V(150, 50),
     name: 'Alberto\'s Room',
     doors: {
       kitchen: V(285, 62),
@@ -47,6 +48,7 @@ let rooms = {
     ),
     height: 563,
     width: 386,
+    spawnLocation: V(190, 50),
     name: 'Kitchen',
     doors: {
       living_room: V(386, 480),
@@ -61,6 +63,7 @@ let rooms = {
     ),
     height: 563,
     width: 420,
+    spawnLocation: V(210, 50),
     name: 'Living Room',
     doors: {
       kitchen: V(0, 480),
@@ -74,6 +77,7 @@ let rooms = {
     ),
     height: 172,
     width: 992,
+    spawnLocation: V(200, 50),
     name: 'Hallway',
     doors: {
       living_room: V(0, 62),
@@ -89,6 +93,7 @@ let rooms = {
     ),
     height: 495,
     width: 285,
+    spawnLocation: V(150, 50),
     name: 'Cartland\'s Room',
     doors: {
       hallway: V(230, 0),
@@ -102,6 +107,7 @@ let rooms = {
     ),
     height: 495,
     width: 285,
+    spawnLocation: V(150, 50),
     name: 'Nick\'s Room',
     doors: {
       hallway: V(229, 0),
@@ -115,6 +121,7 @@ let rooms = {
     ),
     height: 391,
     width: 374,
+    spawnLocation: V(190, 50),
     name: 'Stromme\'s Room',
     doors: {
       hallway: V(56, 0),
@@ -128,6 +135,7 @@ let rooms = {
     ),
     height: 104,
     width: 1018,
+    spawnLocation: V(500, 50),
     name: 'Patio',
     doors: {
       kitchen: V(327, 0),
@@ -425,11 +433,28 @@ class Canvas extends React.Component {
       return;
     }
 
-    this.people[person].showName = true;
+    let personObject = this.people[person];
+    personObject.showName = true;
+
+    let currentRoom = personObject.waypoints[0].room;
+    if (personObject.waypoints[0].room != room) {
+      console.log(person + " needs to move from " + currentRoom + " to " + room);
+      this.movePersonToRoom(personObject, room);
+    }
 
     setTimeout(() => {
       this.people[person].showName = false;
     }, 30*1000);
+  }
+
+  movePersonToRoom(person, room) {
+    if (room in rooms && "width" in rooms[room]) {
+      let roomSpawnLocation = rooms[room].spawnLocation;
+      person.waypoints = [
+        this.newRandomLocationWaypoint(roomSpawnLocation, room)
+      ];
+      person.room = room;
+    }
   }
 
   draw = () => {

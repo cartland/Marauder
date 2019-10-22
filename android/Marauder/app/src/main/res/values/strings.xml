@@ -12,14 +12,14 @@
     <string-array name="locations">
         <item>unknown</item>
         <item>living_room</item>
-        <item>stromme_bedroom</item>
-        <item>nick_bedroom</item>
-        <item>cartland_bedroom</item>
+        <item>stromme_room</item>
+        <item>nick_room</item>
+        <item>cartland_room</item>
         <item>hallway</item>
         <item>bathroom</item>
         <item>kitchen</item>
         <item>patio</item>
         <item>front_steps</item>
-        <item>alberto_bedroom</item>
+        <item>alberto_room</item>
     </string-array>
 </resources>
