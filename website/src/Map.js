@@ -28,6 +28,8 @@ const STEP_WIDTH_FACTOR = 0.25;
 const STEP_FADE_DURATION = 7 * 1000; // 7 seconds.
 // Time it takes for the name to disappear after wand tap.
 const SHOW_NAME_DURATION_S = 30; // Time in seconds
+// Person ID to trigger a web page reset.
+const RESET_LOGICAL_ID = 'reset';
 
 let rooms = {
   alberto_room: {
@@ -180,6 +182,11 @@ class Canvas extends React.Component {
           let room = change.doc.get('nfcData').nfcReaderLocation;
           let person = change.doc.get('nfcData').nfcLogicalId;
 
+          // Check to see if this is a reset request.
+          if (person == RESET_LOGICAL_ID) {
+            window.location.reload();
+            return;
+          }
           this.wandTapped(room, person);
         }
       });
@@ -436,6 +443,9 @@ class Canvas extends React.Component {
     }
 
     let personObject = this.people[person];
+    if (!personObject) {
+      return;
+    }
     personObject.showName = true;
     let hideTime = new Date();
     hideTime.setSeconds(hideTime.getSeconds() + SHOW_NAME_DURATION_S);
