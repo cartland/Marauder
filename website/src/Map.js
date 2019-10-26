@@ -26,6 +26,8 @@ const STEP_DISTANCE = 50;
 const STEP_WIDTH_FACTOR = 0.25;
 // Time it takes for a step to fade in milliseconds.
 const STEP_FADE_DURATION = 7 * 1000; // 7 seconds.
+// Time it takes for the name to disappear after wand tap.
+const SHOW_NAME_DURATION_S = 30; // Time in seconds
 
 let rooms = {
   alberto_room: {
@@ -435,6 +437,9 @@ class Canvas extends React.Component {
 
     let personObject = this.people[person];
     personObject.showName = true;
+    let hideTime = new Date();
+    hideTime.setSeconds(hideTime.getSeconds() + SHOW_NAME_DURATION_S);
+    personObject.hideNameTime = hideTime;
 
     let currentRoom = personObject.waypoints[0].room;
     if (personObject.waypoints[0].room != room) {
@@ -442,9 +447,24 @@ class Canvas extends React.Component {
       this.movePersonToRoom(personObject, room);
     }
 
-    setTimeout(() => {
+    this.hideNameOrReschedule(person);
+  }
+
+  /**
+   * Hide the person name if the time has passed.
+   * If not, then schedule a timeout to try again with the new time.
+   */
+  hideNameOrReschedule(person) {
+    let now = new Date();
+    let hideTime = this.people[person].hideNameTime;
+    if (now > hideTime) {
       this.people[person].showName = false;
-    }, 30*1000);
+    } else {
+      let delayMs = hideTime.getTime() - now.getTime();
+      setTimeout(() => {
+        this.hideNameOrReschedule(person);
+      }, delayMs);
+    }
   }
 
   movePersonToRoom(person, room) {
