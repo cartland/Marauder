@@ -196,50 +196,56 @@ class Canvas extends React.Component {
 
     this.people = {
       stromme: {
-        name: 'Stromme',
-        room: 'stromme_room',
-        waypoints: [
-          this.newStandingStillWaypoint(V(300, 300), 2*1000, 'stromme_room'),
-        ],
-      },
-      alberto: {
-        name: 'Alberto',
-        room: 'alberto_room',
-        waypoints: [
-          this.newStandingStillWaypoint(V(0, 0), 2*1000, 'alberto_room'),
-        ],
-      },
-      cartland: {
-        name: 'Cartland',
-        room: 'cartland_room',
-        waypoints: [
-          this.newStandingStillWaypoint(V(0, 0), 2*1000, 'cartland_room'),
-        ],
-      },
-      nick: {
-        name: 'Nick',
-        room: 'nick_room',
-        waypoints: [
-          this.newStandingStillWaypoint(V(0, 0), 2*1000, 'nick_room'),
-        ],
-      },
-      the_womping_willow: {
         name: 'The Womping Willow',
         room: 'stromme_room',
         waypoints: [
           this.newStandingStillWaypoint(V(300, 300), 2*1000, 'stromme_room'),
         ],
       },
-      dumbledore: {
-        name: 'Dumbledore',
-        room: 'patio',
+      alberto: {
+        name: 'Nimbus 2000',
+        room: 'alberto_room',
+        waypoints: [
+          this.newStandingStillWaypoint(V(0, 0), 2*1000, 'alberto_room'),
+        ],
+      },
+      cartland: {
+        name: 'Golden Snitch',
+        room: 'cartland_room',
+        waypoints: [
+          this.newStandingStillWaypoint(V(0, 0), 2*1000, 'cartland_room'),
+        ],
+      },
+      nick: {
+        name: 'Moving Portrait',
+        room: 'nick_room',
+        waypoints: [
+          this.newStandingStillWaypoint(V(0, 0), 2*1000, 'nick_room'),
+        ],
+      },
+      tal: {
+        name: 'Dobby',
+        room: 'living_room',
         waypoints: [
           this.newStandingStillWaypoint(V(50, 50), 2*1000, 'patio'),
         ],
       },
-
-      tal: {
-        name: 'Tal',
+      harry: {
+        name: 'Harry Potter',
+        room: 'hallway',
+        waypoints: [
+          this.newStandingStillWaypoint(V(300, 300), 2*1000, 'hallway'),
+        ],
+      },
+      dumbledore: {
+        name: 'Dumbledore',
+        room: 'kitchen',
+        waypoints: [
+          this.newStandingStillWaypoint(V(50, 50), 2*1000, 'patio'),
+        ],
+      },
+      ghost: {
+        name: 'Ghost',
         room: 'patio',
         waypoints: [
           this.newStandingStillWaypoint(V(50, 50), 2*1000, 'patio'),
