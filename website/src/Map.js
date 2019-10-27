@@ -7,6 +7,7 @@ import "firebase/firestore";
 import FootstepLeft from './assets/footstep-left.svg';
 import FootstepRight from './assets/footstep-right.svg';
 import { V } from './Vector2.js';
+import { Random } from './Random.js';
 
 import getViewport from './getViewport.js';
 
@@ -181,13 +182,14 @@ class Canvas extends React.Component {
         if (change.type === "added") {
           let room = change.doc.get('nfcData').nfcReaderLocation;
           let person = change.doc.get('nfcData').nfcLogicalId;
+          let timestamp = change.doc.get('timestamp');
 
           // Check to see if this is a reset request.
           if (person == RESET_LOGICAL_ID) {
             window.location.reload();
             return;
           }
-          this.wandTapped(room, person);
+          this.wandTapped(room, person, timestamp);
         }
       });
     });
@@ -254,10 +256,13 @@ class Canvas extends React.Component {
     }
 
     let randomRoomChange = () => {
+      let prng = new Random();
+      let randomPersonFloat = prng.nextFloat();
+      let randomRoomFloat = prng.nextFloat();
       let peopleKeys = Object.keys(this.people);
-      let randomPerson = peopleKeys[Math.floor(Math.random() * peopleKeys.length)];
+      let randomPerson = peopleKeys[Math.floor(randomPersonFloat * peopleKeys.length)];
       let newRoomOptions = Object.keys(rooms[this.people[randomPerson].room].doors);
-      let newRoom = newRoomOptions[Math.floor(Math.random() * newRoomOptions.length)];
+      let newRoom = newRoomOptions[Math.floor(randomRoomFloat * newRoomOptions.length)];
 
       this.changeRoom(randomPerson, newRoom);
       setTimeout(randomRoomChange, 10*1000);
@@ -309,9 +314,13 @@ class Canvas extends React.Component {
     this.draw()
   }
 
-  newRandomLocationWaypoint = (startingLocation, roomId) => {
-    let endingX = Math.random() * (rooms[roomId].width - 30) + 15;
-    let endingY = Math.random() * (rooms[roomId].height - 30) + 15;
+  newRandomLocationWaypoint = (startingLocation, roomId, prng) => {
+    let randomX = prng.nextFloat();
+    let randomY = prng.nextFloat();
+    let randomSpeed = prng.nextFloat();
+
+    let endingX = randomX * (rooms[roomId].width - 30) + 15;
+    let endingY = randomY * (rooms[roomId].height - 30) + 15;
 
     let ending = V(endingX, endingY);
     let distance = ending.sub(startingLocation).size();
@@ -321,10 +330,9 @@ class Canvas extends React.Component {
     let maxSpeed = 560 / 10; // cross the living room in 10 seconds
     let minSpeed = 560 / 30; // cross the living room in 20 seconds
 
-    let speed = Math.random() * (maxSpeed - minSpeed) + minSpeed;
+    let speed = randomSpeed * (maxSpeed - minSpeed) + minSpeed;
     let duration = distance / speed;
-    console.log(`speed: ${speed}, distance: ${distance}, duration: ${duration}`)
-
+    // console.log(`speed: ${speed}, distance: ${distance}, duration: ${duration}`)
 
     // convert from seconds to ms
     duration *= 1000;
@@ -358,12 +366,15 @@ class Canvas extends React.Component {
   }
 
   nextWaypoint = (startingLocation, room) => {
-    let choice = Math.floor(Math.random() * 10);
+    let prng = new Random();
+    let randomChoice = prng.nextFloat();
+    let randomDuration = prng.nextFloat();
 
+    let choice = Math.floor(randomChoice * 10);
     if (choice < 4) {
-      return this.newStandingStillWaypoint(startingLocation, 1000*(5*Math.random()+2), room);
+      return this.newStandingStillWaypoint(startingLocation, 1000*(5*randomDuration+2), room);
     } else {
-      return this.newRandomLocationWaypoint(startingLocation, room);
+      return this.newRandomLocationWaypoint(startingLocation, room, prng);
     }
   }
 
@@ -401,7 +412,8 @@ class Canvas extends React.Component {
     this.people[person].waypoints.push(
       this.newRandomLocationWaypoint(
         otherSideDoorLocation,
-        newRoom
+        newRoom,
+        new Random()
       )
     )
 
@@ -429,11 +441,11 @@ class Canvas extends React.Component {
 
           elapsed -= personState.waypoints[0].duration;
           personState.waypoints.shift();
-          console.log('moving to waypoint', personState.waypoints[0]);
+          // console.log('moving to waypoint', personState.waypoints[0]);
         } else { // otherwise we randomly create them
           let newWaypoint = this.nextWaypoint(personState.waypoints[0].endingLocation, personState.room);
           personState.waypoints.push(newWaypoint);
-          console.log('added waypoint', newWaypoint);
+          // console.log('added waypoint', newWaypoint);
         }
       }
     }
@@ -441,8 +453,9 @@ class Canvas extends React.Component {
     return this.people[person].waypoints[0];
   }
 
-  wandTapped = (room, person) => {
-    console.log('wandTapped', room, person);
+  wandTapped = (room, person, timestamp) => {
+    console.log('wandTapped', room, person, timestamp);
+    let prng = new Random(timestamp.seconds);
 
     if (!person) {
       return;
@@ -460,7 +473,7 @@ class Canvas extends React.Component {
     let currentRoom = personObject.waypoints[0].room;
     if (personObject.waypoints[0].room != room) {
       console.log(person + " needs to move from " + currentRoom + " to " + room);
-      this.movePersonToRoom(personObject, room);
+      this.movePersonToRoom(personObject, room, prng);
     }
 
     this.hideNameOrReschedule(person);
@@ -483,11 +496,11 @@ class Canvas extends React.Component {
     }
   }
 
-  movePersonToRoom(person, room) {
+  movePersonToRoom(person, room, prng) {
     if (room in rooms && "width" in rooms[room]) {
       let roomSpawnLocation = rooms[room].spawnLocation;
       person.waypoints = [
-        this.newRandomLocationWaypoint(roomSpawnLocation, room)
+        this.newRandomLocationWaypoint(roomSpawnLocation, room, prng)
       ];
       person.room = room;
     }
