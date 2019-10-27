@@ -33,6 +33,7 @@ const STEP_FADE_DURATION = 7 * 1000; // 7 seconds.
 const SHOW_NAME_DURATION_S = 30; // Time in seconds
 // Person ID to trigger a web page reset.
 const RESET_LOGICAL_ID = 'reset';
+const UPDATE_LOGIC_INTERVAL_MS = 10;
 
 let rooms = generateRooms();
 
@@ -53,8 +54,7 @@ class Footstep {
   }
 }
 
-class Canvas extends React.Component {
-  state = {
+class Canvas extends React.Component { state = {
     // not 4k, but is the same size as the base image
     mapWidth: 2560,
     mapHeight: 1440,
@@ -90,6 +90,7 @@ class Canvas extends React.Component {
 
     this.canvas = React.createRef();
     this.image = React.createRef();
+    this.lastLogicUpdateTime = 0;
   }
 
   componentDidMount() {
@@ -107,7 +108,11 @@ class Canvas extends React.Component {
 
     for (let personIndex = 0; personIndex < peopleKeys.size; personIndex++) {
       let personKey = peopleKeys[personIndex];
-      let personKeyRoom = rooms[this.people[personKey].room];
+      let personObject = this.people[personKey];
+      let personKeyRoom = rooms[personObject.room];
+
+      // let newWaypoint = this.generateNextWaypoint(personObject.waypoints[0].endingLocation, personState.room, new Random());
+      // personState.waypoints.push(newWaypoint);
       let newRoomOptions = Object.keys(personKeyRoom.doors);
       let randomRoomFloat = prng.nextFloat();
       let newRoom = newRoomOptions[Math.floor(randomRoomFloat * newRoomOptions.length)];
@@ -156,8 +161,6 @@ class Canvas extends React.Component {
 
     let ending = V(endingX, endingY);
     let distance = ending.sub(startingLocation).size();
-    // let distance = Math.sqrt(Math.pow(startingLocation[0]-endingX, 2) +
-    //                          Math.pow(startingLocation[1]-endingY, 2));
 
     let maxSpeed = 560 / 10; // cross the living room in 10 seconds
     let minSpeed = 560 / 30; // cross the living room in 20 seconds
@@ -197,7 +200,7 @@ class Canvas extends React.Component {
     }
   }
 
-  nextWaypoint = (startingLocation, room, prng) => {
+  generateNextWaypoint = (startingLocation, room, prng) => {
     let randomChoice = prng.nextFloat();
     let randomDuration = prng.nextFloat();
 
@@ -251,7 +254,11 @@ class Canvas extends React.Component {
     this.people[person].room = newRoom;
   }
 
-  updateWaypoints(person, prng) {
+  getWaypoint(person) {
+    return this.people[person].waypoints[0];
+  }
+
+  updateWaypoints(person, currentTime, prng) {
     let personState = this.people[person];
     if (personState.waypoints.length === 0) {
       console.error(`Person ${person} has no waypoints`);
@@ -276,14 +283,12 @@ class Canvas extends React.Component {
           personState.waypoints.shift();
           // console.log('moving to waypoint', personState.waypoints[0]);
         } else { // otherwise we randomly create them
-          let newWaypoint = this.nextWaypoint(personState.waypoints[0].endingLocation, personState.room, new Random());
+          let newWaypoint = this.generateNextWaypoint(personState.waypoints[0].endingLocation, personState.room, new Random());
           personState.waypoints.push(newWaypoint);
           // console.log('added waypoint', newWaypoint);
         }
       }
     }
-
-    return this.people[person].waypoints[0];
   }
 
   wandTapped = (room, person, timestamp) => {
@@ -340,59 +345,61 @@ class Canvas extends React.Component {
   }
 
   draw = () => {
+    let currentTime = new Date();
     let context = this.canvas.current.getContext("2d")
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     context.drawImage(this.image.current, 0, 0);
-    context.font = "40px Roboto";
-
+    context.font = "60px Roboto";
     Object.keys(this.people).map(person => {
-      let currentWaypoint = this.updateWaypoints(person);
-      let startingLocation = currentWaypoint.startingLocation;
-      let endingLocation = currentWaypoint.endingLocation;
-      let duration = currentWaypoint.duration;
-      let currentTime = new Date();
-      let elapsed = currentTime - currentWaypoint.startedAt;
-      let centerOfMassLocation = V(
-        easeInOutQuad(
-          elapsed,
-          startingLocation.x,
-          endingLocation.x - startingLocation.x,
-          duration
-        ),
-        easeInOutQuad(
-          elapsed,
-          startingLocation.y,
-          endingLocation.y - startingLocation.y,
-          duration
-        )
-      );
-
-      let roomDetails = rooms[currentWaypoint.room];
-
-      context.save()
-      context.translate(roomDetails.topLeft.x, roomDetails.topLeft.y);
-      this.drawPerson(context, centerOfMassLocation);
-      this.drawPerson(context, startingLocation);
-      this.drawPerson(context, endingLocation);
-      if (this.people[person].showName === true) {
-        context.fillText(this.people[person].name, centerOfMassLocation.x + 10, centerOfMassLocation.y + 35);
-      }
-      this.createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime);
-      context.restore()
+      this.drawPerson(person, context, currentTime);
     })
+
+    if (currentTime.getTime() - this.lastLogicUpdateTime > UPDATE_LOGIC_INTERVAL_MS) {
+      Object.keys(this.people).map(person => {
+        let currentWaypoint = this.updateWaypoints(person, currentTime, new Random());
+      })
+    }
 
     context.save();
     this.drawFootsteps(context);
     context.restore();
 
+    this.lastLogicUpdateTime = currentTime.getTime();
     requestAnimationFrame(this.draw);
   }
 
-  /**
-   * Draw a person at coordinate X and Y.
-   */
-  drawPerson = (context, centerOfMassLocation) => {
-    // DO NOTHING. PERSON IS INVISIBLE.
+  drawPerson(person, context, currentTime) {
+    let currentWaypoint = this.getWaypoint(person);
+    if (currentWaypoint == null) {
+      return;
+    }
+    let startingLocation = currentWaypoint.startingLocation;
+    let endingLocation = currentWaypoint.endingLocation;
+    let duration = currentWaypoint.duration;
+    let elapsed = currentTime - currentWaypoint.startedAt;
+    let centerOfMassLocation = V(
+      easeInOutQuad(
+        elapsed,
+        startingLocation.x,
+        endingLocation.x - startingLocation.x,
+        duration
+      ),
+      easeInOutQuad(
+        elapsed,
+        startingLocation.y,
+        endingLocation.y - startingLocation.y,
+        duration
+      )
+    );
+    let roomDetails = rooms[currentWaypoint.room];
+
+    context.save()
+    context.translate(roomDetails.topLeft.x, roomDetails.topLeft.y);
+    if (this.people[person].showName === true) {
+      context.fillText(this.people[person].name, centerOfMassLocation.x + 10, centerOfMassLocation.y + 35);
+    }
+    this.createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime);
+    context.restore();
   }
 
   createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime) {
