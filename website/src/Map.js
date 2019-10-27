@@ -86,20 +86,7 @@ class Canvas extends React.Component {
 
     this.people = generatePeople();
 
-    let randomRoomChange = () => {
-      let prng = new Random();
-      let randomPersonFloat = prng.nextFloat();
-      let randomRoomFloat = prng.nextFloat();
-      let peopleKeys = Object.keys(this.people);
-      let randomPerson = peopleKeys[Math.floor(randomPersonFloat * peopleKeys.length)];
-      let newRoomOptions = Object.keys(rooms[this.people[randomPerson].room].doors);
-      let newRoom = newRoomOptions[Math.floor(randomRoomFloat * newRoomOptions.length)];
-
-      this.changeRoom(randomPerson, newRoom);
-      setTimeout(randomRoomChange, 10*1000);
-    };
-
-    setTimeout(randomRoomChange, 2000);
+    this.generateWaypoints();
 
     this.canvas = React.createRef();
     this.image = React.createRef();
@@ -112,6 +99,20 @@ class Canvas extends React.Component {
 
   componentWillUnmount() {
     window.removeEventListener("resize", this.updateDimensions);
+  }
+
+  generateWaypoints() {
+    let prng = new Random();
+    let peopleKeys = Object.keys(this.people);
+
+    for (let personIndex = 0; personIndex < peopleKeys.size; personIndex++) {
+      let personKey = peopleKeys[personIndex];
+      let personKeyRoom = rooms[this.people[personKey].room];
+      let newRoomOptions = Object.keys(personKeyRoom.doors);
+      let randomRoomFloat = prng.nextFloat();
+      let newRoom = newRoomOptions[Math.floor(randomRoomFloat * newRoomOptions.length)];
+      this.addRoomChange(personKey, newRoom);
+    }
   }
 
   updateDimensions = () => {
@@ -196,8 +197,7 @@ class Canvas extends React.Component {
     }
   }
 
-  nextWaypoint = (startingLocation, room) => {
-    let prng = new Random();
+  nextWaypoint = (startingLocation, room, prng) => {
     let randomChoice = prng.nextFloat();
     let randomDuration = prng.nextFloat();
 
@@ -216,8 +216,8 @@ class Canvas extends React.Component {
     return distance / speed;
   }
 
-  changeRoom = (person, newRoom) => {
-    console.log(`changeRoom: moving ${person} to ${newRoom}`);
+  addRoomChange = (person, newRoom) => {
+    console.log(`addRoomChange: moving ${person} to ${newRoom}`);
     let doorLocation = rooms[this.people[person].room].doors[newRoom];
 
     let speed = 560 / 10; // cross the living room in 10 seconds
@@ -251,7 +251,7 @@ class Canvas extends React.Component {
     this.people[person].room = newRoom;
   }
 
-  updateWaypoints = person => {
+  updateWaypoints(person, prng) {
     let personState = this.people[person];
     if (personState.waypoints.length === 0) {
       console.error(`Person ${person} has no waypoints`);
@@ -276,7 +276,7 @@ class Canvas extends React.Component {
           personState.waypoints.shift();
           // console.log('moving to waypoint', personState.waypoints[0]);
         } else { // otherwise we randomly create them
-          let newWaypoint = this.nextWaypoint(personState.waypoints[0].endingLocation, personState.room);
+          let newWaypoint = this.nextWaypoint(personState.waypoints[0].endingLocation, personState.room, new Random());
           personState.waypoints.push(newWaypoint);
           // console.log('added waypoint', newWaypoint);
         }
