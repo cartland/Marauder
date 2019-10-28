@@ -1,48 +1,104 @@
 
-import { V } from './Vector2.js';
+export class Person {
+  constructor(name, paths, firstRoom) {
+    this.name = name;
+    this.paths = paths;
+    if (this.firstPath() == null) {
+      this.firstRoom = firstRoom;
+    } else {
+      this.firstRoom = this.firstPath().room;
+    }
+    if (this.lastPath() == null) {
+      this.lastRoom = null;
+    } else {
+      this.lastRoom = this.lastPath().room;
+    }
+  }
+
+  firstPath() {
+    if (this.paths.length == 0) {
+      return null;
+    }
+    return this.paths[0];
+  }
+
+  lastPath() {
+    if (this.paths.length == 0) {
+      return null;
+    }
+    return this.paths[this.paths.length - 1];
+  }
+
+  addPaths(paths) {
+    this.paths.push(...paths);
+    this.lastRoom = this.lastPath().room;
+  }
+
+  popPath() {
+    let returnValue = this.firstPath();
+    this.paths.shift();
+    return returnValue;
+  }
+
+  setPaths(paths) {
+    this.paths = paths;
+    if (this.paths.length > 0) {
+      this.lastRoom = this.lastPath().room;
+    }
+  }
+
+  setStartTime(startTime) {
+    let time = startTime;
+    for (let index = 0; index < this.paths.length; index++) {
+      let path = this.paths[index];
+      path.startedAt = time;
+      time = new Date(time + path.duration);
+    }
+  }
+}
 
 export function generatePeople() {
-  return{
-    stromme: {
-      name: 'The Womping Willow',
-      room: 'stromme_room',
-      paths: [],
-    },
-    alberto: {
-      name: 'Nimbus 2000',
-      room: 'alberto_room',
-      paths: [],
-    },
-    cartland: {
-      name: 'Golden Snitch',
-      room: 'cartland_room',
-      paths: [],
-    },
-    nick: {
-      name: 'Moving Portrait',
-      room: 'nick_room',
-      paths: [],
-    },
-    tal: {
-      name: 'Dobby',
-      room: 'living_room',
-      paths: [],
-    },
-    harry: {
-      name: 'Harry Potter',
-      room: 'hallway',
-      paths: [],
-    },
-    dumbledore: {
-      name: 'Dumbledore',
-      room: 'kitchen',
-      paths: [],
-    },
-    ghost: {
-      name: 'Ghost',
-      room: 'patio',
-      paths: [],
-    },
+  return {
+    stromme: new Person(
+      'The Womping Willow',
+      [],
+      'stromme_room'
+    ),
+    alberto: new Person(
+      'Nimbus 2000',
+      [],
+      'alberto_room'
+    ),
+    cartland: new Person(
+      'Golden Snitch',
+      [],
+      'cartland_room'
+    ),
+    nick: new Person(
+      'Moving Portrait',
+      [],
+      'nick_room'
+    ),
+    tal: new Person(
+      'Dobby',
+      [],
+      'kitchen'
+    ),
+    harry: new Person(
+      'Harry Potter',
+      [],
+      'hallway'
+    ),
+    dumbledore: new Person(
+      'Dumbledore',
+      [],
+      'living_room'
+    ),
+    ghost: new Person(
+      'Ghost',
+      [],
+      'patio'
+    ),
   };
 }
 

@@ -10,6 +10,7 @@ import { V } from './Vector2.js';
 import { generateRooms } from './Room.js';
 import { generatePeople} from './People.js';
 import { Random } from './Random.js';
+import { Path } from './Path.js';
 
 import getViewport from './getViewport.js';
 
@@ -51,17 +52,6 @@ class Footstep {
       + this.location.y.toPrecision(5) + ","
       + this.direction.x.toPrecision(5) + ","
       + this.direction.y.toPrecision(5);
-  }
-}
-
-class Path {
-
-  constructor(room, startingLocation, endingLocation, duration, startedAt) {
-    this.room = room;
-    this.startingLocation = startingLocation;
-    this.endingLocation = endingLocation;
-    this.duration = duration;
-    this.startedAt = startedAt;
   }
 }
 
@@ -117,16 +107,16 @@ class Canvas extends React.Component { state = {
     let prng = new Random();
     let peopleKeys = Object.keys(people);
 
-    for (let personIndex = 0; personIndex < peopleKeys.size; personIndex++) {
-      let personKey = peopleKeys[personIndex];
-      let personObject = people[personKey];
-      let personKeyRoom = rooms[personObject.room];
+    // for (let personIndex = 0; personIndex < peopleKeys.size; personIndex++) {
+    //   let personKey = peopleKeys[personIndex];
+    //   let personObject = people[personKey];
+    //   let personKeyRoom = 'patio';
 
-      let newRoomOptions = Object.keys(personKeyRoom.doors);
-      let randomRoomFloat = prng.nextFloat();
-      let newRoom = newRoomOptions[Math.floor(randomRoomFloat * newRoomOptions.length)];
-      this.addRoomChange(personKey, newRoom, prng);
-    }
+    //   let newRoomOptions = Object.keys(personKeyRoom.doors);
+    //   let randomRoomFloat = prng.nextFloat();
+    //   let newRoom = newRoomOptions[Math.floor(randomRoomFloat * newRoomOptions.length)];
+    //   this.addRoomChange(personKey, newRoom, prng);
+    // }
   }
 
   updateDimensions = () => {
@@ -160,7 +150,25 @@ class Canvas extends React.Component { state = {
     this.draw()
   }
 
-  newRandomLocationWaypoint = (startingLocation, room, prng) => {
+  generateRandomPaths(startingLocation, room, prng) {
+    let randomChoice = prng.nextFloat();
+    let randomDuration = 1000 * (5 * prng.nextFloat() + 2);
+
+    if (randomChoice < 0.4) { // Stand still.
+      return [new Path(room, startingLocation, startingLocation, randomDuration, undefined)];
+    } else if (randomChoice < 0.9) { // Move inside room.
+      if (typeof room == "undefined") {
+        room = 'living_room';
+      }
+      return [this.generateRandomPathInRoom(room, startingLocation, prng)];
+    } else {
+      // TODO: Change room.
+      return [this.generateRandomPathInRoom(room, startingLocation, prng)];
+    }
+  }
+
+  generateRandomPathInRoom(room, startingLocation, prng) {
+    console.log(room);
     let randomX = prng.nextFloat();
     let randomY = prng.nextFloat();
     let randomSpeed = prng.nextFloat();
@@ -180,18 +188,6 @@ class Canvas extends React.Component { state = {
     return new Path(room, startingLocation, endingLocation, duration, undefined);
   }
 
-  generateNextWaypoint = (startingLocation, room, prng) => {
-    let randomChoice = prng.nextFloat();
-    let randomDuration = 1000 * (5 * prng.nextFloat() + 2);
-
-    let choice = Math.floor(randomChoice * 10);
-    if (choice < 4) {
-      return new Path(room, startingLocation, startingLocation, randomDuration, undefined);
-    } else {
-      return this.newRandomLocationWaypoint(startingLocation, room, prng);
-    }
-  }
-
   getDuration = (location1, location2, speed) => {
     let distance = location2.sub(location1).size();
     // let distance = Math.sqrt(Math.pow(location1[0]-location2[0], 2) +
@@ -205,67 +201,58 @@ class Canvas extends React.Component { state = {
 
     let speed = 560 / 10; // cross the living room in 10 seconds
 
-    let startingLocation = this.people[person].paths[this.people[person].paths.length-1].endingLocation;
+    let startingLocation = this.people[person].lastPath().endingLocation;
 
     let duration = 1000 * this.getDuration(startingLocation, doorLocation, speed);
 
     let room = this.people[person].room
 
-    this.people[person].paths.push(
+    this.people[person].addPaths([
       new Path(room, startingLocation, doorLocation, duration, undefined)
-    );
+    ]);
 
     let otherSideDoorLocation = rooms[newRoom].doors[this.people[person].room];
     if (otherSideDoorLocation === undefined) {
       throw new Error(`room ${newRoom} does not have a door to ${this.people[person].room}`)
     }
 
-    this.people[person].paths.push(
-      this.newRandomLocationWaypoint(
-        otherSideDoorLocation,
+    this.people[person].addPaths([
+      this.generateRandomPathInRoom(
         newRoom,
+        otherSideDoorLocation,
         prng
       )
-    )
+    ]);
 
     this.people[person].room = newRoom;
   }
 
   getWaypoint(person) {
-    return this.people[person].paths[0];
+    return this.people[person].firstPath();
   }
 
   updateWaypoints(person, currentTime, prng) {
     let personState = this.people[person];
-    if (personState.paths.length === 0) {
+    if (personState.firstPath() == null) {
       console.error(`Person ${person} has no paths`);
       let location = V(50, 50);
       let duration = 2*1000;
-      personState.paths.push(
-        new Path('patio', location, location, duration, undefined)
-      );
+      personState.addPaths([
+        new Path(personState.firstRoom, location, location, duration, undefined)
+      ]);
     }
 
     // case: we are at the start, and need to kick things off
-    if (personState.paths[0].startedAt === undefined) {
-      personState.paths[0].startedAt = new Date();
-    } else { // case: we are ongoing
-      let elapsed = new Date() - personState.paths[0].startedAt;
-      while (elapsed > personState.paths[0].duration) {
-
-        // if there are future paths, we move on to those
-        if (personState.paths.length > 1) {
-          personState.paths[1].startedAt =
-            new Date(personState.paths[0].startedAt.getTime() + personState.paths[0].duration);
-
-          elapsed -= personState.paths[0].duration;
-          personState.paths.shift();
-          // console.log('moving to waypoint', personState.paths[0]);
-        } else { // otherwise we randomly create them
-          let newWaypoint = this.generateNextWaypoint(personState.paths[0].endingLocation, personState.room, prng);
-          personState.paths.push(newWaypoint);
-          // console.log('added waypoint', newWaypoint);
-        }
+    if (personState.firstPath().startedAt === undefined) {
+      personState.setStartTime(currentTime);
+    }
+    let elapsed = currentTime - personState.firstPath().startedAt;
+    while (elapsed > personState.firstPath().duration) {
+      let poppedPath = personState.popPath();
+      elapsed -= poppedPath.duration;
+      if (personState.firstPath() == null) {
+        let paths = this.generateRandomPaths(poppedPath.endingLocation, poppedPath.room, prng);
+        personState.addPaths(paths);
       }
     }
   }
@@ -287,8 +274,8 @@ class Canvas extends React.Component { state = {
     hideTime.setSeconds(hideTime.getSeconds() + SHOW_NAME_DURATION_S);
     personObject.hideNameTime = hideTime;
 
-    let currentRoom = personObject.paths[0].room;
-    if (personObject.paths[0].room != room) {
+    let currentRoom = personObject.firstPath().room;
+    if (personObject.firstPath().room != room) {
       console.log(person + " needs to move from " + currentRoom + " to " + room);
       this.movePersonToRoom(personObject, room, prng);
     }
@@ -316,9 +303,9 @@ class Canvas extends React.Component { state = {
   movePersonToRoom(person, room, prng) {
     if (room in rooms && "width" in rooms[room]) {
       let roomSpawnLocation = rooms[room].spawnLocation;
-      person.paths = [
-        this.newRandomLocationWaypoint(roomSpawnLocation, room, prng)
-      ];
+      person.setPaths([
+        this.generateRandomPathInRoom(room, roomSpawnLocation, prng)
+      ]);
       person.room = room;
     }
   }
@@ -349,7 +336,7 @@ class Canvas extends React.Component { state = {
 
   drawPerson(person, context, currentTime) {
     let currentWaypoint = this.getWaypoint(person);
-    if (currentWaypoint == null) {
+    if (!currentWaypoint) {
       return;
     }
     let startingLocation = currentWaypoint.startingLocation;
