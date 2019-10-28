@@ -58,7 +58,7 @@ class Footstep {
   }
 }
 
-class Canvas extends React.Component { state = {
+class Canvas extends Component { state = {
     // not 4k, but is the same size as the base image
     mapWidth: 2560,
     mapHeight: 1440,
@@ -77,11 +77,32 @@ class Canvas extends React.Component { state = {
           let timestamp = change.doc.get('timestamp');
 
           // Check to see if this is a reset request.
-          if (person == RESET_LOGICAL_ID) {
+          if (person === RESET_LOGICAL_ID) {
             window.location.reload();
             return;
           }
           this.wandTapped(room, person, timestamp);
+        }
+      });
+    });
+
+    let yesterday = new Date(new Date().setDate(new Date().getDate()-1));
+    let that = this;
+    firebase.firestore().collection('nfcUpdates')
+      .where('timestamp', '>', yesterday)
+      .orderBy('timestamp', 'desc')
+      .onSnapshot((snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          let person = change.doc.get('nfcData').nfcLogicalId;
+          let timestamp = change.doc.get('timestamp');
+
+          // // Check to see if this is a reset request.
+          if (person === RESET_LOGICAL_ID) {
+            console.log('Initialize with seed.', timestamp.seconds);
+            that.initializePaths(that.people, new Random(timestamp.seconds));
+            return;
+          }
         }
       });
     });
@@ -119,7 +140,6 @@ class Canvas extends React.Component { state = {
         personObject.addPaths(paths);
         room = personObject.lastPath().room;
       }
-      console.log(personObject.paths);
     }
   }
 
@@ -128,7 +148,6 @@ class Canvas extends React.Component { state = {
     let aspectRatio = viewport.width / viewport.height;
     let mapAspectRatio = this.state.mapWidth / this.state.mapHeight;
 
-    var fullScreenStyle;
     if (aspectRatio <= mapAspectRatio) {
       this.setState({
         fullScreenStyle: {
@@ -159,7 +178,6 @@ class Canvas extends React.Component { state = {
     let randomDuration = 1000 * (5 * prng.nextFloat() + 2);
 
     if (!startingLocation) {
-      console.log('Generating random path, no starting location provided');
       let range = V(rooms[room].width, rooms[room].height);
       let buffer = 15;
       startingLocation = this.randomLocation(range, buffer, prng);
@@ -288,9 +306,9 @@ class Canvas extends React.Component { state = {
       let poppedPath = personObject.popPath();
       elapsed -= poppedPath.duration;
       if (personObject.firstPath() == null) {
+        console.log('Warning: No path, created a new one.', personObject.name, personObject.paths);
         let paths = this.generateRandomPaths(poppedPath.endingLocation, poppedPath.room, new Random());
         personObject.addPaths(paths);
-        console.log('Warning: No path, created a new one.', personObject.name, personObject.paths);
       }
     }
   }
@@ -313,7 +331,7 @@ class Canvas extends React.Component { state = {
     personObject.hideNameTime = hideTime;
 
     let currentRoom = personObject.firstPath().room;
-    if (personObject.firstPath().room != room) {
+    if (personObject.firstPath().room !== room) {
       console.log(person + " needs to apparate from " + currentRoom + " to " + room);
       this.movePersonToRoom(personObject, room, prng);
     }
@@ -430,10 +448,10 @@ class Canvas extends React.Component { state = {
       let leftFootstepLocation = globalStepLocation.add(scaledStepVector.orthogonalLeft().scale(STEP_WIDTH_FACTOR));
       let rightFootstepLocation = globalStepLocation.add(scaledStepVector.orthogonalRight().scale(STEP_WIDTH_FACTOR));
 
-      if (stepNumber % 2 == 0) {
+      if (stepNumber % 2 === 0) {
         this.createFootstep(rightFootstepLocation, footstepDirection, stepNumber, stepBeginTime);
       }
-      if (stepNumber % 2 == 1) {
+      if (stepNumber % 2 === 1) {
         this.createFootstep(leftFootstepLocation, footstepDirection, stepNumber, stepBeginTime);
       }
     }
@@ -481,7 +499,7 @@ class Canvas extends React.Component { state = {
    */
   drawFoot = (context, footstep, opacity) => {
     let img = footstepLeftImg
-    if (footstep.stepNumber % 2 == 0) {
+    if (footstep.stepNumber % 2 === 0) {
       img = footstepRightImg;
     }
     let stepLocation = footstep.location;
@@ -494,20 +512,11 @@ class Canvas extends React.Component { state = {
     context.restore()
   }
 
-  /*
-
-  algorithm for animating inside a room
-
-  1. set paths
-  2. animate to those paths
-
-  */
-
   render() {
     return(
       <div style={this.state.fullScreenStyle}>
         <canvas ref={this.canvas} style={this.state.fullScreenStyle} width={this.state.mapWidth} height={this.state.mapHeight} />
-        <img onLoad={this.handleOnLoadImage} ref={this.image} src={process.env.PUBLIC_URL + '/129OctaviaTopDownView.png'} className="hidden" />
+        <img onLoad={this.handleOnLoadImage} ref={this.image} src={process.env.PUBLIC_URL + '/129OctaviaTopDownView.png'} className="hidden" alt="Map View of Octavia House" />
       </div>
     )
   }

@@ -13,7 +13,7 @@ export default function getViewport() {
 // IE6 in standards compliant mode (i.e. with a valid doctype as the first line in the document)
  else if (typeof document.documentElement != 'undefined'
  && typeof document.documentElement.clientWidth !=
- 'undefined' && document.documentElement.clientWidth != 0) {
+ 'undefined' && document.documentElement.clientWidth !== 0) {
     viewPortWidth = document.documentElement.clientWidth;
     viewPortHeight = document.documentElement.clientHeight;
  }
