@@ -99,8 +99,14 @@ class Canvas extends Component { state = {
 
           // // Check to see if this is a reset request.
           if (person === RESET_LOGICAL_ID) {
-            console.log('Initialize with seed.', timestamp.seconds);
-            that.initializePaths(that.people, new Random(timestamp.seconds));
+            let seconds = timestamp.seconds;
+            if (seconds > that.resetTimestamp) {
+              console.log('Initialize with seed.', seconds);
+              that.resetTimestamp = seconds;
+              that.initializePaths(that.people, new Random(timestamp.seconds));
+            } else {
+              console.log('Ignoring old reset.', seconds);
+            }
             return;
           }
         }
@@ -111,7 +117,8 @@ class Canvas extends Component { state = {
 
     this.people = generatePeople();
 
-    this.initializePaths(this.people, new Random(0));
+    this.initializePaths(this.people);
+    this.resetTimestamp = 0;
 
     this.canvas = React.createRef();
     this.image = React.createRef();
@@ -127,7 +134,8 @@ class Canvas extends Component { state = {
     window.removeEventListener("resize", this.updateDimensions);
   }
 
-  initializePaths(people, prng) {
+  initializePaths(people) {
+    let prng = new Random(this.resetTimestamp);
     let peopleKeys = Object.keys(people);
 
     for (let personIndex = 0; personIndex < peopleKeys.length; personIndex++) {
@@ -135,6 +143,7 @@ class Canvas extends Component { state = {
       let personObject = people[personKey];
       let room = personObject.firstRoom;
 
+      personObject.setPaths([]);
       for (let round = 0; round < INITIAL_PATH_COUNT; round++) {
         let paths = this.generateRandomPaths(undefined, room, prng);
         personObject.addPaths(paths);

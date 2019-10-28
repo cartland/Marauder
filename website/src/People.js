@@ -56,18 +56,6 @@ export class Person {
   setStartTime(startTime) {
     this.firstPath().startedAt = startTime;
   }
-  //   let time = startTime;
-  //   for (let index = 0; index < this.paths.length; index++) {
-  //     let path = this.paths[index];
-
-  //     let timeCopy = new Date();
-  //     timeCopy.setMilliseconds(time.getMilliseconds());
-  //     path.startedAt = timeCopy;
-
-  //     time = timeCopy;
-  //     time.setMilliseconds(time.getMilliseconds() + path.duration);
-  //   }
-  // }
 }
 
 export function generatePeople() {
