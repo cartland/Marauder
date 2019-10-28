@@ -6,42 +6,42 @@ export function generatePeople() {
     stromme: {
       name: 'The Womping Willow',
       room: 'stromme_room',
-      waypoints: [],
+      paths: [],
     },
     alberto: {
       name: 'Nimbus 2000',
       room: 'alberto_room',
-      waypoints: [],
+      paths: [],
     },
     cartland: {
       name: 'Golden Snitch',
       room: 'cartland_room',
-      waypoints: [],
+      paths: [],
     },
     nick: {
       name: 'Moving Portrait',
       room: 'nick_room',
-      waypoints: [],
+      paths: [],
     },
     tal: {
       name: 'Dobby',
       room: 'living_room',
-      waypoints: [],
+      paths: [],
     },
     harry: {
       name: 'Harry Potter',
       room: 'hallway',
-      waypoints: [],
+      paths: [],
     },
     dumbledore: {
       name: 'Dumbledore',
       room: 'kitchen',
-      waypoints: [],
+      paths: [],
     },
     ghost: {
       name: 'Ghost',
       room: 'patio',
-      waypoints: [],
+      paths: [],
     },
   };
 }
