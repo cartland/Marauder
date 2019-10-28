@@ -16,14 +16,14 @@ export class Person {
   }
 
   firstPath() {
-    if (this.paths.length == 0) {
+    if (this.paths.length === 0) {
       return null;
     }
     return this.paths[0];
   }
 
   lastPath() {
-    if (this.paths.length == 0) {
+    if (this.paths.length === 0) {
       return null;
     }
     return this.paths[this.paths.length - 1];

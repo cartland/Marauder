@@ -253,33 +253,29 @@ class Canvas extends React.Component { state = {
     this.people[person].room = newRoom;
   }
 
-  getWaypoint(person) {
-    return this.people[person].firstPath();
-  }
-
-  updateWaypoints(person, currentTime, prng) {
-    let personState = this.people[person];
-    if (personState.firstPath() == null) {
+  updatePaths(person, currentTime) {
+    let personObject = this.people[person];
+    if (personObject.firstPath() == null) {
       console.error(`Person ${person} has no paths`);
       let location = V(50, 50);
       let duration = 2*1000;
-      personState.addPaths([
-        new Path(personState.firstRoom, location, location, duration, undefined)
+      personObject.addPaths([
+        new Path(personObject.firstRoom, location, location, duration, undefined)
       ]);
     }
 
     // case: we are at the start, and need to kick things off
-    if (personState.firstPath().startedAt === undefined) {
-      personState.setStartTime(currentTime);
+    if (personObject.firstPath().startedAt === undefined) {
+      personObject.setStartTime(currentTime);
     }
-    let elapsed = currentTime - personState.firstPath().startedAt;
-    while (elapsed > personState.firstPath().duration) {
-      let poppedPath = personState.popPath();
+    let elapsed = currentTime - personObject.firstPath().startedAt;
+    while (elapsed > personObject.firstPath().duration) {
+      let poppedPath = personObject.popPath();
       elapsed -= poppedPath.duration;
-      if (personState.firstPath() == null) {
-        let paths = this.generateRandomPaths(poppedPath.endingLocation, poppedPath.room, prng);
-        personState.addPaths(paths);
-        console.log(personState.name, personState.paths);
+      if (personObject.firstPath() == null) {
+        let paths = this.generateRandomPaths(poppedPath.endingLocation, poppedPath.room, new Random());
+        personObject.addPaths(paths);
+        console.log(personObject.name, personObject.paths);
       }
     }
   }
@@ -349,7 +345,7 @@ class Canvas extends React.Component { state = {
 
     if (currentTime.getTime() - this.lastLogicUpdateTime > UPDATE_LOGIC_INTERVAL_MS) {
       Object.keys(this.people).map(person => {
-        let currentWaypoint = this.updateWaypoints(person, currentTime, new Random());
+        this.updatePaths(person, currentTime);
       })
     }
 
@@ -362,14 +358,14 @@ class Canvas extends React.Component { state = {
   }
 
   drawPerson(person, context, currentTime) {
-    let currentWaypoint = this.getWaypoint(person);
-    if (!currentWaypoint) {
+    let currentPath = this.people[person].firstPath();
+    if (!currentPath) {
       return;
     }
-    let startingLocation = currentWaypoint.startingLocation;
-    let endingLocation = currentWaypoint.endingLocation;
-    let duration = currentWaypoint.duration;
-    let elapsed = currentTime - currentWaypoint.startedAt;
+    let startingLocation = currentPath.startingLocation;
+    let endingLocation = currentPath.endingLocation;
+    let duration = currentPath.duration;
+    let elapsed = currentTime - currentPath.startedAt;
     let centerOfMassLocation = V(
       easeInOutQuad(
         elapsed,
@@ -384,7 +380,7 @@ class Canvas extends React.Component { state = {
         duration
       )
     );
-    let roomDetails = rooms[currentWaypoint.room];
+    let roomDetails = rooms[currentPath.room];
 
     context.save()
     context.translate(roomDetails.topLeft.x, roomDetails.topLeft.y);
