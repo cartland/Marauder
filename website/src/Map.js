@@ -34,7 +34,10 @@ const STEP_FADE_DURATION = 7 * 1000; // 7 seconds.
 const SHOW_NAME_DURATION_S = 30; // Time in seconds
 // Person ID to trigger a web page reset.
 const RESET_LOGICAL_ID = 'reset';
+// Time between logic updates.
 const UPDATE_LOGIC_INTERVAL_MS = 10;
+// Number of paths to generate per person during initialization.
+const INITIAL_PATH_COUNT = 1000;
 
 let rooms = generateRooms();
 
@@ -87,7 +90,7 @@ class Canvas extends React.Component { state = {
 
     this.people = generatePeople();
 
-    this.generatePaths(this.people);
+    this.initializePaths(this.people, new Random(0));
 
     this.canvas = React.createRef();
     this.image = React.createRef();
@@ -103,20 +106,21 @@ class Canvas extends React.Component { state = {
     window.removeEventListener("resize", this.updateDimensions);
   }
 
-  generatePaths(people) {
-    let prng = new Random();
+  initializePaths(people, prng) {
     let peopleKeys = Object.keys(people);
 
-    // for (let personIndex = 0; personIndex < peopleKeys.size; personIndex++) {
-    //   let personKey = peopleKeys[personIndex];
-    //   let personObject = people[personKey];
-    //   let personKeyRoom = 'patio';
+    for (let personIndex = 0; personIndex < peopleKeys.length; personIndex++) {
+      let personKey = peopleKeys[personIndex];
+      let personObject = people[personKey];
+      let room = personObject.firstRoom;
 
-    //   let newRoomOptions = Object.keys(personKeyRoom.doors);
-    //   let randomRoomFloat = prng.nextFloat();
-    //   let newRoom = newRoomOptions[Math.floor(randomRoomFloat * newRoomOptions.length)];
-    //   this.addRoomChange(personKey, newRoom, prng);
-    // }
+      for (let round = 0; round < INITIAL_PATH_COUNT; round++) {
+        let paths = this.generateRandomPaths(undefined, room, prng);
+        personObject.addPaths(paths);
+        room = personObject.lastPath().room;
+      }
+      console.log(personObject.paths);
+    }
   }
 
   updateDimensions = () => {
@@ -154,6 +158,13 @@ class Canvas extends React.Component { state = {
     let randomChoice = prng.nextFloat();
     let randomDuration = 1000 * (5 * prng.nextFloat() + 2);
 
+    if (!startingLocation) {
+      console.log('Generating random path, no starting location provided');
+      let range = V(rooms[room].width, rooms[room].height);
+      let buffer = 15;
+      startingLocation = this.randomLocation(range, buffer, prng);
+    }
+
     if (randomChoice < 0.2) { // Stand still.
       return [new Path(room, startingLocation, startingLocation, randomDuration, undefined)];
     } else if (randomChoice < 0.8) { // Move inside room.
@@ -167,15 +178,12 @@ class Canvas extends React.Component { state = {
   }
 
   generateRandomPathInRoom(room, startingLocation, prng) {
-    console.log(room);
-    let randomX = prng.nextFloat();
-    let randomY = prng.nextFloat();
     let randomSpeed = prng.nextFloat();
 
-    let endingX = randomX * (rooms[room].width - 30) + 15;
-    let endingY = randomY * (rooms[room].height - 30) + 15;
+    let range = V(rooms[room].width, rooms[room].height);
+    let buffer = 15;
+    let endingLocation = this.randomLocation(range, buffer, prng);
 
-    let endingLocation = V(endingX, endingY);
     let distance = endingLocation.sub(startingLocation).size();
 
     let maxSpeed = 560 / 10; // cross the living room in 10 seconds
@@ -185,6 +193,14 @@ class Canvas extends React.Component { state = {
     let duration = distance / speed;
     duration *= 1000;
     return new Path(room, startingLocation, endingLocation, duration, undefined);
+  }
+
+  randomLocation(range, buffer, prng) {
+    let randomX = prng.nextFloat();
+    let randomY = prng.nextFloat();
+    let endingX = randomX * (range.x - (buffer * 2)) + buffer;
+    let endingY = randomY * (range.y - (buffer * 2)) + buffer;
+    return V(endingX, endingY);
   }
 
   generateRandomRoomChange(room, startingLocation, prng) {
@@ -222,7 +238,6 @@ class Canvas extends React.Component { state = {
   }
 
   addRoomChange = (person, newRoom, prng) => {
-    console.log(`addRoomChange: moving ${person} to ${newRoom}`);
     let doorLocation = rooms[this.people[person].room].doors[newRoom];
 
     let speed = 560 / 10; // cross the living room in 10 seconds
@@ -275,7 +290,7 @@ class Canvas extends React.Component { state = {
       if (personObject.firstPath() == null) {
         let paths = this.generateRandomPaths(poppedPath.endingLocation, poppedPath.room, new Random());
         personObject.addPaths(paths);
-        console.log(personObject.name, personObject.paths);
+        console.log('Warning: No path, created a new one.', personObject.name, personObject.paths);
       }
     }
   }
@@ -299,7 +314,7 @@ class Canvas extends React.Component { state = {
 
     let currentRoom = personObject.firstPath().room;
     if (personObject.firstPath().room != room) {
-      console.log(person + " needs to move from " + currentRoom + " to " + room);
+      console.log(person + " needs to apparate from " + currentRoom + " to " + room);
       this.movePersonToRoom(personObject, room, prng);
     }
 
