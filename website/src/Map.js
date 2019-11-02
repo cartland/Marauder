@@ -350,6 +350,9 @@ class Canvas extends Component { state = {
 
     this.movePersonToRoom(personObject, room, prng);
     this.generatePathsForPerson(personObject, INITIAL_PATH_COUNT, prng);
+    let milliseconds = timestamp.seconds * 1000;
+    let dateFromTimestamp = new Date(milliseconds);
+    personObject.setStartTime(dateFromTimestamp);
     this.hideNameOrReschedule(person);
   }
 
