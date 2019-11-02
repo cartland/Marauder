@@ -35,7 +35,7 @@ const SHOW_NAME_DURATION_S = 30; // Time in seconds
 // Person ID to trigger a web page reset.
 const RESET_LOGICAL_ID = 'reset';
 // Time between logic updates.
-const UPDATE_LOGIC_INTERVAL_MS = 10;
+const UPDATE_LOGIC_INTERVAL_MS = 5;
 // Number of paths to generate per person during initialization.
 const INITIAL_PATH_COUNT = 1000;
 
@@ -141,14 +141,23 @@ class Canvas extends Component { state = {
     for (let personIndex = 0; personIndex < peopleKeys.length; personIndex++) {
       let personKey = peopleKeys[personIndex];
       let personObject = people[personKey];
-      let room = personObject.firstRoom;
 
       personObject.setPaths([]);
-      for (let round = 0; round < INITIAL_PATH_COUNT; round++) {
-        let paths = this.generateRandomPaths(undefined, room, prng);
-        personObject.addPaths(paths);
-        room = personObject.lastPath().room;
+      this.generatePathsForPerson(personObject, INITIAL_PATH_COUNT, prng);
+    }
+  }
+
+  generatePathsForPerson(personObject, count, prng) {
+    for (let round = 0; round < count; round++) {
+      let lastPath = personObject.lastPath();
+      let startingLocation = null;
+      let room = personObject.firstRoom;
+      if (lastPath) {
+        startingLocation = lastPath.endingLocation;
+        room = lastPath.room;
       }
+      let paths = this.generateRandomPaths(startingLocation, room, prng);
+      personObject.addPaths(paths);
     }
   }
 
@@ -184,7 +193,7 @@ class Canvas extends Component { state = {
 
   generateRandomPaths(startingLocation, room, prng) {
     let randomChoice = prng.nextFloat();
-    let randomDuration = 1000 * (5 * prng.nextFloat() + 2);
+    let randomDurationMs = 1000 * (3 * prng.nextFloat() + 2);
 
     if (!startingLocation) {
       let range = V(rooms[room].width, rooms[room].height);
@@ -193,7 +202,7 @@ class Canvas extends Component { state = {
     }
 
     if (randomChoice < 0.2) { // Stand still.
-      return [new Path(room, startingLocation, startingLocation, randomDuration, undefined)];
+      return [new Path(room, startingLocation, startingLocation, randomDurationMs, undefined)];
     } else if (randomChoice < 0.8) { // Move inside room.
       if (typeof room == "undefined") {
         room = 'living_room';
@@ -339,12 +348,8 @@ class Canvas extends Component { state = {
     hideTime.setSeconds(hideTime.getSeconds() + SHOW_NAME_DURATION_S);
     personObject.hideNameTime = hideTime;
 
-    let currentRoom = personObject.firstPath().room;
-    if (personObject.firstPath().room !== room) {
-      console.log(person + " needs to apparate from " + currentRoom + " to " + room);
-      this.movePersonToRoom(personObject, room, prng);
-    }
-
+    this.movePersonToRoom(personObject, room, prng);
+    this.generatePathsForPerson(personObject, INITIAL_PATH_COUNT, prng);
     this.hideNameOrReschedule(person);
   }
 
