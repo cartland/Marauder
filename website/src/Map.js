@@ -29,8 +29,10 @@ const STEP_DISTANCE = 50;
 const STEP_WIDTH_FACTOR = 0.25;
 // Time it takes for a step to fade in milliseconds.
 const STEP_FADE_DURATION = 7 * 1000; // 7 seconds.
+// Time to stand still after tapping wand.
+const STAND_STILL_DURATION_S = 10;
 // Time it takes for the name to disappear after wand tap.
-const SHOW_NAME_DURATION_S = 30; // Time in seconds
+const SHOW_NAME_DURATION_S = 40; // Time in seconds
 // Person ID to trigger a web page reset.
 const RESET_LOGICAL_ID = 'reset';
 // Time between logic updates.
@@ -400,7 +402,7 @@ class Canvas extends Component { state = {
     if (room in rooms && "width" in rooms[room]) {
       let roomSpawnLocation = rooms[room].spawnLocation;
       person.setPaths([
-        this.generateRandomPathInRoom(room, roomSpawnLocation, prng)
+        new Path(room, roomSpawnLocation, roomSpawnLocation, STAND_STILL_DURATION_S * 1000, undefined)
       ]);
       person.room = room;
     }
