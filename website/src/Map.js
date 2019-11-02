@@ -193,7 +193,7 @@ class Canvas extends Component { state = {
 
   generateRandomPaths(startingLocation, room, prng) {
     let randomChoice = prng.nextFloat();
-    let randomDurationMs = 1000 * (3 * prng.nextFloat() + 2);
+    let randomDurationMs = 1000 * (2 * prng.nextFloat() + 1);
 
     if (!startingLocation) {
       let range = V(rooms[room].width, rooms[room].height);
@@ -201,7 +201,7 @@ class Canvas extends Component { state = {
       startingLocation = this.randomLocation(range, buffer, prng);
     }
 
-    if (randomChoice < 0.2) { // Stand still.
+    if (randomChoice < 0.1) { // Stand still.
       return [new Path(room, startingLocation, startingLocation, randomDurationMs, undefined)];
     } else if (randomChoice < 0.8) { // Move inside room.
       if (typeof room == "undefined") {
@@ -441,8 +441,9 @@ class Canvas extends Component { state = {
 
    drawNameTag = (context, image, centerOfMassLocation) => {
      let imageWidth = image.width ? image.width : 0;
+     let imageHeight = image.height ? image.height : 0;
      context.save()
-     context.translate(centerOfMassLocation.x - imageWidth / 2, centerOfMassLocation.y);
+     context.translate(centerOfMassLocation.x - imageWidth / 2, centerOfMassLocation.y - imageHeight / 2);
      context.drawImage(image, 0, 0);
      context.restore()
    }
