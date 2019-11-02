@@ -84,7 +84,16 @@ export class Person {
   }
 
   setStartTime(startTime) {
-    this.firstPath().startedAt = startTime;
+    let startedAt = startTime;
+    for (let i = 0; i < this.paths.length; i++) {
+      let path = this.paths[i];
+      path.startedAt = startedAt;
+
+      let nextTime = new Date(startedAt.getTime());
+      nextTime.setMilliseconds(startedAt.getMilliseconds() + path.duration);
+
+      startedAt = nextTime;
+    }
   }
 }
 
