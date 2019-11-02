@@ -433,7 +433,7 @@ class Canvas extends Component { state = {
         context.fillText(this.people[person].name, centerOfMassLocation.x + 10, centerOfMassLocation.y + 35);
       }
     }
-    this.createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime);
+    this.createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime, duration);
     context.restore();
   }
 
@@ -445,7 +445,7 @@ class Canvas extends Component { state = {
      context.restore()
    }
 
-  createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime) {
+  createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime, duration) {
     // Direction of a single step.
     let footstepDirection = endingLocation.sub(startingLocation).normalize();
     if (footstepDirection == null) {
@@ -456,12 +456,21 @@ class Canvas extends Component { state = {
     let centerOfMassDistance = centerOfMassLocation.sub(startingLocation).size();
     let scaledStepVector = footstepDirection.scale(STEP_DISTANCE);
 
+    let totalDistance = endingLocation.sub(startingLocation).size();
+    let speed = totalDistance / duration;
+
     // Number of steps since the starting location.
     let stepCount = Math.floor(centerOfMassDistance / STEP_DISTANCE);
     // For each step since the starting location, draw it.
     for (let stepNumber = 0; stepNumber <= stepCount; stepNumber++) {
       let stepLocation = startingLocation.add(scaledStepVector.scale(stepNumber));
-      let stepBeginTime = currentTime;
+      let distanceSinceStep = centerOfMassLocation.sub(stepLocation).size();
+      let timeSinceStep = duration * distanceSinceStep / totalDistance;
+
+      if (timeSinceStep >= STEP_FADE_DURATION) {
+        continue;
+      }
+      let stepBeginTime = currentTime - timeSinceStep;
 
       // Global coordinates.
       let globalStepLocation = stepLocation.add(V(roomDetails.topLeft.x, roomDetails.topLeft.y));
