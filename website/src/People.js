@@ -85,7 +85,7 @@ export class Person {
 }
 
 export function generatePeople() {
-  return {
+  let people = {
     stromme: new Person(
       'The Womping Willow',
       WompingWillowImg,
@@ -128,12 +128,15 @@ export function generatePeople() {
       [],
       'living_room'
     ),
-    ghost: new Person(
+  };
+  for (let count = 0; count < 3; count++) {
+    people['ghost' + count] = new Person(
       'Ghost',
       null,
       [],
-      'patio'
-    ),
-  };
+      'living_room'
+    )
+  }
+  return people;
 }
 
