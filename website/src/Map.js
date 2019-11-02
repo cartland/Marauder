@@ -42,11 +42,12 @@ let rooms = generateRooms();
 
 class Footstep {
 
-  constructor(location, direction, stepNumber, stepBeginTime) {
+  constructor(location, direction, stepNumber, stepBeginTime, size) {
     this.location = location;
     this.direction = direction;
     this.stepNumber = stepNumber;
     this.stepBeginTime = stepBeginTime;
+    this.size = size;
   }
 
   key() {
@@ -425,14 +426,16 @@ class Canvas extends Component { state = {
     context.save()
     context.translate(roomDetails.topLeft.x, roomDetails.topLeft.y);
     let personObject = this.people[person];
+    let footstepSize = 12;
     if (personObject.showName === true) {
+      footstepSize = 24;
       if (personObject.image) {
         this.drawNameTag(context, personObject.image, centerOfMassLocation);
       } else {
         context.fillText(this.people[person].name, centerOfMassLocation.x + 10, centerOfMassLocation.y + 35);
       }
     }
-    this.createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime, duration);
+    this.createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime, duration, footstepSize);
     context.restore();
   }
 
@@ -444,7 +447,7 @@ class Canvas extends Component { state = {
      context.restore()
    }
 
-  createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime, duration) {
+  createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime, duration, footstepSize) {
     // Direction of a single step.
     let footstepDirection = endingLocation.sub(startingLocation).normalize();
     if (footstepDirection == null) {
@@ -478,16 +481,16 @@ class Canvas extends Component { state = {
       let rightFootstepLocation = globalStepLocation.add(scaledStepVector.orthogonalRight().scale(STEP_WIDTH_FACTOR));
 
       if (stepNumber % 2 === 0) {
-        this.createFootstep(rightFootstepLocation, footstepDirection, stepNumber, stepBeginTime);
+        this.createFootstep(rightFootstepLocation, footstepDirection, stepNumber, stepBeginTime, footstepSize);
       }
       if (stepNumber % 2 === 1) {
-        this.createFootstep(leftFootstepLocation, footstepDirection, stepNumber, stepBeginTime);
+        this.createFootstep(leftFootstepLocation, footstepDirection, stepNumber, stepBeginTime, footstepSize);
       }
     }
   }
 
-  createFootstep(footstepLocation, footstepDirection, stepNumber, stepBeginTime) {
-    let footstep = new Footstep(footstepLocation, footstepDirection, stepNumber, stepBeginTime);
+  createFootstep(footstepLocation, footstepDirection, stepNumber, stepBeginTime, size) {
+    let footstep = new Footstep(footstepLocation, footstepDirection, stepNumber, stepBeginTime, size);
     let key = footstep.key();
     if (this.containsFootstep(key)) {
       // Do nothing.
@@ -537,7 +540,7 @@ class Canvas extends Component { state = {
     context.translate(stepLocation.x, stepLocation.y);
     context.rotate(Math.atan2(footstepDirection.y, footstepDirection.x) + 90 * Math.PI / 180)
     context.globalAlpha = opacity;
-    context.drawImage(img, 0, 0, 12, 12 * img.height / img.width);
+    context.drawImage(img, 0, 0, footstep.size, footstep.size * img.height / img.width);
     context.restore()
   }
 
