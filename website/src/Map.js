@@ -196,7 +196,7 @@ class Canvas extends Component { state = {
 
     if (!startingLocation) {
       let range = V(rooms[room].width, rooms[room].height);
-      let buffer = 15;
+      let buffer = 30;
       startingLocation = this.randomLocation(range, buffer, prng);
     }
 

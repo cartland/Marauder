@@ -10,9 +10,9 @@ export function generateRooms() {
   let albertoKitchenDoor = V(494, 570);
   let kitchenLivingRoomDoor = V(922, 570);
   let kitchenPatioDoor = V(826, 1080);
-  let livingRoomHallwayDoor = V(1390, 570);
+  let livingRoomHallwayDoor = V(1390, 710);
   let hallwayCartlandRoomDoor = V(1738, 800);
-  let hallwayNickRoomDoor = V(1970, 800);
+  let hallwayNickRoomDoor = V(1950, 800);
   let hallwayStrommeRoomDoor = V(2100, 800);
 
   let albertoTopLeft = V(276, topGuideline);
@@ -63,7 +63,7 @@ export function generateRooms() {
     },
   };
 
-  let hallwayTopLeft = V(1408, topGuideline);
+  let hallwayTopLeft = V(1408, 642);
   let hallwayBottomRight = V(2284, 784);
   let hallwayVector = hallwayBottomRight.sub(hallwayTopLeft);
   let hallwaySpawnLocation = V(hallwayVector.x / 4, 50);
