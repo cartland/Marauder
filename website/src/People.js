@@ -1,13 +1,17 @@
 
-import DobbyName from './assets/dobby_h100.png';
-import GoldenSnitchName from './assets/golden_snitch_h100.png';
-import HarryPotterName from './assets/harry_potter_h100.png';
-import MovingPortraitName from './assets/moving_portrait_h100.png';
-import Nimbus2000Name from './assets/nimbus_2000_h100.png';
-import WompingWillowName from './assets/womping_willow_h100.png';
+import DobbyName from './assets/dobby_h200.png';
+import DumbledoreName from './assets/dumbledore_h200.png';
+import GoldenSnitchName from './assets/golden_snitch_h200.png';
+import HarryPotterName from './assets/harry_potter_h200.png';
+import MovingPortraitName from './assets/moving_portrait_h200.png';
+import Nimbus2000Name from './assets/nimbus_2000_h200.png';
+import WompingWillowName from './assets/whomping_willow_h200.png';
 
 let DobbyImg = new Image();
 DobbyImg.src = DobbyName;
+
+let DumbledoreImg = new Image();
+DumbledoreImg.src = DumbledoreName;
 
 let GoldenSnitchImg = new Image();
 GoldenSnitchImg.src = GoldenSnitchName;
@@ -124,7 +128,7 @@ export function generatePeople() {
     ),
     dumbledore: new Person(
       'Dumbledore',
-      null,
+      DumbledoreImg,
       [],
       'living_room'
     ),

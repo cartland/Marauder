@@ -385,6 +385,9 @@ class Canvas extends Component { state = {
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     context.drawImage(this.image.current, 0, 0);
     context.font = "60px Roboto";
+
+    this.drawFootsteps(context);
+
     Object.keys(this.people).map(person => {
       this.drawPerson(person, context, currentTime);
     })
@@ -394,10 +397,6 @@ class Canvas extends Component { state = {
         this.updatePaths(person, currentTime);
       })
     }
-
-    context.save();
-    this.drawFootsteps(context);
-    context.restore();
 
     this.lastLogicUpdateTime = currentTime.getTime();
     requestAnimationFrame(this.draw);
