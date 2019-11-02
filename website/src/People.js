@@ -33,6 +33,7 @@ export class Person {
     this.name = name;
     this.image = image;
     this.paths = paths;
+    this.prng = null
     if (this.firstPath() == null) {
       this.firstRoom = firstRoom;
     } else {

@@ -134,16 +134,30 @@ class Canvas extends Component { state = {
     window.removeEventListener("resize", this.updateDimensions);
   }
 
-  initializePaths(people) {
-    let prng = new Random(this.resetTimestamp);
+  initializePaths(people, prng) {
+    if (!prng) {
+      console.log('Initializing paths without PRNG, using reset timestamp', this.resetTimestamp);
+      prng = new Random(this.resetTimestamp);
+    }
     let peopleKeys = Object.keys(people);
+
+    let dateFromTimestamp = null;
+    if (this.resetTimestamp) {
+      let milliseconds = this.resetTimestamp * 1000;
+      dateFromTimestamp = new Date(milliseconds);
+      console.log('Initializing start time', dateFromTimestamp);
+    }
 
     for (let personIndex = 0; personIndex < peopleKeys.length; personIndex++) {
       let personKey = peopleKeys[personIndex];
       let personObject = people[personKey];
+      personObject.prng = prng;
 
       personObject.setPaths([]);
       this.generatePathsForPerson(personObject, INITIAL_PATH_COUNT, prng);
+      if (dateFromTimestamp) {
+        personObject.setStartTime(dateFromTimestamp);
+      }
     }
   }
 
@@ -325,7 +339,14 @@ class Canvas extends Component { state = {
       elapsed -= poppedPath.duration;
       if (personObject.firstPath() == null) {
         console.log('Warning: No path, created a new one.', personObject.name, personObject.paths);
-        let paths = this.generateRandomPaths(poppedPath.endingLocation, poppedPath.room, new Random());
+        let prng = personObject.prng;
+        if (!prng) {
+          console.log('No PRNG. Using random');
+          prng = new Random();
+        } else {
+          console.log('Using person PRNG to create new paths');
+        }
+        let paths = this.generateRandomPaths(poppedPath.endingLocation, poppedPath.room, prng);
         personObject.addPaths(paths);
       }
     }
@@ -343,6 +364,8 @@ class Canvas extends Component { state = {
     if (!personObject) {
       return;
     }
+    personObject.prng = prng;
+
     personObject.showName = true;
     let hideTime = new Date();
     hideTime.setSeconds(hideTime.getSeconds() + SHOW_NAME_DURATION_S);
