@@ -410,22 +410,17 @@ class Canvas extends Component { state = {
     }
     let startingLocation = currentPath.startingLocation;
     let endingLocation = currentPath.endingLocation;
+    let vector = endingLocation.sub(startingLocation);
     let duration = currentPath.duration;
     let elapsed = currentTime - currentPath.startedAt;
-    let centerOfMassLocation = V(
-      easeInOutQuad(
-        elapsed,
-        startingLocation.x,
-        endingLocation.x - startingLocation.x,
-        duration
-      ),
-      easeInOutQuad(
-        elapsed,
-        startingLocation.y,
-        endingLocation.y - startingLocation.y,
-        duration
-      )
-    );
+    // If startedAt or elapsed is undefined, then we use the startingLocation.
+    let centerOfMassLocation = startingLocation;
+    if (elapsed) {
+      centerOfMassLocation = V(
+        easeInOutQuad(elapsed, startingLocation.x, vector.x, duration),
+        easeInOutQuad(elapsed, startingLocation.y, vector.y, duration)
+      );
+    }
     let roomDetails = rooms[currentPath.room];
 
     context.save()
