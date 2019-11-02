@@ -20,7 +20,6 @@ footstepLeftImg.src = FootstepLeft;
 let footstepRightImg = new Image();
 footstepRightImg.src = FootstepRight;
 
-
 /* global window */
 window.easeInOutQuad = easeInOutQuad
 
@@ -431,12 +430,25 @@ class Canvas extends Component { state = {
 
     context.save()
     context.translate(roomDetails.topLeft.x, roomDetails.topLeft.y);
-    if (this.people[person].showName === true) {
-      context.fillText(this.people[person].name, centerOfMassLocation.x + 10, centerOfMassLocation.y + 35);
+    let personObject = this.people[person];
+    if (personObject.showName === true) {
+      if (personObject.image) {
+        this.drawNameTag(context, personObject.image, centerOfMassLocation);
+      } else {
+        context.fillText(this.people[person].name, centerOfMassLocation.x + 10, centerOfMassLocation.y + 35);
+      }
     }
     this.createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime);
     context.restore();
   }
+
+   drawNameTag = (context, image, centerOfMassLocation) => {
+     let imageWidth = image.width ? image.width : 0;
+     context.save()
+     context.translate(centerOfMassLocation.x - imageWidth / 2, centerOfMassLocation.y);
+     context.drawImage(image, 0, 0);
+     context.restore()
+   }
 
   createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime) {
     // Direction of a single step.
