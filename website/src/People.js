@@ -152,6 +152,12 @@ export function generatePeople() {
       [],
       'hallway'
     ),
+    student: new Person(
+      'Gryffindor Student',
+      null,
+      [],
+      'hallway'
+    ),
   };
   for (let count = 0; count < 3; count++) {
     people['ghost' + count] = new Person(
