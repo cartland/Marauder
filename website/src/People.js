@@ -5,6 +5,7 @@ import GoldenSnitchName from './assets/golden_snitch_h200.png';
 import HarryPotterName from './assets/harry_potter_h200.png';
 import MovingPortraitName from './assets/moving_portrait_h200.png';
 import Nimbus2000Name from './assets/nimbus_2000_h200.png';
+import ScabbersName from './assets/scabbers_h200.png';
 import WompingWillowName from './assets/whomping_willow_h200.png';
 
 let DobbyImg = new Image();
@@ -27,6 +28,9 @@ Nimbus2000Img.src = Nimbus2000Name;
 
 let WompingWillowImg = new Image();
 WompingWillowImg.src = WompingWillowName;
+
+let ScabbersImg = new Image();
+ScabbersImg.src = ScabbersName;
 
 export class Person {
   constructor(name, image, paths, firstRoom) {
@@ -141,6 +145,12 @@ export function generatePeople() {
       DumbledoreImg,
       [],
       'living_room'
+    ),
+    scabbers: new Person(
+      'Scabbers',
+      ScabbersImg,
+      [],
+      'hallway'
     ),
   };
   for (let count = 0; count < 3; count++) {
