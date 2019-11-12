@@ -6,12 +6,12 @@ import "firebase/firestore";
 
 import FootstepLeft from './assets/footstep-left.svg';
 import FootstepRight from './assets/footstep-right.svg';
-import { V } from './Vector2.js';
-import { generateRooms } from './Room.js';
-import { generatePeople } from './People.js';
-import { Footstep } from './Footstep.js';
+import { V } from './model/Vector2.js';
+import { generateRooms } from './config/Rooms.js';
+import { generatePeople } from './config/People.js';
+import { Footstep } from './model/Footstep.js';
 import { Random } from './Random.js';
-import { Path } from './Path.js';
+import { Path } from './model/Path.js';
 
 import getViewport from './getViewport.js';
 

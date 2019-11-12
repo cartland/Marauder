@@ -1,5 +1,4 @@
-
-import { V } from './Vector2.js';
+import { V } from '../model/Vector2.js';
 
 export function generateRooms() {
   let topGuideline = 510;

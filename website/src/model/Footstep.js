@@ -1,5 +1,4 @@
 export class Footstep {
-
   constructor(location, direction, stepNumber, stepBeginTime, size) {
     this.location = location;
     this.direction = direction;

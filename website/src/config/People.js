@@ -1,13 +1,13 @@
-import { Person } from './Person.js'
+import { Person } from '../model/Person.js'
 
-import DobbyName from './assets/dobby_h200.png';
-import DumbledoreName from './assets/dumbledore_h200.png';
-import GoldenSnitchName from './assets/golden_snitch_h200.png';
-import HarryPotterName from './assets/harry_potter_h200.png';
-import MovingPortraitName from './assets/moving_portrait_h200.png';
-import Nimbus2000Name from './assets/nimbus_2000_h200.png';
-import ScabbersName from './assets/scabbers_h200.png';
-import WompingWillowName from './assets/whomping_willow_h200.png';
+import DobbyName from '../assets/dobby_h200.png';
+import DumbledoreName from '../assets/dumbledore_h200.png';
+import GoldenSnitchName from '../assets/golden_snitch_h200.png';
+import HarryPotterName from '../assets/harry_potter_h200.png';
+import MovingPortraitName from '../assets/moving_portrait_h200.png';
+import Nimbus2000Name from '../assets/nimbus_2000_h200.png';
+import ScabbersName from '../assets/scabbers_h200.png';
+import WompingWillowName from '../assets/whomping_willow_h200.png';
 
 let DobbyImg = new Image();
 DobbyImg.src = DobbyName;
