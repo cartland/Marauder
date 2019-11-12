@@ -9,6 +9,7 @@ import FootstepRight from './assets/footstep-right.svg';
 import { V } from './Vector2.js';
 import { generateRooms } from './Room.js';
 import { generatePeople} from './People.js';
+import { Footstep } from './Footstep.js';
 import { Random } from './Random.js';
 import { Path } from './Path.js';
 
@@ -41,24 +42,6 @@ const UPDATE_LOGIC_INTERVAL_MS = 5;
 const INITIAL_PATH_COUNT = 1000;
 
 let rooms = generateRooms();
-
-class Footstep {
-
-  constructor(location, direction, stepNumber, stepBeginTime, size) {
-    this.location = location;
-    this.direction = direction;
-    this.stepNumber = stepNumber;
-    this.stepBeginTime = stepBeginTime;
-    this.size = size;
-  }
-
-  key() {
-    return this.location.x.toPrecision(5) + ","
-      + this.location.y.toPrecision(5) + ","
-      + this.direction.x.toPrecision(5) + ","
-      + this.direction.y.toPrecision(5);
-  }
-}
 
 class Canvas extends Component { state = {
     // not 4k, but is the same size as the base image
