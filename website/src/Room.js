@@ -154,4 +154,3 @@ export function generateRooms() {
   console.log(rooms);
   return rooms;
 }
-

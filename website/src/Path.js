@@ -11,4 +11,3 @@ export class Path {
     this.startedAt = startedAt;
   }
 }
-

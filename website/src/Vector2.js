@@ -13,7 +13,7 @@ class Vector2 {
     return new Vector2(this.x + b.x, this.y + b.y);
   }
 
-  sub(b){
+  sub(b) {
     return this.add(b.scale(-1.0));
   }
 
@@ -42,4 +42,3 @@ export function V(x, y) {
 }
 
 export default Vector2
-

@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import { easeInOutQuad } from 'js-easing-functions';
 
 import * as firebase from "firebase/app";
@@ -8,7 +8,7 @@ import FootstepLeft from './assets/footstep-left.svg';
 import FootstepRight from './assets/footstep-right.svg';
 import { V } from './Vector2.js';
 import { generateRooms } from './Room.js';
-import { generatePeople} from './People.js';
+import { generatePeople } from './People.js';
 import { Footstep } from './Footstep.js';
 import { Random } from './Random.js';
 import { Path } from './Path.js';
@@ -43,7 +43,8 @@ const INITIAL_PATH_COUNT = 1000;
 
 let rooms = generateRooms();
 
-class Canvas extends Component { state = {
+class Canvas extends Component {
+  state = {
     // not 4k, but is the same size as the base image
     mapWidth: 2560,
     mapHeight: 1440,
@@ -55,48 +56,48 @@ class Canvas extends Component { state = {
     firebase.firestore().collection('nfcUpdates')
       .where('timestamp', '>', new Date())
       .onSnapshot((snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === "added") {
-          let room = change.doc.get('nfcData').nfcReaderLocation;
-          let person = change.doc.get('nfcData').nfcLogicalId;
-          let timestamp = change.doc.get('timestamp');
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === "added") {
+            let room = change.doc.get('nfcData').nfcReaderLocation;
+            let person = change.doc.get('nfcData').nfcLogicalId;
+            let timestamp = change.doc.get('timestamp');
 
-          // Check to see if this is a reset request.
-          if (person === RESET_LOGICAL_ID) {
-            window.location.reload();
-            return;
+            // Check to see if this is a reset request.
+            if (person === RESET_LOGICAL_ID) {
+              window.location.reload();
+              return;
+            }
+            this.wandTapped(room, person, timestamp);
           }
-          this.wandTapped(room, person, timestamp);
-        }
+        });
       });
-    });
 
-    let yesterday = new Date(new Date().setDate(new Date().getDate()-1));
+    let yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
     let that = this;
     firebase.firestore().collection('nfcUpdates')
       .where('timestamp', '>', yesterday)
       .orderBy('timestamp', 'desc')
       .onSnapshot((snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === "added") {
-          let person = change.doc.get('nfcData').nfcLogicalId;
-          let timestamp = change.doc.get('timestamp');
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === "added") {
+            let person = change.doc.get('nfcData').nfcLogicalId;
+            let timestamp = change.doc.get('timestamp');
 
-          // // Check to see if this is a reset request.
-          if (person === RESET_LOGICAL_ID) {
-            let seconds = timestamp.seconds;
-            if (seconds > that.resetTimestamp) {
-              console.log('Initialize with seed.', seconds);
-              that.resetTimestamp = seconds;
-              that.initializePaths(that.people, new Random(timestamp.seconds));
-            } else {
-              console.log('Ignoring old reset.', seconds);
+            // // Check to see if this is a reset request.
+            if (person === RESET_LOGICAL_ID) {
+              let seconds = timestamp.seconds;
+              if (seconds > that.resetTimestamp) {
+                console.log('Initialize with seed.', seconds);
+                that.resetTimestamp = seconds;
+                that.initializePaths(that.people, new Random(timestamp.seconds));
+              } else {
+                console.log('Ignoring old reset.', seconds);
+              }
+              return;
             }
-            return;
           }
-        }
+        });
       });
-    });
 
     this.footsteps = {};
 
@@ -169,20 +170,20 @@ class Canvas extends Component { state = {
       this.setState({
         fullScreenStyle: {
           height: '100vh',
-          width: `${100*mapAspectRatio}vh`,
+          width: `${100 * mapAspectRatio}vh`,
         },
       })
     } else {
       this.setState({
         fullScreenStyle: {
-          height: `${100/mapAspectRatio}vw`,
+          height: `${100 / mapAspectRatio}vw`,
           width: '100vw',
         },
       })
     }
 
     setTimeout(() => {
-      window.scrollTo(viewport.width/2, viewport.height/2);
+      window.scrollTo(viewport.width / 2, viewport.height / 2);
     }, 500);
   }
 
@@ -308,7 +309,7 @@ class Canvas extends Component { state = {
     if (personObject.firstPath() == null) {
       console.error(`Person ${person} has no paths`);
       let location = V(50, 50);
-      let duration = 2*1000;
+      let duration = 2 * 1000;
       personObject.addPaths([
         new Path(personObject.firstRoom, location, location, duration, undefined)
       ]);
@@ -450,14 +451,14 @@ class Canvas extends Component { state = {
     context.restore();
   }
 
-   drawNameTag = (context, image, centerOfMassLocation) => {
-     let imageWidth = image.width ? image.width : 0;
-     let imageHeight = image.height ? image.height : 0;
-     context.save()
-     context.translate(centerOfMassLocation.x - imageWidth / 2, centerOfMassLocation.y - imageHeight / 2);
-     context.drawImage(image, 0, 0);
-     context.restore()
-   }
+  drawNameTag = (context, image, centerOfMassLocation) => {
+    let imageWidth = image.width ? image.width : 0;
+    let imageHeight = image.height ? image.height : 0;
+    context.save()
+    context.translate(centerOfMassLocation.x - imageWidth / 2, centerOfMassLocation.y - imageHeight / 2);
+    context.drawImage(image, 0, 0);
+    context.restore()
+  }
 
   createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime, duration, footstepSize) {
     // Direction of a single step.
@@ -511,7 +512,7 @@ class Canvas extends Component { state = {
     }
   }
 
-   containsFootstep(key) {
+  containsFootstep(key) {
     return key in this.footsteps;
   }
 
@@ -557,7 +558,7 @@ class Canvas extends Component { state = {
   }
 
   render() {
-    return(
+    return (
       <div style={this.state.fullScreenStyle}>
         <canvas ref={this.canvas} style={this.state.fullScreenStyle} width={this.state.mapWidth} height={this.state.mapHeight} />
         <img onLoad={this.handleOnLoadImage} ref={this.image} src={process.env.PUBLIC_URL + '/129OctaviaTopDownView.png'} className="hidden" alt="Map View of Octavia House" />
