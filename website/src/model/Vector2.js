@@ -1,4 +1,4 @@
-class Vector2 {
+export class Vector2 {
   constructor(x, y) {
     this.x = x;
     this.y = y;
@@ -39,5 +39,3 @@ class Vector2 {
 export function V(x, y) {
   return new Vector2(x, y);
 }
-
-export default Vector2

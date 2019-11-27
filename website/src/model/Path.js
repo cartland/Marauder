@@ -1,4 +1,3 @@
-
 export class Path {
   constructor(room, startingLocation, endingLocation, duration, startedAt) {
     if (!room) {

@@ -1,15 +1,12 @@
-import { GameEvent } from './GameEvent'
-
 export class Timeline {
-  events: Array<GameEvent>
-  constructor(events: Array<GameEvent>) {
+  constructor(events) {
     this.events = events;
   }
 
-  addEvent(event: GameEvent) {
+  addEvent(event) {
     this.events.push(event);
     this.events.sort((a, b) => {
       return a.timestampMillis - b.timestampMillis;
-    })
+    });
   }
 }

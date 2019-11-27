@@ -1,7 +1,5 @@
 export class GameEvent {
-  timestampMillis: number;
-  kind: string;
-  constructor(timestampMillis: number, kind: string) {
+  constructor(timestampMillis, kind) {
     if (!timestampMillis) {
       throw 'GameEvent must have a timestamp, found ' + timestampMillis;
     }
@@ -18,21 +16,18 @@ export class GameEvent {
 }
 
 export class ResetEvent extends GameEvent {
-  constructor(timestampMillis: number) {
+  constructor(timestampMillis) {
     super(timestampMillis, 'RESET');
   }
 }
 
 export class WandTapEvent extends GameEvent {
-  personIndex: number;
-  roomIndex: number;
-  constructor(timestampMillis: number, personIndex: number, roomIndex: number) {
+  constructor(timestampMillis, personIndex, roomIndex) {
     super(timestampMillis, 'WANDTAP');
     this.personIndex = personIndex;
     this.roomIndex = roomIndex;
   }
 }
-
 
 /**
  * Return the events in the range [beginTimestampRange, endTimestampRange].
@@ -40,7 +35,7 @@ export class WandTapEvent extends GameEvent {
  * @param {number} beginTimestampMillis Begin range, inclusive.
  * @param {number} endTimestampMillis End range, inclusive.
  */
-export function getEventsInRange(events: Array<GameEvent>, beginTimestampMillis: number, endTimestampMillis: number) {
+export function getEventsInRange(events, beginTimestampMillis, endTimestampMillis) {
   let beginIndex = 0;
   for (; beginIndex < events.length; beginIndex++) {
     let event = events[beginIndex];
@@ -48,13 +43,13 @@ export function getEventsInRange(events: Array<GameEvent>, beginTimestampMillis:
       continue;
     }
     if (event.timestampMillis > endTimestampMillis) {
-      console.log(`getEventsInRange: No events in range`)
+      console.log(`getEventsInRange: No events in range`);
       return [];
     }
-    console.log(`getEventsInRange: Found first event ${event.toString()}`)
+    console.log(`getEventsInRange: Found first event ${event.toString()}`);
     break;
   }
-  const eventsInRange = new Array<GameEvent>();
+  const eventsInRange = new Array();
   let endIndex = beginIndex;
   for (; endIndex < events.length; endIndex++) {
     let event = events[endIndex];

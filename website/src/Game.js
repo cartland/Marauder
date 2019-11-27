@@ -1,22 +1,7 @@
-import {
-  GameEvent,
-  WandTapEvent,
-  getEventsInRange
-} from './model/GameEvent'
-import { Timeline } from './model/Timeline';
+import { getEventsInRange } from './model/GameEvent';
 
 export class Game {
-  startTimestampMillis: Number;
-  rooms: Array<object>;
-  people: Array<object>;
-  footprints: Array<object>;
-  timeline: Timeline
-  constructor(
-    startTimestampMillis: Number,
-    rooms: Array<object>,
-    people: Array<object>,
-    timeline: Timeline
-  ) {
+  constructor(startTimestampMillis, rooms, people, timeline) {
     this.startTimestampMillis = startTimestampMillis;
     this.rooms = rooms;
     this.people = people;
@@ -24,11 +9,11 @@ export class Game {
     this.footprints = [];
   }
 
-  processEventsInRange(events: Array<GameEvent>, beginTimestampMillis: number, endTimestampMillis: number) {
+  processEventsInRange(events, beginTimestampMillis, endTimestampMillis) {
     if (events.length == 0) {
       return;
     }
-    let lastEvent: GameEvent = events[0];
+    let lastEvent = events[0];
     const eventsInRange = getEventsInRange(events, beginTimestampMillis, endTimestampMillis);
     for (let i = 0; i < eventsInRange.length; i++) {
       let currentEvent = events[i];
@@ -37,8 +22,7 @@ export class Game {
     }
   }
 
-  processEvent(lastEvent: GameEvent, currentEvent: GameEvent) {
-
+  processEvent(lastEvent, currentEvent) {
   }
 
   getPeople() {

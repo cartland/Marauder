@@ -10,7 +10,7 @@ import { V } from './model/Vector2.js';
 import { generateRooms } from './config/Rooms.js';
 import { generatePeople } from './config/People.js';
 import { Footstep } from './model/Footstep.js';
-import { Random } from './Random.js';
+import { Random } from './util/Random.js';
 import { Path } from './model/Path.js';
 
 import getViewport from './getViewport.js';
