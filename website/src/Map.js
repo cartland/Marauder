@@ -389,38 +389,38 @@ class Canvas extends Component {
 
   draw = () => {
     let currentTime = new Date();
-    let context = this.canvas.current.getContext("2d")
-    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    context.font = "60px Roboto";
 
-    // Background.
-    this.backgroundRenderer.drawBackground(context, this.image.current);
-
-    // Footsteps.
-    this.updateFootsteps();
-    this.footstepRenderer.drawFootsteps(context, this.footsteps);
-
-    // People.
-    Object.keys(this.people).map(personKey => {
-      let person = this.people[personKey];
-      this.updatePerson(person, context, currentTime);
-      if (person.showName) {
-        this.personRenderer.drawPerson(context, person);
-      }
+    // Updates.
+    this.updateFootsteps(this.footsteps, currentTime);
+    Object.values(this.people).forEach(person => {
+      this.updatePerson(person, currentTime);
     })
-
     // Paths.
     if (currentTime.getTime() - this.lastLogicUpdateTime > C.UPDATE_LOGIC_INTERVAL_MS) {
       Object.keys(this.people).map(person => {
         this.updatePaths(person, currentTime);
       })
     }
-
     this.lastLogicUpdateTime = currentTime.getTime();
+
+    // Drawing.
+    let context = this.canvas.current.getContext("2d")
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    context.font = "60px Roboto";
+    // Draw background first.
+    this.backgroundRenderer.drawBackground(context, this.image.current);
+    // Draw footsteps before people.
+    this.footstepRenderer.drawFootsteps(context, this.footsteps);
+    // Draw people after footsteps.
+    Object.values(this.people).forEach(person => {
+      if (person.showName) {
+        this.personRenderer.drawPerson(context, person);
+      }
+    });
     requestAnimationFrame(this.draw);
   }
 
-  updatePerson(person, context, currentTime) {
+  updatePerson(person, currentTime) {
     let currentPath = person.firstPath();
     if (!currentPath) {
       return;
@@ -446,10 +446,10 @@ class Canvas extends Component {
     if (person.showName === true) {
       footstepSize = 24;
     }
-    this.createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime, duration, footstepSize);
+    this.createFootsteps(centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime, duration, footstepSize);
   }
 
-  createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime, duration, footstepSize) {
+  createFootsteps(centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime, duration, footstepSize) {
     // Direction of a single step.
     let footstepDirection = endingLocation.sub(startingLocation).normalize();
     if (footstepDirection == null) {
@@ -513,9 +513,8 @@ class Canvas extends Component {
     delete this.footsteps[key];
   }
 
-  updateFootsteps() {
-    let currentTime = new Date();
-    for (const [key, footstep] of Object.entries(this.footsteps)) {
+  updateFootsteps(footsteps, currentTime) {
+    for (const [key, footstep] of Object.entries(footsteps)) {
       // Opacity is 1.0 if no time has passed fades to 0.0 if C.STEP_FADE_DURATION has passed.
       let timeSinceStep = currentTime - footstep.stepBeginTime;
       let opacity = Math.max(0, C.STEP_FADE_DURATION - timeSinceStep) / C.STEP_FADE_DURATION; // 0-1.0
