@@ -13,6 +13,8 @@ import { Footstep } from './model/Footstep.js';
 import { Random } from './util/Random.js';
 import { Path } from './model/Path.js';
 
+import { C } from "./config/C.js";
+
 import getViewport from './getViewport.js';
 
 let footstepLeftImg = new Image();
@@ -23,23 +25,6 @@ footstepRightImg.src = FootstepRight;
 
 /* global window */
 window.easeInOutQuad = easeInOutQuad
-
-// Length of a single step in pixels.
-const STEP_DISTANCE = 50;
-// Left and right feet are offset by a factor of the STEP_DISTANCE.
-const STEP_WIDTH_FACTOR = 0.25;
-// Time it takes for a step to fade in milliseconds.
-const STEP_FADE_DURATION = 7 * 1000; // 7 seconds.
-// Time to stand still after tapping wand.
-const STAND_STILL_DURATION_S = 10;
-// Time it takes for the name to disappear after wand tap.
-const SHOW_NAME_DURATION_S = 40; // Time in seconds
-// Person ID to trigger a web page reset.
-const RESET_LOGICAL_ID = 'reset';
-// Time between logic updates.
-const UPDATE_LOGIC_INTERVAL_MS = 5;
-// Number of paths to generate per person during initialization.
-const INITIAL_PATH_COUNT = 1000;
 
 let rooms = generateRooms();
 
@@ -63,7 +48,7 @@ class Canvas extends Component {
             let timestamp = change.doc.get('timestamp');
 
             // Check to see if this is a reset request.
-            if (person === RESET_LOGICAL_ID) {
+            if (person === C.RESET_LOGICAL_ID) {
               window.location.reload();
               return;
             }
@@ -84,7 +69,7 @@ class Canvas extends Component {
             let timestamp = change.doc.get('timestamp');
 
             // // Check to see if this is a reset request.
-            if (person === RESET_LOGICAL_ID) {
+            if (person === C.RESET_LOGICAL_ID) {
               let seconds = timestamp.seconds;
               if (seconds > that.resetTimestamp) {
                 console.log('Initialize with seed.', seconds);
@@ -140,7 +125,7 @@ class Canvas extends Component {
       personObject.prng = prng;
 
       personObject.setPaths([]);
-      this.generatePathsForPerson(personObject, INITIAL_PATH_COUNT, prng);
+      this.generatePathsForPerson(personObject, C.INITIAL_PATH_COUNT, prng);
       if (dateFromTimestamp) {
         personObject.setStartTime(dateFromTimestamp);
       }
@@ -354,11 +339,11 @@ class Canvas extends Component {
 
     personObject.showName = true;
     let hideTime = new Date();
-    hideTime.setSeconds(hideTime.getSeconds() + SHOW_NAME_DURATION_S);
+    hideTime.setSeconds(hideTime.getSeconds() + C.SHOW_NAME_DURATION_S);
     personObject.hideNameTime = hideTime;
 
     this.movePersonToRoom(personObject, room, prng);
-    this.generatePathsForPerson(personObject, INITIAL_PATH_COUNT, prng);
+    this.generatePathsForPerson(personObject, C.INITIAL_PATH_COUNT, prng);
     let milliseconds = timestamp.seconds * 1000;
     let dateFromTimestamp = new Date(milliseconds);
     personObject.setStartTime(dateFromTimestamp);
@@ -386,7 +371,7 @@ class Canvas extends Component {
     if (room in rooms && "width" in rooms[room]) {
       let roomSpawnLocation = rooms[room].spawnLocation;
       person.setPaths([
-        new Path(room, roomSpawnLocation, roomSpawnLocation, STAND_STILL_DURATION_S * 1000, undefined)
+        new Path(room, roomSpawnLocation, roomSpawnLocation, C.STAND_STILL_DURATION_S * 1000, undefined)
       ]);
       person.room = room;
     }
@@ -405,7 +390,7 @@ class Canvas extends Component {
       this.drawPerson(person, context, currentTime);
     })
 
-    if (currentTime.getTime() - this.lastLogicUpdateTime > UPDATE_LOGIC_INTERVAL_MS) {
+    if (currentTime.getTime() - this.lastLogicUpdateTime > C.UPDATE_LOGIC_INTERVAL_MS) {
       Object.keys(this.people).map(person => {
         this.updatePaths(person, currentTime);
       })
@@ -469,20 +454,20 @@ class Canvas extends Component {
     }
     // Distance traveled since the starting location.
     let centerOfMassDistance = centerOfMassLocation.sub(startingLocation).size();
-    let scaledStepVector = footstepDirection.scale(STEP_DISTANCE);
+    let scaledStepVector = footstepDirection.scale(C.STEP_DISTANCE);
 
     let totalDistance = endingLocation.sub(startingLocation).size();
     let speed = totalDistance / duration;
 
     // Number of steps since the starting location.
-    let stepCount = Math.floor(centerOfMassDistance / STEP_DISTANCE);
+    let stepCount = Math.floor(centerOfMassDistance / C.STEP_DISTANCE);
     // For each step since the starting location, draw it.
     for (let stepNumber = 0; stepNumber <= stepCount; stepNumber++) {
       let stepLocation = startingLocation.add(scaledStepVector.scale(stepNumber));
       let distanceSinceStep = centerOfMassLocation.sub(stepLocation).size();
       let timeSinceStep = duration * distanceSinceStep / totalDistance;
 
-      if (timeSinceStep >= STEP_FADE_DURATION) {
+      if (timeSinceStep >= C.STEP_FADE_DURATION) {
         continue;
       }
       let stepBeginTime = currentTime - timeSinceStep;
@@ -490,8 +475,8 @@ class Canvas extends Component {
       // Global coordinates.
       let globalStepLocation = stepLocation.add(V(roomDetails.topLeft.x, roomDetails.topLeft.y));
 
-      let leftFootstepLocation = globalStepLocation.add(scaledStepVector.orthogonalLeft().scale(STEP_WIDTH_FACTOR));
-      let rightFootstepLocation = globalStepLocation.add(scaledStepVector.orthogonalRight().scale(STEP_WIDTH_FACTOR));
+      let leftFootstepLocation = globalStepLocation.add(scaledStepVector.orthogonalLeft().scale(C.STEP_WIDTH_FACTOR));
+      let rightFootstepLocation = globalStepLocation.add(scaledStepVector.orthogonalRight().scale(C.STEP_WIDTH_FACTOR));
 
       if (stepNumber % 2 === 0) {
         this.createFootstep(rightFootstepLocation, footstepDirection, stepNumber, stepBeginTime, footstepSize);
@@ -527,9 +512,9 @@ class Canvas extends Component {
   drawFootsteps(context) {
     let currentTime = new Date();
     for (const [key, footstep] of Object.entries(this.footsteps)) {
-      // Opacity is 1.0 if no time has passed fades to 0.0 if STEP_FADE_DURATION has passed.
+      // Opacity is 1.0 if no time has passed fades to 0.0 if C.STEP_FADE_DURATION has passed.
       let timeSinceStep = currentTime - footstep.stepBeginTime;
-      let opacity = Math.max(0, STEP_FADE_DURATION - timeSinceStep) / STEP_FADE_DURATION; // 0-1.0
+      let opacity = Math.max(0, C.STEP_FADE_DURATION - timeSinceStep) / C.STEP_FADE_DURATION; // 0-1.0
       if (opacity <= 0) {
         this.deleteFootstep(key);
       }
