@@ -11,6 +11,9 @@ import { Footstep } from './model/Footstep.js';
 import { Random } from './util/Random.js';
 import { Path } from './model/Path.js';
 
+// Background
+import { BackgroundRenderer } from './render/BackgroundRenderer';
+
 // Footsteps
 import FootstepLeft from './assets/footstep-left.svg';
 import FootstepRight from './assets/footstep-right.svg';
@@ -38,6 +41,7 @@ class Canvas extends Component {
   constructor(props) {
     super(props);
 
+    this.backgroundRenderer = new BackgroundRenderer();
     this.footstepRenderer = new FootstepRenderer({
       footstepLeft: FootstepLeft,
       footstepRight: FootstepRight
@@ -387,8 +391,10 @@ class Canvas extends Component {
     let currentTime = new Date();
     let context = this.canvas.current.getContext("2d")
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    context.drawImage(this.image.current, 0, 0);
     context.font = "60px Roboto";
+
+    // Background.
+    this.backgroundRenderer.drawBackground(context, this.image.current);
 
     // Footsteps.
     this.updateFootsteps();
