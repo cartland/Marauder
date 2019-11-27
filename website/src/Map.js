@@ -4,8 +4,6 @@ import { easeInOutQuad } from 'js-easing-functions';
 import * as firebase from "firebase/app";
 import "firebase/firestore";
 
-import FootstepLeft from './assets/footstep-left.svg';
-import FootstepRight from './assets/footstep-right.svg';
 import { V } from './model/Vector2.js';
 import { generateRooms } from './config/Rooms.js';
 import { generatePeople } from './config/People.js';
@@ -13,15 +11,14 @@ import { Footstep } from './model/Footstep.js';
 import { Random } from './util/Random.js';
 import { Path } from './model/Path.js';
 
+// Footsteps
+import FootstepLeft from './assets/footstep-left.svg';
+import FootstepRight from './assets/footstep-right.svg';
+import { FootstepRenderer } from './render/FootstepRenderer.js';
+
 import { C } from "./config/C.js";
 
 import getViewport from './getViewport.js';
-
-let footstepLeftImg = new Image();
-footstepLeftImg.src = FootstepLeft;
-
-let footstepRightImg = new Image();
-footstepRightImg.src = FootstepRight;
 
 /* global window */
 window.easeInOutQuad = easeInOutQuad
@@ -37,6 +34,11 @@ class Canvas extends Component {
 
   constructor(props) {
     super(props);
+
+    this.footstepRenderer = new FootstepRenderer({
+      footstepLeft: FootstepLeft,
+      footstepRight: FootstepRight
+    });
 
     firebase.firestore().collection('nfcUpdates')
       .where('timestamp', '>', new Date())
@@ -384,7 +386,8 @@ class Canvas extends Component {
     context.drawImage(this.image.current, 0, 0);
     context.font = "60px Roboto";
 
-    this.drawFootsteps(context);
+    this.updateFootsteps();
+    this.footstepRenderer.drawFootsteps(context, this.footsteps);
 
     Object.keys(this.people).map(person => {
       this.drawPerson(person, context, currentTime);
@@ -509,7 +512,7 @@ class Canvas extends Component {
     delete this.footsteps[key];
   }
 
-  drawFootsteps(context) {
+  updateFootsteps() {
     let currentTime = new Date();
     for (const [key, footstep] of Object.entries(this.footsteps)) {
       // Opacity is 1.0 if no time has passed fades to 0.0 if C.STEP_FADE_DURATION has passed.
@@ -518,28 +521,8 @@ class Canvas extends Component {
       if (opacity <= 0) {
         this.deleteFootstep(key);
       }
-      this.drawFoot(context, footstep, opacity);
+      footstep.opacity = opacity;
     }
-  }
-
-  /**
-   * Draw a foot near stepX, stepY.
-   * footstepDirection is the direction of a single step.
-   * Opacity allows the step to fade.
-   */
-  drawFoot = (context, footstep, opacity) => {
-    let img = footstepLeftImg
-    if (footstep.stepNumber % 2 === 0) {
-      img = footstepRightImg;
-    }
-    let stepLocation = footstep.location;
-    let footstepDirection = footstep.direction;
-    context.save()
-    context.translate(stepLocation.x, stepLocation.y);
-    context.rotate(Math.atan2(footstepDirection.y, footstepDirection.x) + 90 * Math.PI / 180)
-    context.globalAlpha = opacity;
-    context.drawImage(img, 0, 0, footstep.size, footstep.size * img.height / img.width);
-    context.restore()
   }
 
   render() {

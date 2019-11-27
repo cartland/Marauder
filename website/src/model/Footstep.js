@@ -5,6 +5,7 @@ export class Footstep {
     this.stepNumber = stepNumber;
     this.stepBeginTime = stepBeginTime;
     this.size = size;
+    this.opacity = 1.0;
   }
 
   key() {
