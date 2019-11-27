@@ -16,6 +16,9 @@ import FootstepLeft from './assets/footstep-left.svg';
 import FootstepRight from './assets/footstep-right.svg';
 import { FootstepRenderer } from './render/FootstepRenderer.js';
 
+// Person
+import { PersonRenderer } from './render/PersonRenderer.js';
+
 import { C } from "./config/C.js";
 
 import getViewport from './getViewport.js';
@@ -39,6 +42,7 @@ class Canvas extends Component {
       footstepLeft: FootstepLeft,
       footstepRight: FootstepRight
     });
+    this.personRenderer = new PersonRenderer();
 
     firebase.firestore().collection('nfcUpdates')
       .where('timestamp', '>', new Date())
@@ -386,13 +390,20 @@ class Canvas extends Component {
     context.drawImage(this.image.current, 0, 0);
     context.font = "60px Roboto";
 
+    // Footsteps.
     this.updateFootsteps();
     this.footstepRenderer.drawFootsteps(context, this.footsteps);
 
-    Object.keys(this.people).map(person => {
-      this.drawPerson(person, context, currentTime);
+    // People.
+    Object.keys(this.people).map(personKey => {
+      let person = this.people[personKey];
+      this.updatePerson(person, context, currentTime);
+      if (person.showName) {
+        this.personRenderer.drawPerson(context, person);
+      }
     })
 
+    // Paths.
     if (currentTime.getTime() - this.lastLogicUpdateTime > C.UPDATE_LOGIC_INTERVAL_MS) {
       Object.keys(this.people).map(person => {
         this.updatePaths(person, currentTime);
@@ -403,8 +414,8 @@ class Canvas extends Component {
     requestAnimationFrame(this.draw);
   }
 
-  drawPerson(person, context, currentTime) {
-    let currentPath = this.people[person].firstPath();
+  updatePerson(person, context, currentTime) {
+    let currentPath = person.firstPath();
     if (!currentPath) {
       return;
     }
@@ -422,30 +433,14 @@ class Canvas extends Component {
       );
     }
     let roomDetails = rooms[currentPath.room];
+    person.room = roomDetails;
+    person.location = centerOfMassLocation;
 
-    context.save()
-    context.translate(roomDetails.topLeft.x, roomDetails.topLeft.y);
-    let personObject = this.people[person];
     let footstepSize = 12;
-    if (personObject.showName === true) {
+    if (person.showName === true) {
       footstepSize = 24;
-      if (personObject.image) {
-        this.drawNameTag(context, personObject.image, centerOfMassLocation);
-      } else {
-        context.fillText(this.people[person].name, centerOfMassLocation.x + 10, centerOfMassLocation.y + 35);
-      }
     }
     this.createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime, duration, footstepSize);
-    context.restore();
-  }
-
-  drawNameTag = (context, image, centerOfMassLocation) => {
-    let imageWidth = image.width ? image.width : 0;
-    let imageHeight = image.height ? image.height : 0;
-    context.save()
-    context.translate(centerOfMassLocation.x - imageWidth / 2, centerOfMassLocation.y - imageHeight / 2);
-    context.drawImage(image, 0, 0);
-    context.restore()
   }
 
   createFootsteps(context, centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime, duration, footstepSize) {

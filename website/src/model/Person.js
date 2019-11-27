@@ -2,8 +2,10 @@ export class Person {
   constructor(name, image, paths, firstRoom) {
     this.name = name;
     this.image = image;
+    this.location = null;
+    this.room = null;
     this.paths = paths;
-    this.prng = null
+    this.prng = null;
     if (this.firstPath() == null) {
       this.firstRoom = firstRoom;
     } else {
