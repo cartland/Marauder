@@ -4,10 +4,10 @@ import { easeInOutQuad } from 'js-easing-functions';
 import * as firebase from "firebase/app";
 import "firebase/firestore";
 
+import { C } from "./config/C.js";
 import { V } from './model/Vector2.js';
 import { generateRooms } from './config/Rooms.js';
 import { generatePeople } from './config/People.js';
-import { Footstep } from './model/Footstep.js';
 import { Random } from './util/Random.js';
 import { Path } from './model/Path.js';
 
@@ -18,11 +18,11 @@ import { BackgroundRenderer } from './render/BackgroundRenderer';
 import FootstepLeft from './assets/footstep-left.svg';
 import FootstepRight from './assets/footstep-right.svg';
 import { FootstepRenderer } from './render/FootstepRenderer.js';
+import { FootstepController } from './controller/FootstepController';
 
 // Person
 import { PersonRenderer } from './render/PersonRenderer.js';
-
-import { C } from "./config/C.js";
+import { PersonController } from './controller/PersonController';
 
 import getViewport from './getViewport.js';
 
@@ -47,6 +47,8 @@ class Canvas extends Component {
       footstepRight: FootstepRight
     });
     this.personRenderer = new PersonRenderer();
+    this.footstepController = new FootstepController();
+    this.personController = new PersonController(this.footstepController);
 
     firebase.firestore().collection('nfcUpdates')
       .where('timestamp', '>', new Date())
@@ -93,8 +95,6 @@ class Canvas extends Component {
           }
         });
       });
-
-    this.footsteps = {};
 
     this.people = generatePeople();
 
@@ -391,9 +391,9 @@ class Canvas extends Component {
     let currentTime = new Date();
 
     // Updates.
-    this.updateFootsteps(this.footsteps, currentTime);
+    this.footstepController.updateFootsteps(currentTime);
     Object.values(this.people).forEach(person => {
-      this.updatePerson(person, currentTime);
+      this.personController.updatePerson(rooms, person, currentTime);
     })
     // Paths.
     if (currentTime.getTime() - this.lastLogicUpdateTime > C.UPDATE_LOGIC_INTERVAL_MS) {
@@ -410,7 +410,7 @@ class Canvas extends Component {
     // Draw background first.
     this.backgroundRenderer.drawBackground(context, this.image.current);
     // Draw footsteps before people.
-    this.footstepRenderer.drawFootsteps(context, this.footsteps);
+    this.footstepRenderer.drawFootsteps(context, this.footstepController.getFootsteps());
     // Draw people after footsteps.
     Object.values(this.people).forEach(person => {
       if (person.showName) {
@@ -418,111 +418,6 @@ class Canvas extends Component {
       }
     });
     requestAnimationFrame(this.draw);
-  }
-
-  updatePerson(person, currentTime) {
-    let currentPath = person.firstPath();
-    if (!currentPath) {
-      return;
-    }
-    let startingLocation = currentPath.startingLocation;
-    let endingLocation = currentPath.endingLocation;
-    let vector = endingLocation.sub(startingLocation);
-    let duration = currentPath.duration;
-    let elapsed = currentTime - currentPath.startedAt;
-    // If startedAt or elapsed is undefined, then we use the startingLocation.
-    let centerOfMassLocation = startingLocation;
-    if (elapsed) {
-      centerOfMassLocation = V(
-        easeInOutQuad(elapsed, startingLocation.x, vector.x, duration),
-        easeInOutQuad(elapsed, startingLocation.y, vector.y, duration)
-      );
-    }
-    let roomDetails = rooms[currentPath.room];
-    person.room = roomDetails;
-    person.location = centerOfMassLocation;
-
-    let footstepSize = 12;
-    if (person.showName === true) {
-      footstepSize = 24;
-    }
-    this.createFootsteps(centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime, duration, footstepSize);
-  }
-
-  createFootsteps(centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime, duration, footstepSize) {
-    // Direction of a single step.
-    let footstepDirection = endingLocation.sub(startingLocation).normalize();
-    if (footstepDirection == null) {
-      // Do not create footsteps when standing still.
-      return;
-    }
-    // Distance traveled since the starting location.
-    let centerOfMassDistance = centerOfMassLocation.sub(startingLocation).size();
-    let scaledStepVector = footstepDirection.scale(C.STEP_DISTANCE);
-
-    let totalDistance = endingLocation.sub(startingLocation).size();
-    let speed = totalDistance / duration;
-
-    // Number of steps since the starting location.
-    let stepCount = Math.floor(centerOfMassDistance / C.STEP_DISTANCE);
-    // For each step since the starting location, draw it.
-    for (let stepNumber = 0; stepNumber <= stepCount; stepNumber++) {
-      let stepLocation = startingLocation.add(scaledStepVector.scale(stepNumber));
-      let distanceSinceStep = centerOfMassLocation.sub(stepLocation).size();
-      let timeSinceStep = duration * distanceSinceStep / totalDistance;
-
-      if (timeSinceStep >= C.STEP_FADE_DURATION) {
-        continue;
-      }
-      let stepBeginTime = currentTime - timeSinceStep;
-
-      // Global coordinates.
-      let globalStepLocation = stepLocation.add(V(roomDetails.topLeft.x, roomDetails.topLeft.y));
-
-      let leftFootstepLocation = globalStepLocation.add(scaledStepVector.orthogonalLeft().scale(C.STEP_WIDTH_FACTOR));
-      let rightFootstepLocation = globalStepLocation.add(scaledStepVector.orthogonalRight().scale(C.STEP_WIDTH_FACTOR));
-
-      if (stepNumber % 2 === 0) {
-        this.createFootstep(rightFootstepLocation, footstepDirection, stepNumber, stepBeginTime, footstepSize);
-      }
-      if (stepNumber % 2 === 1) {
-        this.createFootstep(leftFootstepLocation, footstepDirection, stepNumber, stepBeginTime, footstepSize);
-      }
-    }
-  }
-
-  createFootstep(footstepLocation, footstepDirection, stepNumber, stepBeginTime, size) {
-    let footstep = new Footstep(footstepLocation, footstepDirection, stepNumber, stepBeginTime, size);
-    let key = footstep.key();
-    if (this.containsFootstep(key)) {
-      // Do nothing.
-    } else {
-      this.addFootstepToMap(key, footstep);
-    }
-  }
-
-  containsFootstep(key) {
-    return key in this.footsteps;
-  }
-
-  addFootstepToMap(key, footstep) {
-    this.footsteps[key] = footstep;
-  }
-
-  deleteFootstep(key) {
-    delete this.footsteps[key];
-  }
-
-  updateFootsteps(footsteps, currentTime) {
-    for (const [key, footstep] of Object.entries(footsteps)) {
-      // Opacity is 1.0 if no time has passed fades to 0.0 if C.STEP_FADE_DURATION has passed.
-      let timeSinceStep = currentTime - footstep.stepBeginTime;
-      let opacity = Math.max(0, C.STEP_FADE_DURATION - timeSinceStep) / C.STEP_FADE_DURATION; // 0-1.0
-      if (opacity <= 0) {
-        this.deleteFootstep(key);
-      }
-      footstep.opacity = opacity;
-    }
   }
 
   render() {
