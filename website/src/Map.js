@@ -127,28 +127,28 @@ class Canvas extends Component {
 
     for (let personIndex = 0; personIndex < peopleKeys.length; personIndex++) {
       let personKey = peopleKeys[personIndex];
-      let personObject = people[personKey];
-      personObject.prng = prng;
+      let person = people[personKey];
+      person.prng = prng;
 
-      personObject.setPaths([]);
-      this.generatePathsForPerson(personObject, C.INITIAL_PATH_COUNT, prng);
+      person.setPaths([]);
+      this.generatePathsForPerson(person, C.INITIAL_PATH_COUNT, prng);
       if (dateFromTimestamp) {
-        personObject.setStartTime(dateFromTimestamp);
+        person.setStartTime(dateFromTimestamp);
       }
     }
   }
 
-  generatePathsForPerson(personObject, count, prng) {
+  generatePathsForPerson(person, count, prng) {
     for (let round = 0; round < count; round++) {
-      let lastPath = personObject.lastPath();
+      let lastPath = person.lastPath();
       let startingLocation = null;
-      let room = personObject.firstRoom;
+      let room = person.firstRoom;
       if (lastPath) {
         startingLocation = lastPath.endingLocation;
         room = lastPath.room;
       }
       let paths = this.generateRandomPaths(startingLocation, room, prng);
-      personObject.addPaths(paths);
+      person.addPaths(paths);
     }
   }
 
@@ -264,27 +264,27 @@ class Canvas extends Component {
     return distance / speed;
   }
 
-  addRoomChange = (person, newRoom, prng) => {
-    let doorLocation = this.rooms[this.people[person].room].doors[newRoom];
+  addRoomChange = (personKey, newRoom, prng) => {
+    let doorLocation = this.rooms[this.people[personKey].room].doors[newRoom];
 
     let speed = 560 / 10; // cross the living room in 10 seconds
 
-    let startingLocation = this.people[person].lastPath().endingLocation;
+    let startingLocation = this.people[personKey].lastPath().endingLocation;
 
     let duration = 1000 * this.getDuration(startingLocation, doorLocation, speed);
 
-    let room = this.people[person].room
+    let room = this.people[personKey].room
 
-    this.people[person].addPaths([
+    this.people[personKey].addPaths([
       new Path(room, startingLocation, doorLocation, duration, undefined)
     ]);
 
-    let otherSideDoorLocation = this.rooms[newRoom].doors[this.people[person].room];
+    let otherSideDoorLocation = this.rooms[newRoom].doors[this.people[personKey].room];
     if (otherSideDoorLocation === undefined) {
-      throw new Error(`room ${newRoom} does not have a door to ${this.people[person].room}`)
+      throw new Error(`room ${newRoom} does not have a door to ${this.people[personKey].room}`)
     }
 
-    this.people[person].addPaths([
+    this.people[personKey].addPaths([
       this.generateRandomPathInRoom(
         newRoom,
         otherSideDoorLocation,
@@ -292,31 +292,31 @@ class Canvas extends Component {
       )
     ]);
 
-    this.people[person].room = newRoom;
+    this.people[personKey].room = newRoom;
   }
 
-  updatePaths(person, currentTime) {
-    let personObject = this.people[person];
-    if (personObject.firstPath() == null) {
-      console.error(`Person ${person} has no paths`);
+  updatePaths(personKey, currentTime) {
+    let person = this.people[personKey];
+    if (person.firstPath() == null) {
+      console.error(`Person ${personKey} has no paths`);
       let location = V(50, 50);
       let duration = 2 * 1000;
-      personObject.addPaths([
-        new Path(personObject.firstRoom, location, location, duration, undefined)
+      person.addPaths([
+        new Path(person.firstRoom, location, location, duration, undefined)
       ]);
     }
 
     // case: we are at the start, and need to kick things off
-    if (personObject.firstPath().startedAt === undefined) {
-      personObject.setStartTime(currentTime);
+    if (person.firstPath().startedAt === undefined) {
+      person.setStartTime(currentTime);
     }
-    let elapsed = currentTime - personObject.firstPath().startedAt;
-    while (elapsed > personObject.firstPath().duration) {
-      let poppedPath = personObject.popPath();
+    let elapsed = currentTime - person.firstPath().startedAt;
+    while (elapsed > person.firstPath().duration) {
+      let poppedPath = person.popPath();
       elapsed -= poppedPath.duration;
-      if (personObject.firstPath() == null) {
-        console.log('Warning: No path, created a new one.', personObject.name, personObject.paths);
-        let prng = personObject.prng;
+      if (person.firstPath() == null) {
+        console.log('Warning: No path, created a new one.', person.name, person.paths);
+        let prng = person.prng;
         if (!prng) {
           console.log('No PRNG. Using random');
           prng = new Random();
@@ -324,51 +324,51 @@ class Canvas extends Component {
           console.log('Using person PRNG to create new paths');
         }
         let paths = this.generateRandomPaths(poppedPath.endingLocation, poppedPath.room, prng);
-        personObject.addPaths(paths);
+        person.addPaths(paths);
       }
     }
   }
 
-  wandTapped = (room, person, timestamp) => {
-    console.log('wandTapped', room, person, timestamp);
+  wandTapped = (room, personKey, timestamp) => {
+    console.log('wandTapped', room, personKey, timestamp);
     let prng = new Random(timestamp.seconds);
 
+    if (!personKey) {
+      return;
+    }
+
+    let person = this.people[personKey];
     if (!person) {
       return;
     }
+    person.prng = prng;
 
-    let personObject = this.people[person];
-    if (!personObject) {
-      return;
-    }
-    personObject.prng = prng;
-
-    personObject.showName = true;
+    person.showName = true;
     let hideTime = new Date();
     hideTime.setSeconds(hideTime.getSeconds() + C.SHOW_NAME_DURATION_S);
-    personObject.hideNameTime = hideTime;
+    person.hideNameTime = hideTime;
 
-    this.movePersonToRoom(personObject, room, prng);
-    this.generatePathsForPerson(personObject, C.INITIAL_PATH_COUNT, prng);
+    this.movePersonToRoom(person, room, prng);
+    this.generatePathsForPerson(person, C.INITIAL_PATH_COUNT, prng);
     let milliseconds = timestamp.seconds * 1000;
     let dateFromTimestamp = new Date(milliseconds);
-    personObject.setStartTime(dateFromTimestamp);
-    this.hideNameOrReschedule(person);
+    person.setStartTime(dateFromTimestamp);
+    this.hideNameOrReschedule(personKey);
   }
 
   /**
    * Hide the person name if the time has passed.
    * If not, then schedule a timeout to try again with the new time.
    */
-  hideNameOrReschedule(person) {
+  hideNameOrReschedule(personKey) {
     let now = new Date();
-    let hideTime = this.people[person].hideNameTime;
+    let hideTime = this.people[personKey].hideNameTime;
     if (now > hideTime) {
-      this.people[person].showName = false;
+      this.people[personKey].showName = false;
     } else {
       let delayMs = hideTime.getTime() - now.getTime();
       setTimeout(() => {
-        this.hideNameOrReschedule(person);
+        this.hideNameOrReschedule(personKey);
       }, delayMs);
     }
   }
