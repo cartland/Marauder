@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { easeInOutQuad } from 'js-easing-functions';
 
 import * as firebase from "firebase/app";
 import "firebase/firestore";
@@ -26,11 +25,6 @@ import { PersonController } from './controller/PersonController';
 
 import getViewport from './getViewport.js';
 
-/* global window */
-window.easeInOutQuad = easeInOutQuad
-
-let rooms = generateRooms();
-
 class Canvas extends Component {
   state = {
     // not 4k, but is the same size as the base image
@@ -40,6 +34,8 @@ class Canvas extends Component {
 
   constructor(props) {
     super(props);
+
+    this.rooms = generateRooms();
 
     this.backgroundRenderer = new BackgroundRenderer();
     this.footstepRenderer = new FootstepRenderer({
@@ -191,7 +187,7 @@ class Canvas extends Component {
     let randomDurationMs = 1000 * (2 * prng.nextFloat() + 1);
 
     if (!startingLocation) {
-      let range = V(rooms[room].width, rooms[room].height);
+      let range = V(this.rooms[room].width, this.rooms[room].height);
       let buffer = 30;
       startingLocation = this.randomLocation(range, buffer, prng);
     }
@@ -211,7 +207,7 @@ class Canvas extends Component {
   generateRandomPathInRoom(room, startingLocation, prng) {
     let randomSpeed = prng.nextFloat();
 
-    let range = V(rooms[room].width, rooms[room].height);
+    let range = V(this.rooms[room].width, this.rooms[room].height);
     let buffer = 15;
     let endingLocation = this.randomLocation(range, buffer, prng);
 
@@ -235,11 +231,11 @@ class Canvas extends Component {
   }
 
   generateRandomRoomChange(room, startingLocation, prng) {
-    let doorOptions = Object.keys(rooms[room].doors);
+    let doorOptions = Object.keys(this.rooms[room].doors);
     let randomDoorFloat = prng.nextFloat();
     let newDoorIndex = Math.floor(randomDoorFloat * doorOptions.length);
     let newRoom = doorOptions[newDoorIndex];
-    let doorLocation = rooms[room].doors[newRoom];
+    let doorLocation = this.rooms[room].doors[newRoom];
 
     let speed = 560 / 10; // cross the living room in 10 seconds
     let duration = 1000 * this.getDuration(startingLocation, doorLocation, speed);
@@ -247,7 +243,7 @@ class Canvas extends Component {
     // First path to door.
     let pathToDoor = new Path(room, startingLocation, doorLocation, duration, undefined);
 
-    let otherSideDoorLocation = rooms[newRoom].doors[room];
+    let otherSideDoorLocation = this.rooms[newRoom].doors[room];
     if (otherSideDoorLocation === undefined) {
       throw new Error(`room ${newRoom} does not have a door to ${room}`)
     }
@@ -269,7 +265,7 @@ class Canvas extends Component {
   }
 
   addRoomChange = (person, newRoom, prng) => {
-    let doorLocation = rooms[this.people[person].room].doors[newRoom];
+    let doorLocation = this.rooms[this.people[person].room].doors[newRoom];
 
     let speed = 560 / 10; // cross the living room in 10 seconds
 
@@ -283,7 +279,7 @@ class Canvas extends Component {
       new Path(room, startingLocation, doorLocation, duration, undefined)
     ]);
 
-    let otherSideDoorLocation = rooms[newRoom].doors[this.people[person].room];
+    let otherSideDoorLocation = this.rooms[newRoom].doors[this.people[person].room];
     if (otherSideDoorLocation === undefined) {
       throw new Error(`room ${newRoom} does not have a door to ${this.people[person].room}`)
     }
@@ -378,8 +374,8 @@ class Canvas extends Component {
   }
 
   movePersonToRoom(person, room, prng) {
-    if (room in rooms && "width" in rooms[room]) {
-      let roomSpawnLocation = rooms[room].spawnLocation;
+    if (room in this.rooms && "width" in this.rooms[room]) {
+      let roomSpawnLocation = this.rooms[room].spawnLocation;
       person.setPaths([
         new Path(room, roomSpawnLocation, roomSpawnLocation, C.STAND_STILL_DURATION_S * 1000, undefined)
       ]);
@@ -393,7 +389,7 @@ class Canvas extends Component {
     // Updates.
     this.footstepController.updateFootsteps(currentTime);
     Object.values(this.people).forEach(person => {
-      this.personController.updatePerson(rooms, person, currentTime);
+      this.personController.updatePerson(this.rooms, person, currentTime);
     })
     // Paths.
     if (currentTime.getTime() - this.lastLogicUpdateTime > C.UPDATE_LOGIC_INTERVAL_MS) {
