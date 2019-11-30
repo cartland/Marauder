@@ -1,5 +1,6 @@
 import { V } from '../model/Vector2';
 import { Door } from '../model/Door';
+import { Room } from '../model/Room';
 
 export function generateRooms() {
   let topGuideline = 510;
@@ -19,127 +20,119 @@ export function generateRooms() {
   let albertoBottomRight = V(480, 766);
   let albertoVector = albertoBottomRight.sub(albertoTopLeft);
   let albertoSpawnLocation = V(albertoVector.x / 2, 50);
-  let albertoRoom = {
-    topLeft: albertoTopLeft,
-    width: albertoVector.x,
-    height: albertoVector.y,
-    spawnLocation: albertoSpawnLocation,
-    name: 'Alberto\'s Room',
-    doors: [
+  let albertoRoom = new Room(
+    albertoTopLeft,
+    albertoVector,
+    albertoSpawnLocation,
+    'Alberto\'s Room',
+    [
       new Door('kitchen', albertoKitchenDoor.sub(albertoTopLeft))
     ],
-  };
+  );
 
   let kitchenTopLeft = V(kitchenLeftGuideline, topGuideline);
   let kitchenBottomRight = V(908, kitchenBottomGuideline);
   let kitchenVector = kitchenBottomRight.sub(kitchenTopLeft);
   let kitchenSpawnLocation = V(kitchenVector.x / 2, 50);
-  let kitchen = {
-    topLeft: kitchenTopLeft,
-    width: kitchenVector.x,
-    height: kitchenVector.y,
-    spawnLocation: kitchenSpawnLocation,
-    name: 'Kitchen',
-    doors: [
+  let kitchen = new Room(
+    kitchenTopLeft,
+    kitchenVector,
+    kitchenSpawnLocation,
+    'Kitchen',
+    [
       new Door('living_room', kitchenLivingRoomDoor.sub(kitchenTopLeft)),
       new Door('alberto_room', albertoKitchenDoor.sub(kitchenTopLeft)),
       new Door('patio', kitchenPatioDoor.sub(kitchenTopLeft)),
     ],
-  };
+  );
 
   let livingRoomTopLeft = V(938, topGuideline);
   let livingRoomBottomRight = V(1378, 1064);
   let livingRoomVector = livingRoomBottomRight.sub(livingRoomTopLeft);
   let livingSpawnLocation = V(livingRoomVector.x / 2, 50);
-  let livingRoom = {
-    topLeft: livingRoomTopLeft,
-    width: livingRoomVector.x,
-    height: livingRoomVector.y,
-    spawnLocation: livingSpawnLocation,
-    name: 'Living Room',
-    doors: [
+  let livingRoom = new Room(
+    livingRoomTopLeft,
+    livingRoomVector,
+    livingSpawnLocation,
+    'Living Room',
+    [
       new Door('kitchen', kitchenLivingRoomDoor.sub(livingRoomTopLeft)),
       new Door('hallway', livingRoomHallwayDoor.sub(livingRoomTopLeft)),
     ],
-  };
+  );
 
   let hallwayTopLeft = V(1408, 642);
   let hallwayBottomRight = V(2284, 784);
   let hallwayVector = hallwayBottomRight.sub(hallwayTopLeft);
   let hallwaySpawnLocation = V(hallwayVector.x / 4, 50);
-  let hallway = {
-    topLeft: hallwayTopLeft,
-    width: hallwayVector.x,
-    height: hallwayVector.y,
-    spawnLocation: hallwaySpawnLocation,
-    name: 'Hallway',
-    doors: [
+  let hallway = new Room(
+    hallwayTopLeft,
+    hallwayVector,
+    hallwaySpawnLocation,
+    'Hallway',
+    [
       new Door('living_room', livingRoomHallwayDoor.sub(hallwayTopLeft)),
       new Door('cartland_room', hallwayCartlandRoomDoor.sub(hallwayTopLeft)),
       new Door('nick_room', hallwayNickRoomDoor.sub(hallwayTopLeft)),
       new Door('stromme_room', hallwayStrommeRoomDoor.sub(hallwayTopLeft)),
     ],
-  };
+  );
 
   let cartlandTopLeft = V(1606, bedroomTopGuideline);
   let cartlandBottomRight = V(1798, 1300);
   let cartlandVector = cartlandBottomRight.sub(cartlandTopLeft);
   let cartlandSpawnLocation = V(cartlandVector.x / 2, 50);
-  let cartlandRoom = {
-    topLeft: cartlandTopLeft,
-    width: cartlandVector.x,
-    height: cartlandVector.y,
-    spawnLocation: cartlandSpawnLocation,
-    name: 'Cartland\'s Room',
-    doors: [
+  let cartlandRoom = new Room(
+    cartlandTopLeft,
+    cartlandVector,
+    cartlandSpawnLocation,
+    'Cartland\'s Room',
+    [
       new Door('hallway', hallwayCartlandRoomDoor.sub(cartlandTopLeft)),
     ],
-  };
+  );
 
   let nickTopLeft = V(1828, bedroomTopGuideline);
   let nickBottomRight = V(2024, 1300);
   let nickVector = nickBottomRight.sub(nickTopLeft);
   let nickSpawnLocation = V(nickVector.x / 2, 50);
-  let nickRoom = {
-    topLeft: nickTopLeft,
-    width: nickVector.x,
-    height: nickVector.y,
-    spawnLocation: nickSpawnLocation,
-    name: 'Nick\'s Room',
-    doors: [
+  let nickRoom = new Room(
+    nickTopLeft,
+    nickVector,
+    nickSpawnLocation,
+    'Nick\'s Room',
+    [
       new Door('hallway', hallwayNickRoomDoor.sub(nickTopLeft)),
     ],
-  };
+  );
 
   let strommeTopLeft = V(2052, bedroomTopGuideline);
   let strommeBottomRight = V(2284, 1110);
   let strommeVector = strommeBottomRight.sub(strommeTopLeft);
   let strommeSpawnLocation = V(strommeVector.x / 2, 50);
-  let strommeRoom = {
-    topLeft: strommeTopLeft,
-    width: strommeVector.x,
-    height: strommeVector.y,
-    spawnLocation: strommeSpawnLocation,
-    name: 'Stromme\'s Room',
-    doors: [
+  let strommeRoom = new Room(
+    strommeTopLeft,
+    strommeVector,
+    strommeSpawnLocation,
+    'Stromme\'s Room',
+    [
       new Door('hallway', hallwayStrommeRoomDoor.sub(strommeTopLeft)),
     ],
-  };
+  );
 
   let patioTopLeft = V(kitchenLeftGuideline, 1094);
   let patioBottomRight = V(1574, 1300);
   let patioVector = patioBottomRight.sub(patioTopLeft);
   let patioSpawnLocation = V(patioVector.x / 2, 50);
-  let patio = {
-    topLeft: patioTopLeft,
-    width: patioVector.x,
-    height: patioVector.y,
-    spawnLocation: patioSpawnLocation,
-    name: 'Patio',
-    doors: [
+  let patio = new Room(
+    patioTopLeft,
+    patioVector,
+    patioSpawnLocation,
+    'Patio',
+    [
       new Door('kitchen', kitchenPatioDoor.sub(patioTopLeft)),
     ],
-  };
+  );
 
   let rooms = {
     alberto_room: albertoRoom,

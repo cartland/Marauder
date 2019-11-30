@@ -1,8 +1,8 @@
 export class Room {
-  constructor(topLeft, width, height) {
+  constructor(topLeft, dimensions, spawnLocation, name, doors) {
     this.topLeft = topLeft;
-    this.width = width;
-    this.height = height;
+    this.width = dimensions.x;
+    this.height = dimensions.y;
     this.spawnLocation = spawnLocation;
     this.name = name;
     this.doors = doors;
