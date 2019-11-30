@@ -50,7 +50,7 @@ class Canvas extends Component {
     this.personRenderer = new PersonRenderer();
     this.footstepController = new FootstepController();
     this.roomController = new RoomController(generateRooms());
-    this.personController = new PersonController(this.footstepController, this.roomController);
+    this.personController = new PersonController(generatePeople(), this.footstepController, this.roomController);
     this.pathController = new PathController();
 
     firebase.firestore().collection('nfcUpdates')
@@ -99,9 +99,7 @@ class Canvas extends Component {
         });
       });
 
-    this.people = generatePeople();
-
-    this.initializePaths(this.people);
+    this.initializePaths(this.personController.getPeople());
     this.resetTimestamp = 0;
 
     this.canvas = React.createRef();
@@ -273,30 +271,30 @@ class Canvas extends Component {
   }
 
   addRoomChange = (personKey, newRoom, prng) => {
-    let person = this.people[personKey];
+    let person = this.personController.getPerson(personKey);
 
     let roomDoor = Door.doorToRoom(this.roomController.getRoom(person.room).doors, newRoom);
     let doorLocation = roomDoor.location;
 
     let speed = 560 / 10; // cross the living room in 10 seconds
 
-    let startingLocation = this.people[personKey].lastPath().endingLocation;
+    let startingLocation = this.personController.getPerson(personKey).lastPath().endingLocation;
 
     let duration = 1000 * this.getDuration(startingLocation, doorLocation, speed);
 
-    let room = this.people[personKey].room
+    let room = this.personController.getPerson(personKey).room
 
-    this.people[personKey].addPaths([
+    this.personController.getPerson(personKey).addPaths([
       new Path(room, startingLocation, doorLocation, duration, undefined)
     ]);
 
     let otherRoomDoor = Door.doorToRoom(this.roomController.getRoom(newRoom).doors, person.room);
     let otherSideDoorLocation = otherRoomDoor.location;
     if (otherSideDoorLocation === undefined) {
-      throw new Error(`room ${newRoom} does not have a door to ${this.people[personKey].room}`)
+      throw new Error(`room ${newRoom} does not have a door to ${this.personController.getPerson(personKey).room}`)
     }
 
-    this.people[personKey].addPaths([
+    this.personController.getPerson(personKey).addPaths([
       this.generateRandomPathInRoom(
         newRoom,
         otherSideDoorLocation,
@@ -304,7 +302,7 @@ class Canvas extends Component {
       )
     ]);
 
-    this.people[personKey].room = newRoom;
+    this.personController.getPerson(personKey).room = newRoom;
   }
 
   wandTapped = (room, personKey, timestamp) => {
@@ -315,7 +313,7 @@ class Canvas extends Component {
       return;
     }
 
-    let person = this.people[personKey];
+    let person = this.personController.getPerson(personKey);
     if (!person) {
       return;
     }
@@ -340,9 +338,9 @@ class Canvas extends Component {
    */
   hideNameOrReschedule(personKey) {
     let now = new Date();
-    let hideTime = this.people[personKey].hideNameTime;
+    let hideTime = this.personController.getPerson(personKey).hideNameTime;
     if (now > hideTime) {
-      this.people[personKey].showName = false;
+      this.personController.getPerson(personKey).showName = false;
     } else {
       let delayMs = hideTime.getTime() - now.getTime();
       setTimeout(() => {
@@ -367,8 +365,8 @@ class Canvas extends Component {
 
     // Updates.
     this.footstepController.updateFootsteps(currentTime);
-    this.personController.updatePeople(this.people, currentTime);
-    this.pathController.updatePaths(this.people, currentTime);
+    this.personController.updatePeople(this.personController.getPeople(), currentTime);
+    this.pathController.updatePaths(this.personController.getPeople(), currentTime);
 
     // Drawing.
     let context = this.canvas.current.getContext("2d")
@@ -379,11 +377,8 @@ class Canvas extends Component {
     // Draw footsteps before people.
     this.footstepRenderer.drawFootsteps(context, this.footstepController.getFootsteps());
     // Draw people after footsteps.
-    Object.values(this.people).forEach(person => {
-      if (person.showName) {
-        this.personRenderer.drawPerson(context, person);
-      }
-    });
+    this.personRenderer.drawPeople(context, this.personController.getPeople());
+
     requestAnimationFrame(this.draw);
   }
 

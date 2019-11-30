@@ -1,10 +1,20 @@
 import { V } from '../model/Vector2.js';
 import { easeInOutQuad } from 'js-easing-functions';
+import { thisExpression } from '@babel/types';
 
 export class PersonController {
-  constructor(footstepController, roomController) {
+  constructor(people, footstepController, roomController) {
+    this.people = people;
     this.footstepController = footstepController;
     this.roomController = roomController;
+  }
+
+  getPeople = () => {
+    return this.people;
+  }
+
+  getPerson = (personKey) => {
+    return this.people[personKey];
   }
 
   updatePeople = (people, currentTime) => {

@@ -2,6 +2,14 @@ export class PersonRenderer {
   constructor() {
   }
 
+  drawPeople = (context, people) => {
+    Object.values(people).forEach(person => {
+      if (person.showName) {
+        this.drawPerson(context, person);
+      }
+    });
+  }
+
   drawPerson = (context, person) => {
     context.save();
     context.translate(person.room.topLeft.x, person.room.topLeft.y);
