@@ -6,7 +6,13 @@ export class PersonController {
     this.footstepController = footstepController;
   }
 
-  updatePerson = (rooms, person, currentTime) => {
+  updatePeople = (people, rooms, currentTime) => {
+    Object.values(people).forEach(person => {
+      this.updatePerson(person, rooms, currentTime);
+    })
+  }
+
+  updatePerson = (person, rooms, currentTime) => {
     let currentPath = person.firstPath();
     if (!currentPath) {
       return;

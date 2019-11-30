@@ -17,11 +17,14 @@ import { BackgroundRenderer } from './render/BackgroundRenderer';
 import FootstepLeft from './assets/footstep-left.svg';
 import FootstepRight from './assets/footstep-right.svg';
 import { FootstepRenderer } from './render/FootstepRenderer.js';
-import { FootstepController } from './controller/FootstepController';
 
 // Person
 import { PersonRenderer } from './render/PersonRenderer.js';
+
+// Controllers
+import { FootstepController } from './controller/FootstepController';
 import { PersonController } from './controller/PersonController';
+import { PathController } from './controller/PathController';
 
 import getViewport from './getViewport.js';
 
@@ -45,6 +48,7 @@ class Canvas extends Component {
     this.personRenderer = new PersonRenderer();
     this.footstepController = new FootstepController();
     this.personController = new PersonController(this.footstepController);
+    this.pathController = new PathController();
 
     firebase.firestore().collection('nfcUpdates')
       .where('timestamp', '>', new Date())
@@ -295,40 +299,6 @@ class Canvas extends Component {
     this.people[personKey].room = newRoom;
   }
 
-  updatePaths(personKey, currentTime) {
-    let person = this.people[personKey];
-    if (person.firstPath() == null) {
-      console.error(`Person ${personKey} has no paths`);
-      let location = V(50, 50);
-      let duration = 2 * 1000;
-      person.addPaths([
-        new Path(person.firstRoom, location, location, duration, undefined)
-      ]);
-    }
-
-    // case: we are at the start, and need to kick things off
-    if (person.firstPath().startedAt === undefined) {
-      person.setStartTime(currentTime);
-    }
-    let elapsed = currentTime - person.firstPath().startedAt;
-    while (elapsed > person.firstPath().duration) {
-      let poppedPath = person.popPath();
-      elapsed -= poppedPath.duration;
-      if (person.firstPath() == null) {
-        console.log('Warning: No path, created a new one.', person.name, person.paths);
-        let prng = person.prng;
-        if (!prng) {
-          console.log('No PRNG. Using random');
-          prng = new Random();
-        } else {
-          console.log('Using person PRNG to create new paths');
-        }
-        let paths = this.generateRandomPaths(poppedPath.endingLocation, poppedPath.room, prng);
-        person.addPaths(paths);
-      }
-    }
-  }
-
   wandTapped = (room, personKey, timestamp) => {
     console.log('wandTapped', room, personKey, timestamp);
     let prng = new Random(timestamp.seconds);
@@ -388,16 +358,8 @@ class Canvas extends Component {
 
     // Updates.
     this.footstepController.updateFootsteps(currentTime);
-    Object.values(this.people).forEach(person => {
-      this.personController.updatePerson(this.rooms, person, currentTime);
-    })
-    // Paths.
-    if (currentTime.getTime() - this.lastLogicUpdateTime > C.UPDATE_LOGIC_INTERVAL_MS) {
-      Object.keys(this.people).map(person => {
-        this.updatePaths(person, currentTime);
-      })
-    }
-    this.lastLogicUpdateTime = currentTime.getTime();
+    this.personController.updatePeople(this.people, this.rooms, currentTime);
+    this.pathController.updatePaths(this.people, currentTime);
 
     // Drawing.
     let context = this.canvas.current.getContext("2d")
