@@ -1,4 +1,5 @@
-import { V } from '../model/Vector2.js';
+import { V } from '../model/Vector2';
+import { Door } from '../model/Door';
 
 export function generateRooms() {
   let topGuideline = 510;
@@ -24,9 +25,9 @@ export function generateRooms() {
     height: albertoVector.y,
     spawnLocation: albertoSpawnLocation,
     name: 'Alberto\'s Room',
-    doors: {
-      kitchen: albertoKitchenDoor.sub(albertoTopLeft),
-    },
+    doors: [
+      new Door('kitchen', albertoKitchenDoor.sub(albertoTopLeft))
+    ],
   };
 
   let kitchenTopLeft = V(kitchenLeftGuideline, topGuideline);
@@ -39,11 +40,11 @@ export function generateRooms() {
     height: kitchenVector.y,
     spawnLocation: kitchenSpawnLocation,
     name: 'Kitchen',
-    doors: {
-      living_room: kitchenLivingRoomDoor.sub(kitchenTopLeft),
-      alberto_room: albertoKitchenDoor.sub(kitchenTopLeft),
-      patio: kitchenPatioDoor.sub(kitchenTopLeft),
-    },
+    doors: [
+      new Door('living_room', kitchenLivingRoomDoor.sub(kitchenTopLeft)),
+      new Door('alberto_room', albertoKitchenDoor.sub(kitchenTopLeft)),
+      new Door('patio', kitchenPatioDoor.sub(kitchenTopLeft)),
+    ],
   };
 
   let livingRoomTopLeft = V(938, topGuideline);
@@ -56,10 +57,10 @@ export function generateRooms() {
     height: livingRoomVector.y,
     spawnLocation: livingSpawnLocation,
     name: 'Living Room',
-    doors: {
-      kitchen: kitchenLivingRoomDoor.sub(livingRoomTopLeft),
-      hallway: livingRoomHallwayDoor.sub(livingRoomTopLeft),
-    },
+    doors: [
+      new Door('kitchen', kitchenLivingRoomDoor.sub(livingRoomTopLeft)),
+      new Door('hallway', livingRoomHallwayDoor.sub(livingRoomTopLeft)),
+    ],
   };
 
   let hallwayTopLeft = V(1408, 642);
@@ -72,12 +73,12 @@ export function generateRooms() {
     height: hallwayVector.y,
     spawnLocation: hallwaySpawnLocation,
     name: 'Hallway',
-    doors: {
-      living_room: livingRoomHallwayDoor.sub(hallwayTopLeft),
-      cartland_room: hallwayCartlandRoomDoor.sub(hallwayTopLeft),
-      nick_room: hallwayNickRoomDoor.sub(hallwayTopLeft),
-      stromme_room: hallwayStrommeRoomDoor.sub(hallwayTopLeft),
-    },
+    doors: [
+      new Door('living_room', livingRoomHallwayDoor.sub(hallwayTopLeft)),
+      new Door('cartland_room', hallwayCartlandRoomDoor.sub(hallwayTopLeft)),
+      new Door('nick_room', hallwayNickRoomDoor.sub(hallwayTopLeft)),
+      new Door('stromme_room', hallwayStrommeRoomDoor.sub(hallwayTopLeft)),
+    ],
   };
 
   let cartlandTopLeft = V(1606, bedroomTopGuideline);
@@ -90,9 +91,9 @@ export function generateRooms() {
     height: cartlandVector.y,
     spawnLocation: cartlandSpawnLocation,
     name: 'Cartland\'s Room',
-    doors: {
-      hallway: hallwayCartlandRoomDoor.sub(cartlandTopLeft),
-    },
+    doors: [
+      new Door('hallway', hallwayCartlandRoomDoor.sub(cartlandTopLeft)),
+    ],
   };
 
   let nickTopLeft = V(1828, bedroomTopGuideline);
@@ -105,9 +106,9 @@ export function generateRooms() {
     height: nickVector.y,
     spawnLocation: nickSpawnLocation,
     name: 'Nick\'s Room',
-    doors: {
-      hallway: hallwayNickRoomDoor.sub(nickTopLeft),
-    },
+    doors: [
+      new Door('hallway', hallwayNickRoomDoor.sub(nickTopLeft)),
+    ],
   };
 
   let strommeTopLeft = V(2052, bedroomTopGuideline);
@@ -120,9 +121,9 @@ export function generateRooms() {
     height: strommeVector.y,
     spawnLocation: strommeSpawnLocation,
     name: 'Stromme\'s Room',
-    doors: {
-      hallway: hallwayStrommeRoomDoor.sub(strommeTopLeft),
-    },
+    doors: [
+      new Door('hallway', hallwayStrommeRoomDoor.sub(strommeTopLeft)),
+    ],
   };
 
   let patioTopLeft = V(kitchenLeftGuideline, 1094);
@@ -135,9 +136,9 @@ export function generateRooms() {
     height: patioVector.y,
     spawnLocation: patioSpawnLocation,
     name: 'Patio',
-    doors: {
-      kitchen: kitchenPatioDoor.sub(patioTopLeft),
-    },
+    doors: [
+      new Door('kitchen', kitchenPatioDoor.sub(patioTopLeft)),
+    ],
   };
 
   let rooms = {

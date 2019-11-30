@@ -3,12 +3,15 @@ import React, { Component } from 'react';
 import * as firebase from "firebase/app";
 import "firebase/firestore";
 
-import { C } from "./config/C.js";
-import { V } from './model/Vector2.js';
-import { generateRooms } from './config/Rooms.js';
-import { generatePeople } from './config/People.js';
-import { Random } from './util/Random.js';
-import { Path } from './model/Path.js';
+import { C } from "./config/C";
+import { V } from './model/Vector2';
+import { generateRooms } from './config/Rooms';
+import { generatePeople } from './config/People';
+import { Random } from './util/Random';
+
+// Model.
+import { Path } from './model/Path';
+import { Door } from './model/Door';
 
 // Background
 import { BackgroundRenderer } from './render/BackgroundRenderer';
@@ -16,10 +19,10 @@ import { BackgroundRenderer } from './render/BackgroundRenderer';
 // Footsteps
 import FootstepLeft from './assets/footstep-left.svg';
 import FootstepRight from './assets/footstep-right.svg';
-import { FootstepRenderer } from './render/FootstepRenderer.js';
+import { FootstepRenderer } from './render/FootstepRenderer';
 
 // Person
-import { PersonRenderer } from './render/PersonRenderer.js';
+import { PersonRenderer } from './render/PersonRenderer';
 
 // Controllers
 import { FootstepController } from './controller/FootstepController';
@@ -235,11 +238,11 @@ class Canvas extends Component {
   }
 
   generateRandomRoomChange(room, startingLocation, prng) {
-    let doorOptions = Object.keys(this.rooms[room].doors);
+    let doorOptions = this.rooms[room].doors;
     let randomDoorFloat = prng.nextFloat();
     let newDoorIndex = Math.floor(randomDoorFloat * doorOptions.length);
-    let newRoom = doorOptions[newDoorIndex];
-    let doorLocation = this.rooms[room].doors[newRoom];
+    let door = doorOptions[newDoorIndex];
+    let doorLocation = door.location;
 
     let speed = 560 / 10; // cross the living room in 10 seconds
     let duration = 1000 * this.getDuration(startingLocation, doorLocation, speed);
@@ -247,14 +250,15 @@ class Canvas extends Component {
     // First path to door.
     let pathToDoor = new Path(room, startingLocation, doorLocation, duration, undefined);
 
-    let otherSideDoorLocation = this.rooms[newRoom].doors[room];
+    let newRoomDoor = Door.doorToRoom(this.rooms[door.roomKey].doors, room);
+    let otherSideDoorLocation = newRoomDoor.location;
     if (otherSideDoorLocation === undefined) {
-      throw new Error(`room ${newRoom} does not have a door to ${room}`)
+      throw new Error(`room ${door.roomKey} does not have a door to ${room}`)
     }
 
     // Second path from door in new room.
     let pathFromDoor = this.generateRandomPathInRoom(
-      newRoom,
+      door.roomKey,
       otherSideDoorLocation,
       prng
     );
@@ -269,7 +273,10 @@ class Canvas extends Component {
   }
 
   addRoomChange = (personKey, newRoom, prng) => {
-    let doorLocation = this.rooms[this.people[personKey].room].doors[newRoom];
+    let person = this.people[personKey];
+
+    let roomDoor = Door.doorToRoom(this.rooms[person.room].doors, newRoom);
+    let doorLocation = roomDoor.location;
 
     let speed = 560 / 10; // cross the living room in 10 seconds
 
@@ -283,7 +290,8 @@ class Canvas extends Component {
       new Path(room, startingLocation, doorLocation, duration, undefined)
     ]);
 
-    let otherSideDoorLocation = this.rooms[newRoom].doors[this.people[personKey].room];
+    let otherRoomDoor = Door.doorToRoom(this.rooms[newRoom].doors, person.room);
+    let otherSideDoorLocation = otherRoomDoor.location;
     if (otherSideDoorLocation === undefined) {
       throw new Error(`room ${newRoom} does not have a door to ${this.people[personKey].room}`)
     }
