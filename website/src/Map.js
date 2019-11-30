@@ -28,6 +28,7 @@ import { PersonRenderer } from './render/PersonRenderer';
 import { FootstepController } from './controller/FootstepController';
 import { PersonController } from './controller/PersonController';
 import { PathController } from './controller/PathController';
+import { RoomController } from './controller/RoomController';
 
 import getViewport from './getViewport.js';
 
@@ -41,8 +42,6 @@ class Canvas extends Component {
   constructor(props) {
     super(props);
 
-    this.rooms = generateRooms();
-
     this.backgroundRenderer = new BackgroundRenderer();
     this.footstepRenderer = new FootstepRenderer({
       footstepLeft: FootstepLeft,
@@ -50,7 +49,8 @@ class Canvas extends Component {
     });
     this.personRenderer = new PersonRenderer();
     this.footstepController = new FootstepController();
-    this.personController = new PersonController(this.footstepController);
+    this.roomController = new RoomController(generateRooms());
+    this.personController = new PersonController(this.footstepController, this.roomController);
     this.pathController = new PathController();
 
     firebase.firestore().collection('nfcUpdates')
@@ -194,7 +194,7 @@ class Canvas extends Component {
     let randomDurationMs = 1000 * (2 * prng.nextFloat() + 1);
 
     if (!startingLocation) {
-      let range = V(this.rooms[room].width, this.rooms[room].height);
+      let range = V(this.roomController.getRoom(room).width, this.roomController.getRoom(room).height);
       let buffer = 30;
       startingLocation = this.randomLocation(range, buffer, prng);
     }
@@ -214,7 +214,7 @@ class Canvas extends Component {
   generateRandomPathInRoom(room, startingLocation, prng) {
     let randomSpeed = prng.nextFloat();
 
-    let range = V(this.rooms[room].width, this.rooms[room].height);
+    let range = V(this.roomController.getRoom(room).width, this.roomController.getRoom(room).height);
     let buffer = 15;
     let endingLocation = this.randomLocation(range, buffer, prng);
 
@@ -238,7 +238,7 @@ class Canvas extends Component {
   }
 
   generateRandomRoomChange(room, startingLocation, prng) {
-    let doorOptions = this.rooms[room].doors;
+    let doorOptions = this.roomController.getRoom(room).doors;
     let randomDoorFloat = prng.nextFloat();
     let newDoorIndex = Math.floor(randomDoorFloat * doorOptions.length);
     let door = doorOptions[newDoorIndex];
@@ -250,7 +250,7 @@ class Canvas extends Component {
     // First path to door.
     let pathToDoor = new Path(room, startingLocation, doorLocation, duration, undefined);
 
-    let newRoomDoor = Door.doorToRoom(this.rooms[door.roomKey].doors, room);
+    let newRoomDoor = Door.doorToRoom(this.roomController.getRoom(door.roomKey).doors, room);
     let otherSideDoorLocation = newRoomDoor.location;
     if (otherSideDoorLocation === undefined) {
       throw new Error(`room ${door.roomKey} does not have a door to ${room}`)
@@ -275,7 +275,7 @@ class Canvas extends Component {
   addRoomChange = (personKey, newRoom, prng) => {
     let person = this.people[personKey];
 
-    let roomDoor = Door.doorToRoom(this.rooms[person.room].doors, newRoom);
+    let roomDoor = Door.doorToRoom(this.roomController.getRoom(person.room).doors, newRoom);
     let doorLocation = roomDoor.location;
 
     let speed = 560 / 10; // cross the living room in 10 seconds
@@ -290,7 +290,7 @@ class Canvas extends Component {
       new Path(room, startingLocation, doorLocation, duration, undefined)
     ]);
 
-    let otherRoomDoor = Door.doorToRoom(this.rooms[newRoom].doors, person.room);
+    let otherRoomDoor = Door.doorToRoom(this.roomController.getRoom(newRoom).doors, person.room);
     let otherSideDoorLocation = otherRoomDoor.location;
     if (otherSideDoorLocation === undefined) {
       throw new Error(`room ${newRoom} does not have a door to ${this.people[personKey].room}`)
@@ -352,8 +352,9 @@ class Canvas extends Component {
   }
 
   movePersonToRoom(person, room, prng) {
-    if (room in this.rooms && "width" in this.rooms[room]) {
-      let roomSpawnLocation = this.rooms[room].spawnLocation;
+    // TODO: Remove if-check.
+    if (this.roomController.containsRoom(room) && "width" in this.roomController.getRoom(room)) {
+      let roomSpawnLocation = this.roomController.getRoom(room).spawnLocation;
       person.setPaths([
         new Path(room, roomSpawnLocation, roomSpawnLocation, C.STAND_STILL_DURATION_S * 1000, undefined)
       ]);
@@ -366,7 +367,7 @@ class Canvas extends Component {
 
     // Updates.
     this.footstepController.updateFootsteps(currentTime);
-    this.personController.updatePeople(this.people, this.rooms, currentTime);
+    this.personController.updatePeople(this.people, currentTime);
     this.pathController.updatePaths(this.people, currentTime);
 
     // Drawing.

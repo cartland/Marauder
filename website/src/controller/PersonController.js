@@ -2,17 +2,18 @@ import { V } from '../model/Vector2.js';
 import { easeInOutQuad } from 'js-easing-functions';
 
 export class PersonController {
-  constructor(footstepController) {
+  constructor(footstepController, roomController) {
     this.footstepController = footstepController;
+    this.roomController = roomController;
   }
 
-  updatePeople = (people, rooms, currentTime) => {
+  updatePeople = (people, currentTime) => {
     Object.values(people).forEach(person => {
-      this.updatePerson(person, rooms, currentTime);
+      this.updatePerson(person, currentTime);
     })
   }
 
-  updatePerson = (person, rooms, currentTime) => {
+  updatePerson = (person, currentTime) => {
     let currentPath = person.firstPath();
     if (!currentPath) {
       return;
@@ -30,7 +31,7 @@ export class PersonController {
         easeInOutQuad(elapsed, startingLocation.y, vector.y, duration)
       );
     }
-    let roomDetails = rooms[currentPath.room];
+    let roomDetails = this.roomController.getRoom(currentPath.room);
     person.room = roomDetails;
     person.location = centerOfMassLocation;
 

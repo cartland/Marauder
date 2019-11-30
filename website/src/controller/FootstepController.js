@@ -3,7 +3,7 @@ import { V } from '../model/Vector2.js';
 import { Footstep } from '../model/Footstep.js';
 
 export class FootstepController {
-  constructor(footsteps) {
+  constructor() {
     this.footsteps = {};
   }
 
