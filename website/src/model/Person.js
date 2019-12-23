@@ -1,7 +1,9 @@
+import { Room } from '../model/Room';
+
 export class Person {
   constructor(name, image, paths, firstRoom) {
-    if (typeof firstRoom === 'string') {
-      throw new Error('Room must not be a string');
+    if (!(firstRoom instanceof Room)) {
+      throw new Error('Unexpected type: Expected Room');
     }
     this.name = name;
     this.image = image;
@@ -26,8 +28,8 @@ export class Person {
   }
 
   setRoom = (room) => {
-    if (typeof room === 'string') {
-      throw new Error('Room must not be a string');
+    if (!(room instanceof Room)) {
+      throw new Error('Unexpected type: Expected Room');
     }
     this.room = room;
   }
@@ -37,8 +39,8 @@ export class Person {
   }
 
   setFirstRoom = (firstRoom) => {
-    if (typeof firstRoom === 'string') {
-      throw new Error('Room must not be a string');
+    if (!(firstRoom instanceof Room)) {
+      throw new Error('Unexpected type: Expected Room');
     }
     this.firstRoom = firstRoom;
   }

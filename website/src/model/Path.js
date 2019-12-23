@@ -1,12 +1,15 @@
+import { Room } from '../model/Room';
+
 export class Path {
   constructor(room, startingLocation, endingLocation, duration, startedAt) {
     if (!room) {
       throw new Error(`room ${room} does not exist`);
     }
-    if (typeof room === 'string') {
-      throw new Error('Room must not be a string');
+    if (!(room instanceof Room)) {
+      console.log(room);
+      throw new Error('Unexpected type: Expected Room');
     }
-    this.room = room;
+    this._room = room;
     this.startingLocation = startingLocation;
     this.endingLocation = endingLocation;
     this.duration = duration;
@@ -14,13 +17,13 @@ export class Path {
   }
 
   getRoom = () => {
-    return this.room;
+    return this._room;
   }
 
   setRoom = (room) => {
-    if (typeof room === 'string') {
-      throw new Error('Room must not be a string');
+    if (!(room instanceof Room)) {
+      throw new Error('Unexpected type: Expected Room');
     }
-    this.room = room;
+    this._room = room;
   }
 }

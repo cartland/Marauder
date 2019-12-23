@@ -1,6 +1,5 @@
 import { V } from '../model/Vector2.js';
 import { easeInOutQuad } from 'js-easing-functions';
-import { thisExpression } from '@babel/types';
 
 export class PersonController {
   constructor(people, footstepController, roomController) {
