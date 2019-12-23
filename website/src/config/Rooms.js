@@ -21,6 +21,7 @@ export function generateRooms() {
   let albertoVector = albertoBottomRight.sub(albertoTopLeft);
   let albertoSpawnLocation = V(albertoVector.x / 2, 50);
   let albertoRoom = new Room(
+    'alberto_room',
     albertoTopLeft,
     albertoVector,
     albertoSpawnLocation,
@@ -35,6 +36,7 @@ export function generateRooms() {
   let kitchenVector = kitchenBottomRight.sub(kitchenTopLeft);
   let kitchenSpawnLocation = V(kitchenVector.x / 2, 50);
   let kitchen = new Room(
+    'kitchen',
     kitchenTopLeft,
     kitchenVector,
     kitchenSpawnLocation,
@@ -51,6 +53,7 @@ export function generateRooms() {
   let livingRoomVector = livingRoomBottomRight.sub(livingRoomTopLeft);
   let livingSpawnLocation = V(livingRoomVector.x / 2, 50);
   let livingRoom = new Room(
+    'living_room',
     livingRoomTopLeft,
     livingRoomVector,
     livingSpawnLocation,
@@ -66,6 +69,7 @@ export function generateRooms() {
   let hallwayVector = hallwayBottomRight.sub(hallwayTopLeft);
   let hallwaySpawnLocation = V(hallwayVector.x / 4, 50);
   let hallway = new Room(
+    'hallway',
     hallwayTopLeft,
     hallwayVector,
     hallwaySpawnLocation,
@@ -83,6 +87,7 @@ export function generateRooms() {
   let cartlandVector = cartlandBottomRight.sub(cartlandTopLeft);
   let cartlandSpawnLocation = V(cartlandVector.x / 2, 50);
   let cartlandRoom = new Room(
+    'cartland_room',
     cartlandTopLeft,
     cartlandVector,
     cartlandSpawnLocation,
@@ -97,6 +102,7 @@ export function generateRooms() {
   let nickVector = nickBottomRight.sub(nickTopLeft);
   let nickSpawnLocation = V(nickVector.x / 2, 50);
   let nickRoom = new Room(
+    'nick_room',
     nickTopLeft,
     nickVector,
     nickSpawnLocation,
@@ -111,6 +117,7 @@ export function generateRooms() {
   let strommeVector = strommeBottomRight.sub(strommeTopLeft);
   let strommeSpawnLocation = V(strommeVector.x / 2, 50);
   let strommeRoom = new Room(
+    'stromme_room',
     strommeTopLeft,
     strommeVector,
     strommeSpawnLocation,
@@ -125,6 +132,7 @@ export function generateRooms() {
   let patioVector = patioBottomRight.sub(patioTopLeft);
   let patioSpawnLocation = V(patioVector.x / 2, 50);
   let patio = new Room(
+    'patio',
     patioTopLeft,
     patioVector,
     patioSpawnLocation,

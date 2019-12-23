@@ -8,7 +8,7 @@ export class Footstep {
     this.opacity = 1.0;
   }
 
-  key() {
+  key = () => {
     return this.location.x.toPrecision(5) + ","
       + this.location.y.toPrecision(5) + ","
       + this.direction.x.toPrecision(5) + ","

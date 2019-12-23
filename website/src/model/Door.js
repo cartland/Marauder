@@ -4,7 +4,7 @@ export class Door {
     this.location = location;
   }
 
-  static doorToRoom(doors, roomKey) {
+  static doorToRoom = (doors, roomKey) => {
     var foundDoor = null;
     doors.forEach(door => {
       if (door.roomKey == roomKey) {

@@ -41,7 +41,7 @@ export class PersonController {
         easeInOutQuad(elapsed, startingLocation.y, vector.y, duration)
       );
     }
-    let roomDetails = this.roomController.getRoom(currentPath.room);
+    let roomDetails = this.roomController.getRoom(currentPath.getRoom().roomKey);
     person.room = roomDetails;
     person.location = centerOfMassLocation;
 

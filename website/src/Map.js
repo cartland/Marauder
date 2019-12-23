@@ -50,7 +50,8 @@ class Canvas extends Component {
     this.personRenderer = new PersonRenderer();
     this.footstepController = new FootstepController();
     this.roomController = new RoomController(generateRooms());
-    this.personController = new PersonController(generatePeople(), this.footstepController, this.roomController);
+    let people = generatePeople(this.roomController.allRooms());
+    this.personController = new PersonController(people, this.footstepController, this.roomController);
     this.pathController = new PathController();
 
     firebase.firestore().collection('nfcUpdates')
@@ -58,7 +59,7 @@ class Canvas extends Component {
       .onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
           if (change.type === "added") {
-            let room = change.doc.get('nfcData').nfcReaderLocation;
+            let roomKey = change.doc.get('nfcData').nfcReaderLocation;
             let person = change.doc.get('nfcData').nfcLogicalId;
             let timestamp = change.doc.get('timestamp');
 
@@ -67,7 +68,7 @@ class Canvas extends Component {
               window.location.reload();
               return;
             }
-            this.wandTapped(room, person, timestamp);
+            this.wandTapped(roomKey, person, timestamp);
           }
         });
       });
@@ -147,12 +148,12 @@ class Canvas extends Component {
     for (let round = 0; round < count; round++) {
       let lastPath = person.lastPath();
       let startingLocation = null;
-      let room = person.firstRoom;
+      let room = person.getFirstRoom();
       if (lastPath) {
         startingLocation = lastPath.endingLocation;
-        room = lastPath.room;
+        room = lastPath.getRoom();
       }
-      let paths = this.generateRandomPaths(startingLocation, room, prng);
+      let paths = this.generateRandomPaths(startingLocation, room.roomKey, prng);
       person.addPaths(paths);
     }
   }
@@ -187,32 +188,32 @@ class Canvas extends Component {
     this.draw()
   }
 
-  generateRandomPaths(startingLocation, room, prng) {
+  generateRandomPaths(startingLocation, roomKey, prng) {
     let randomChoice = prng.nextFloat();
     let randomDurationMs = 1000 * (2 * prng.nextFloat() + 1);
 
     if (!startingLocation) {
-      let range = V(this.roomController.getRoom(room).width, this.roomController.getRoom(room).height);
+      let range = V(this.roomController.getRoom(roomKey).width, this.roomController.getRoom(roomKey).height);
       let buffer = 30;
       startingLocation = this.randomLocation(range, buffer, prng);
     }
 
     if (randomChoice < 0.1) { // Stand still.
-      return [new Path(room, startingLocation, startingLocation, randomDurationMs, undefined)];
+      return [new Path(this.roomController.getRoom(roomKey), startingLocation, startingLocation, randomDurationMs, undefined)];
     } else if (randomChoice < 0.8) { // Move inside room.
-      if (typeof room == "undefined") {
-        room = 'living_room';
+      if (typeof roomKey == "undefined") {
+        roomKey = 'living_room';
       }
-      return [this.generateRandomPathInRoom(room, startingLocation, prng)];
+      return [this.generateRandomPathInRoom(roomKey, startingLocation, prng)];
     } else {
-      return this.generateRandomRoomChange(room, startingLocation, prng);
+      return this.generateRandomRoomChange(roomKey, startingLocation, prng);
     }
   }
 
-  generateRandomPathInRoom(room, startingLocation, prng) {
+  generateRandomPathInRoom(roomKey, startingLocation, prng) {
     let randomSpeed = prng.nextFloat();
 
-    let range = V(this.roomController.getRoom(room).width, this.roomController.getRoom(room).height);
+    let range = V(this.roomController.getRoom(roomKey).width, this.roomController.getRoom(roomKey).height);
     let buffer = 15;
     let endingLocation = this.randomLocation(range, buffer, prng);
 
@@ -224,7 +225,7 @@ class Canvas extends Component {
     let speed = randomSpeed * (maxSpeed - minSpeed) + minSpeed;
     let duration = distance / speed;
     duration *= 1000;
-    return new Path(room, startingLocation, endingLocation, duration, undefined);
+    return new Path(this.roomController.getRoom(roomKey), startingLocation, endingLocation, duration, undefined);
   }
 
   randomLocation(range, buffer, prng) {
@@ -235,8 +236,8 @@ class Canvas extends Component {
     return V(endingX, endingY);
   }
 
-  generateRandomRoomChange(room, startingLocation, prng) {
-    let doorOptions = this.roomController.getRoom(room).doors;
+  generateRandomRoomChange(roomKey, startingLocation, prng) {
+    let doorOptions = this.roomController.getRoom(roomKey).doors;
     let randomDoorFloat = prng.nextFloat();
     let newDoorIndex = Math.floor(randomDoorFloat * doorOptions.length);
     let door = doorOptions[newDoorIndex];
@@ -246,12 +247,12 @@ class Canvas extends Component {
     let duration = 1000 * this.getDuration(startingLocation, doorLocation, speed);
 
     // First path to door.
-    let pathToDoor = new Path(room, startingLocation, doorLocation, duration, undefined);
+    let pathToDoor = new Path(this.roomController.getRoom(roomKey), startingLocation, doorLocation, duration, undefined);
 
-    let newRoomDoor = Door.doorToRoom(this.roomController.getRoom(door.roomKey).doors, room);
+    let newRoomDoor = Door.doorToRoom(this.roomController.getRoom(door.roomKey).doors, roomKey);
     let otherSideDoorLocation = newRoomDoor.location;
     if (otherSideDoorLocation === undefined) {
-      throw new Error(`room ${door.roomKey} does not have a door to ${room}`)
+      throw new Error(`room ${door.roomKey} does not have a door to ${roomKey}`)
     }
 
     // Second path from door in new room.
@@ -270,10 +271,10 @@ class Canvas extends Component {
     return distance / speed;
   }
 
-  addRoomChange = (personKey, newRoom, prng) => {
+  addRoomChange = (personKey, newRoomKey, prng) => {
     let person = this.personController.getPerson(personKey);
 
-    let roomDoor = Door.doorToRoom(this.roomController.getRoom(person.room).doors, newRoom);
+    let roomDoor = Door.doorToRoom(this.roomController.getRoom(person.room.roomKey).doors, newRoomKey);
     let doorLocation = roomDoor.location;
 
     let speed = 560 / 10; // cross the living room in 10 seconds
@@ -288,25 +289,25 @@ class Canvas extends Component {
       new Path(room, startingLocation, doorLocation, duration, undefined)
     ]);
 
-    let otherRoomDoor = Door.doorToRoom(this.roomController.getRoom(newRoom).doors, person.room);
+    let otherRoomDoor = Door.doorToRoom(this.roomController.getRoom(newRoomKey).doors, person.room.roomKey);
     let otherSideDoorLocation = otherRoomDoor.location;
     if (otherSideDoorLocation === undefined) {
-      throw new Error(`room ${newRoom} does not have a door to ${this.personController.getPerson(personKey).room}`)
+      throw new Error(`room ${newRoomKey} does not have a door to ${this.personController.getPerson(personKey).room.roomKey}`)
     }
 
     this.personController.getPerson(personKey).addPaths([
       this.generateRandomPathInRoom(
-        newRoom,
+        newRoomKey,
         otherSideDoorLocation,
         prng
       )
     ]);
 
-    this.personController.getPerson(personKey).room = newRoom;
+    this.personController.getPerson(personKey).setRoom(this.roomController.getRoom(newRoomKey));
   }
 
-  wandTapped = (room, personKey, timestamp) => {
-    console.log('wandTapped', room, personKey, timestamp);
+  wandTapped = (roomKey, personKey, timestamp) => {
+    console.log('wandTapped', roomKey, personKey, timestamp);
     let prng = new Random(timestamp.seconds);
 
     if (!personKey) {
@@ -324,7 +325,7 @@ class Canvas extends Component {
     hideTime.setSeconds(hideTime.getSeconds() + C.SHOW_NAME_DURATION_S);
     person.hideNameTime = hideTime;
 
-    this.movePersonToRoom(person, room, prng);
+    this.movePersonToRoom(person, roomKey, prng);
     this.generatePathsForPerson(person, C.INITIAL_PATH_COUNT, prng);
     let milliseconds = timestamp.seconds * 1000;
     let dateFromTimestamp = new Date(milliseconds);
@@ -349,14 +350,14 @@ class Canvas extends Component {
     }
   }
 
-  movePersonToRoom(person, room, prng) {
+  movePersonToRoom(person, roomKey, prng) {
     // TODO: Remove if-check.
-    if (this.roomController.containsRoom(room) && "width" in this.roomController.getRoom(room)) {
-      let roomSpawnLocation = this.roomController.getRoom(room).spawnLocation;
+    if (this.roomController.containsRoom(roomKey) && "width" in this.roomController.getRoom(roomKey)) {
+      let roomSpawnLocation = this.roomController.getRoom(roomKey).spawnLocation;
       person.setPaths([
-        new Path(room, roomSpawnLocation, roomSpawnLocation, C.STAND_STILL_DURATION_S * 1000, undefined)
+        new Path(this.roomController.getRoom(roomKey), roomSpawnLocation, roomSpawnLocation, C.STAND_STILL_DURATION_S * 1000, undefined)
       ]);
-      person.room = room;
+      person.setRoom(this.roomController.getRoom(roomKey));
     }
   }
 

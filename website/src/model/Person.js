@@ -1,5 +1,8 @@
 export class Person {
   constructor(name, image, paths, firstRoom) {
+    if (typeof firstRoom === 'string') {
+      throw new Error('Room must not be a string');
+    }
     this.name = name;
     this.image = image;
     this.location = null;
@@ -18,21 +21,43 @@ export class Person {
     }
   }
 
-  firstPath() {
+  getRoom = () => {
+    return this.room;
+  }
+
+  setRoom = (room) => {
+    if (typeof room === 'string') {
+      throw new Error('Room must not be a string');
+    }
+    this.room = room;
+  }
+
+  getFirstRoom = () => {
+    return this.firstRoom;
+  }
+
+  setFirstRoom = (firstRoom) => {
+    if (typeof firstRoom === 'string') {
+      throw new Error('Room must not be a string');
+    }
+    this.firstRoom = firstRoom;
+  }
+
+  firstPath = () => {
     if (this.paths.length === 0) {
       return null;
     }
     return this.paths[0];
   }
 
-  lastPath() {
+  lastPath = () => {
     if (this.paths.length === 0) {
       return null;
     }
     return this.paths[this.paths.length - 1];
   }
 
-  addPaths(paths) {
+  addPaths = (paths) => {
     this.paths.push(...paths);
     this.lastRoom = this.lastPath().room;
     if (this.paths.length > 0) {
@@ -43,20 +68,20 @@ export class Person {
     }
   }
 
-  popPath() {
+  popPath =() => {
     let returnValue = this.firstPath();
     this.paths.shift();
     return returnValue;
   }
 
-  setPaths(paths) {
+  setPaths = (paths) => {
     this.paths = paths;
     if (this.paths.length > 0) {
       this.lastRoom = this.lastPath().room;
     }
   }
 
-  setStartTime(startTime) {
+  setStartTime = (startTime) => {
     let startedAt = startTime;
     for (let i = 0; i < this.paths.length; i++) {
       let path = this.paths[i];

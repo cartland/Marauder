@@ -33,61 +33,61 @@ WompingWillowImg.src = WompingWillowName;
 let ScabbersImg = new Image();
 ScabbersImg.src = ScabbersName;
 
-export function generatePeople() {
+export function generatePeople(rooms) {
   let people = {
     stromme: new Person(
       'The Womping Willow',
       WompingWillowImg,
       [],
-      'stromme_room'
+      rooms['stromme_room']
     ),
     alberto: new Person(
       'Nimbus 2000',
       Nimbus2000Img,
       [],
-      'alberto_room'
+      rooms['alberto_room']
     ),
     cartland: new Person(
       'Golden Snitch',
       GoldenSnitchImg,
       [],
-      'cartland_room'
+      rooms['cartland_room']
     ),
     nick: new Person(
       'Moving Portrait',
       MovingPortraitImg,
       [],
-      'nick_room'
+      rooms['nick_room']
     ),
     tal: new Person(
       'Dobby',
       DobbyImg,
       [],
-      'kitchen'
+      rooms['kitchen']
     ),
     harry: new Person(
       'Harry Potter',
       HarryPotterImg,
       [],
-      'hallway'
+      rooms['hallway']
     ),
     dumbledore: new Person(
       'Dumbledore',
       DumbledoreImg,
       [],
-      'living_room'
+      rooms['living_room']
     ),
     scabbers: new Person(
       'Scabbers',
       ScabbersImg,
       [],
-      'hallway'
+      rooms['hallway']
     ),
     student: new Person(
       'Gryffindor Student',
       null,
       [],
-      'hallway'
+      rooms['hallway']
     ),
   };
   for (let count = 0; count < 3; count++) {
@@ -95,7 +95,7 @@ export function generatePeople() {
       'Ghost',
       null,
       [],
-      'living_room'
+      rooms['living_room']
     )
   }
   return people;
