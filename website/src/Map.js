@@ -28,12 +28,6 @@ import getViewport from './getViewport.js';
 import { FirebaseController } from './controller/FirebaseController';
 
 class Canvas extends Component {
-  state = {
-    // not 4k, but is the same size as the base image
-    mapWidth: 2560,
-    mapHeight: 1440,
-  }
-
   constructor(props) {
     super(props);
     // Renderers.
@@ -54,6 +48,11 @@ class Canvas extends Component {
     // Global state.
     this.resetTimestamp = 0;
     this.lastLogicUpdateTime = 0;
+    this.state = {
+      // not 4k, but is the same size as the base image
+      mapWidth: 2560,
+      mapHeight: 1440,
+    };
     // Canvas.
     this.canvas = React.createRef();
     this.image = React.createRef();
