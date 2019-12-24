@@ -60,15 +60,18 @@ class Canvas extends Component {
         snapshot.docChanges().forEach((change) => {
           if (change.type === "added") {
             let roomKey = change.doc.get('nfcData').nfcReaderLocation;
-            let person = change.doc.get('nfcData').nfcLogicalId;
+            let personKey = change.doc.get('nfcData').nfcLogicalId;
             let timestamp = change.doc.get('timestamp');
 
             // Check to see if this is a reset request.
-            if (person === C.RESET_LOGICAL_ID) {
+            if (personKey === C.RESET_LOGICAL_ID) {
               window.location.reload();
               return;
             }
-            this.wandTapped(this.roomController.getRoom(roomKey), person, timestamp);
+            this.wandTapped(
+              this.roomController.getRoom(roomKey),
+              this.personController.getPerson(personKey),
+              timestamp);
           }
         });
       });
@@ -81,11 +84,11 @@ class Canvas extends Component {
       .onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
           if (change.type === "added") {
-            let person = change.doc.get('nfcData').nfcLogicalId;
+            let personKey = change.doc.get('nfcData').nfcLogicalId;
             let timestamp = change.doc.get('timestamp');
 
             // // Check to see if this is a reset request.
-            if (person === C.RESET_LOGICAL_ID) {
+            if (personKey === C.RESET_LOGICAL_ID) {
               let seconds = timestamp.seconds;
               if (seconds > that.resetTimestamp) {
                 console.log('Initialize with seed.', seconds);
@@ -263,55 +266,13 @@ class Canvas extends Component {
 
   getDuration = (location1, location2, speed) => {
     let distance = location2.sub(location1).size();
-    // let distance = Math.sqrt(Math.pow(location1[0]-location2[0], 2) +
-    //                          Math.pow(location1[1]-location2[0], 2));
     return distance / speed;
   }
 
-  addRoomChange = (personKey, newRoom, prng) => {
-    let person = this.personController.getPerson(personKey);
-
-    let roomDoor = Door.doorToRoom(person.room.doors, newRoom.roomKey);
-    let doorLocation = roomDoor.location;
-
-    let speed = 560 / 10; // cross the living room in 10 seconds
-
-    let startingLocation = this.personController.getPerson(personKey).lastPath().endingLocation;
-
-    let duration = 1000 * this.getDuration(startingLocation, doorLocation, speed);
-
-    let room = this.personController.getPerson(personKey).room
-
-    this.personController.getPerson(personKey).addPaths([
-      new Path(room, startingLocation, doorLocation, duration, undefined)
-    ]);
-
-    let otherRoomDoor = Door.doorToRoom(newRoom.doors, person.room.roomKey);
-    let otherSideDoorLocation = otherRoomDoor.location;
-    if (otherSideDoorLocation === undefined) {
-      throw new Error(`room ${newRoom.roomKey} does not have a door to ${this.personController.getPerson(personKey).room.roomKey}`)
-    }
-
-    this.personController.getPerson(personKey).addPaths([
-      this.generateRandomPathInRoom(
-        newRoom,
-        otherSideDoorLocation,
-        prng
-      )
-    ]);
-
-    this.personController.getPerson(personKey).setRoom(newRoom);
-  }
-
-  wandTapped = (room, personKey, timestamp) => {
-    console.log('wandTapped', room.roomKey, personKey, timestamp);
+  wandTapped = (room, person, timestamp) => {
+    console.log('wandTapped', room.roomKey, person.personKey, timestamp);
     let prng = new Random(timestamp.seconds);
 
-    if (!personKey) {
-      return;
-    }
-
-    let person = this.personController.getPerson(personKey);
     if (!person) {
       return;
     }
@@ -327,22 +288,22 @@ class Canvas extends Component {
     let milliseconds = timestamp.seconds * 1000;
     let dateFromTimestamp = new Date(milliseconds);
     person.setStartTime(dateFromTimestamp);
-    this.hideNameOrReschedule(personKey);
+    this.hideNameOrReschedule(person);
   }
 
   /**
    * Hide the person name if the time has passed.
    * If not, then schedule a timeout to try again with the new time.
    */
-  hideNameOrReschedule(personKey) {
+  hideNameOrReschedule(person) {
     let now = new Date();
-    let hideTime = this.personController.getPerson(personKey).hideNameTime;
+    let hideTime = person.hideNameTime;
     if (now > hideTime) {
-      this.personController.getPerson(personKey).showName = false;
+      person.showName = false;
     } else {
       let delayMs = hideTime.getTime() - now.getTime();
       setTimeout(() => {
-        this.hideNameOrReschedule(personKey);
+        this.hideNameOrReschedule(person);
       }, delayMs);
     }
   }

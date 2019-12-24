@@ -1,7 +1,7 @@
 import { Room } from '../model/Room';
 
 export class Person {
-  constructor(name, image, paths, firstRoom) {
+  constructor(personKey, name, image, paths, firstRoom) {
     if (!(firstRoom instanceof Room)) {
       throw new Error('Unexpected type: Expected Room');
     }
