@@ -17,7 +17,7 @@ export class PathController {
     }
     Object.keys(people).map(personKey => {
       let person = people[personKey];
-      console.log(person);
+      console.log(person.name);
       person.prng = prng;
       person.setPaths([]);
       this.addNRandomPathsToPerson(person, C.INITIAL_PATH_COUNT, prng);
