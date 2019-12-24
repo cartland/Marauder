@@ -11,6 +11,7 @@ export class Person {
     this.room = null;
     this.paths = paths;
     this.prng = null;
+    this.showName = false;
     if (this.firstPath() == null) {
       this.firstRoom = firstRoom;
     } else {

@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import * as firebase from "firebase/app";
 import "firebase/firestore";
 
-import { C } from "./config/C";
 import { generateRooms } from './config/Rooms';
 import { generatePeople } from './config/People';
 import { Random } from './util/Random';
@@ -26,6 +25,7 @@ import { PathController } from './controller/PathController';
 import { RoomController } from './controller/RoomController';
 
 import getViewport from './getViewport.js';
+import { FirebaseController } from './controller/FirebaseController';
 
 class Canvas extends Component {
   state = {
@@ -36,79 +36,27 @@ class Canvas extends Component {
 
   constructor(props) {
     super(props);
-
+    // Renderers.
     this.backgroundRenderer = new BackgroundRenderer();
     this.footstepRenderer = new FootstepRenderer({
       footstepLeft: FootstepLeft,
       footstepRight: FootstepRight
     });
     this.personRenderer = new PersonRenderer();
+    // Controllers.
     this.footstepController = new FootstepController();
     this.roomController = new RoomController(generateRooms());
-    let people = generatePeople(this.roomController.allRooms());
-    this.personController = new PersonController(people, this.footstepController, this.roomController);
+    this.personController = new PersonController(generatePeople(this.roomController.allRooms()), this.footstepController, this.roomController);
     this.pathController = new PathController(this.personController, this.roomController);
-
-    firebase.firestore().collection('nfcUpdates')
-      .where('timestamp', '>', new Date())
-      .onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === "added") {
-            let roomKey = change.doc.get('nfcData').nfcReaderLocation;
-            let personKey = change.doc.get('nfcData').nfcLogicalId;
-            let timestamp = change.doc.get('timestamp');
-
-            // Check to see if this is a reset request.
-            if (personKey === C.RESET_LOGICAL_ID) {
-              window.location.reload();
-              return;
-            }
-            this.wandTapped(
-              this.roomController.getRoom(roomKey),
-              this.personController.getPerson(personKey),
-              timestamp);
-          }
-        });
-      });
-
-    let yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
-    let that = this;
-    firebase.firestore().collection('nfcUpdates')
-      .where('timestamp', '>', yesterday)
-      .orderBy('timestamp', 'desc')
-      .onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === "added") {
-            let personKey = change.doc.get('nfcData').nfcLogicalId;
-            let timestamp = change.doc.get('timestamp');
-
-            // // Check to see if this is a reset request.
-            if (personKey === C.RESET_LOGICAL_ID) {
-              let seconds = timestamp.seconds;
-              if (seconds > that.resetTimestamp) {
-                console.log('Initialize with seed.', seconds);
-                that.resetTimestamp = seconds;
-                let milliseconds = this.resetTimestamp * 1000;
-                let dateFromTimestamp = new Date(milliseconds);
-                console.log('Initializing start time', dateFromTimestamp);
-                let prng = new Random(that.resetTimestamp);
-                that.pathController.initializeAllPaths(this.personController.getPeople(), dateFromTimestamp, prng);
-              } else {
-                console.log('Ignoring old reset.', seconds);
-              }
-              return;
-            }
-          }
-        });
-      });
-
-    let prng = new Random(this.resetTimestamp);
-    this.pathController.initializeAllPaths(this.personController.getPeople(), null, prng);
+    this.pathController.initializeAllPaths(this.personController.getPeople(), null, new Random(this.resetTimestamp));
+    this.firebaseController = new FirebaseController(firebase, this.personController, this.roomController, this.pathController);
+    this.firebaseController.initialize();
+    // Global state.
     this.resetTimestamp = 0;
-
+    this.lastLogicUpdateTime = 0;
+    // Canvas.
     this.canvas = React.createRef();
     this.image = React.createRef();
-    this.lastLogicUpdateTime = 0;
   }
 
   componentDidMount() {
@@ -148,55 +96,6 @@ class Canvas extends Component {
 
   handleOnLoadImage = (e) => {
     this.draw()
-  }
-
-  wandTapped = (room, person, timestamp) => {
-    if (!room) {
-      console.log('Unknown Room for wand tap');
-      return;
-    }
-    if (!person) {
-      console.log('Unknown Person for wand tap');
-      return;
-    }
-    console.log('wandTapped', room.roomKey, person.personKey, timestamp);
-    person.prng = new Random(timestamp.seconds);
-
-    this.movePerson(room, person, timestamp);
-    this.showPerson(person);
-  }
-
-  movePerson = (room, person, timestamp) => {
-    this.pathController.movePersonToRoom(person, room, person.prng);
-    this.pathController.addNRandomPathsToPerson(person, C.INITIAL_PATH_COUNT, person.prng);
-    let milliseconds = timestamp.seconds * 1000;
-    let dateFromTimestamp = new Date(milliseconds);
-    person.setStartTime(dateFromTimestamp);
-  }
-
-  showPerson = (person) => {
-    person.showName = true;
-    let hideTime = new Date();
-    hideTime.setSeconds(hideTime.getSeconds() + C.SHOW_NAME_DURATION_S);
-    person.hideNameTime = hideTime;
-    this.hideNameOrReschedule(person);
-  }
-
-  /**
-   * Hide the person name if the time has passed.
-   * If not, then schedule a timeout to try again with the new time.
-   */
-  hideNameOrReschedule(person) {
-    let now = new Date();
-    let hideTime = person.hideNameTime;
-    if (now > hideTime) {
-      person.showName = false;
-    } else {
-      let delayMs = hideTime.getTime() - now.getTime();
-      setTimeout(() => {
-        this.hideNameOrReschedule(person);
-      }, delayMs);
-    }
   }
 
   draw = () => {

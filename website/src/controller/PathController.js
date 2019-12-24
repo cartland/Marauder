@@ -175,4 +175,28 @@ export class PathController {
       person.setRoom(room);
     }
   }
+
+  movePerson = (room, person, timestamp) => {
+    this.movePersonToRoom(person, room, person.prng);
+    this.addNRandomPathsToPerson(person, C.INITIAL_PATH_COUNT, person.prng);
+    let milliseconds = timestamp.seconds * 1000;
+    let dateFromTimestamp = new Date(milliseconds);
+    person.setStartTime(dateFromTimestamp);
+  }
+
+  wandTapped = (room, person, timestamp) => {
+    if (!room) {
+      console.log('Unknown Room for wand tap');
+      return;
+    }
+    if (!person) {
+      console.log('Unknown Person for wand tap');
+      return;
+    }
+    console.log('wandTapped', room.roomKey, person.personKey, timestamp);
+    person.prng = new Random(timestamp.seconds);
+
+    this.movePerson(room, person, timestamp);
+    this.personController.showPerson(person);
+  }
 }

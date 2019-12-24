@@ -1,3 +1,4 @@
+import { C } from "../config/C";
 import { V } from '../model/Vector2.js';
 import { easeInOutQuad } from 'js-easing-functions';
 
@@ -49,5 +50,30 @@ export class PersonController {
       footstepSize = 24;
     }
     this.footstepController.createFootsteps(centerOfMassLocation, startingLocation, endingLocation, roomDetails, currentTime, duration, footstepSize);
+  }
+
+  showPerson = (person) => {
+    person.showName = true;
+    let hideTime = new Date();
+    hideTime.setSeconds(hideTime.getSeconds() + C.SHOW_NAME_DURATION_S);
+    person.hideNameTime = hideTime;
+    this.hideNameOrReschedule(person);
+  }
+
+  /**
+   * Hide the person name if the time has passed.
+   * If not, then schedule a timeout to try again with the new time.
+   */
+  hideNameOrReschedule = (person) => {
+    let now = new Date();
+    let hideTime = person.hideNameTime;
+    if (now > hideTime) {
+      person.showName = false;
+    } else {
+      let delayMs = hideTime.getTime() - now.getTime();
+      setTimeout(() => {
+        this.hideNameOrReschedule(person);
+      }, delayMs);
+    }
   }
 }
