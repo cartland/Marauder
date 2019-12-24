@@ -4,14 +4,9 @@ import * as firebase from "firebase/app";
 import "firebase/firestore";
 
 import { C } from "./config/C";
-import { V } from './model/Vector2';
 import { generateRooms } from './config/Rooms';
 import { generatePeople } from './config/People';
 import { Random } from './util/Random';
-
-// Model.
-import { Path } from './model/Path';
-import { Door } from './model/Door';
 
 // Background
 import { BackgroundRenderer } from './render/BackgroundRenderer';
