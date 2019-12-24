@@ -137,6 +137,8 @@ export class PathController {
     let newDoorIndex = Math.floor(randomDoorFloat * doorOptions.length);
     let door = doorOptions[newDoorIndex];
     let doorLocation = door.location;
+    let newRoomKey = door.roomKey;
+    let newRoom = this.roomController.getRoom(newRoomKey);
 
     let speed = 560 / 10; // cross the living room in 10 seconds
     let duration = 1000 * this.getDuration(startingLocation, doorLocation, speed);
@@ -144,7 +146,7 @@ export class PathController {
     // First path to door.
     let pathToDoor = new Path(room, startingLocation, doorLocation, duration, undefined);
 
-    let newRoomDoor = Door.doorToRoom(this.roomController.getRoom(door.roomKey).doors, room.roomKey);
+    let newRoomDoor = Door.doorToRoom(newRoom.doors, room.roomKey);
     let otherSideDoorLocation = newRoomDoor.location;
     if (otherSideDoorLocation === undefined) {
       throw new Error(`room ${door.roomKey} does not have a door to ${room.roomKey}`)
@@ -152,7 +154,7 @@ export class PathController {
 
     // Second path from door in new room.
     let pathFromDoor = this.generateRandomPathInRoom(
-      room,
+      newRoom,
       otherSideDoorLocation,
       prng
     );
