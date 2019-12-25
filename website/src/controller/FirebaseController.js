@@ -7,6 +7,7 @@ export class FirebaseController {
     this.personController = personController;
     this.roomController = roomController;
     this.pathController = pathController;
+    this.resetTimestamp = 0;
   }
 
   initialize = () => {
@@ -47,9 +48,8 @@ export class FirebaseController {
             // // Check to see if this is a reset request.
             if (personKey === C.RESET_LOGICAL_ID) {
               if (milliseconds > that.resetTimestamp) {
-                console.log('Initialize with seed.', milliseconds);
+                console.log('Reset using timestamp.', milliseconds);
                 that.resetTimestamp = milliseconds;
-                console.log('Initializing start time', milliseconds);
                 let seed = that.resetTimestamp;
                 that.pathController.initializeAllPaths(this.personController.getPeople(), milliseconds, seed);
               } else {

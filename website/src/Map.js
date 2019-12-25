@@ -48,7 +48,6 @@ class Canvas extends Component {
     this.firebaseController = new FirebaseController(firebase, this.personController, this.roomController, this.pathController);
     this.firebaseController.initialize();
     // Global state.
-    this.resetTimestamp = 0;
     this.lastLogicUpdateTime = 0;
     this.state = {
       // not 4k, but is the same size as the base image
