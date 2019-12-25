@@ -11,11 +11,13 @@ export class Person {
     this.room = null;
     this.paths = paths;
     this.prng = null;
+    this.lastStartTime = null;
+    this.lastPopCount = 0;
     this.showName = false;
-    if (this.firstPath() == null) {
+    if (this.currentPath() == null) {
       this.firstRoom = firstRoom;
     } else {
-      this.firstRoom = this.firstPath().room;
+      this.firstRoom = this.currentPath().room;
     }
     if (this.lastPath() == null) {
       this.lastRoom = null;
@@ -46,7 +48,7 @@ export class Person {
     this.firstRoom = firstRoom;
   }
 
-  firstPath = () => {
+  currentPath = () => {
     if (this.paths.length === 0) {
       return null;
     }
@@ -64,16 +66,17 @@ export class Person {
     this.paths.push(...paths);
     this.lastRoom = this.lastPath().room;
     if (this.paths.length > 0) {
-      let first = this.firstPath();
+      let first = this.currentPath();
       if (first.startedAt) {
-        this.setStartTime(this.firstPath().startedAt);
+        this.setStartTime(this.currentPath().startedAt);
       }
     }
   }
 
   popPath =() => {
-    let returnValue = this.firstPath();
+    let returnValue = this.currentPath();
     this.paths.shift();
+    this.lastPopCount = this.lastPopCount + 1;
     return returnValue;
   }
 
@@ -85,6 +88,8 @@ export class Person {
   }
 
   setStartTime = (startTime) => {
+    this.lastStartTime = startTime;
+    this.lastPopCount = 0;
     let startedAt = startTime;
     for (let i = 0; i < this.paths.length; i++) {
       let path = this.paths[i];

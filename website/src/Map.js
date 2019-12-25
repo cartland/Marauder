@@ -26,6 +26,7 @@ import { RoomController } from './controller/RoomController';
 
 import getViewport from './getViewport.js';
 import { FirebaseController } from './controller/FirebaseController';
+import { PathGenerator } from './generator/PathGenerator';
 
 class Canvas extends Component {
   constructor(props) {
@@ -41,8 +42,9 @@ class Canvas extends Component {
     this.footstepController = new FootstepController();
     this.roomController = new RoomController(generateRooms());
     this.personController = new PersonController(generatePeople(this.roomController.allRooms()), this.footstepController, this.roomController);
-    this.pathController = new PathController(this.personController, this.roomController);
-    this.pathController.initializeAllPaths(this.personController.getPeople(), null, new Random(this.resetTimestamp));
+    this.pathGenerator = new PathGenerator(this.roomController);
+    this.pathController = new PathController(this.pathGenerator, this.personController, this.roomController);
+    this.pathController.initializeAllPaths(this.personController.getPeople(), null, 0);
     this.firebaseController = new FirebaseController(firebase, this.personController, this.roomController, this.pathController);
     this.firebaseController.initialize();
     // Global state.

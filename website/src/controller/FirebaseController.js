@@ -52,8 +52,8 @@ export class FirebaseController {
                 let milliseconds = this.resetTimestamp * 1000;
                 let dateFromTimestamp = new Date(milliseconds);
                 console.log('Initializing start time', dateFromTimestamp);
-                let prng = new Random(that.resetTimestamp);
-                that.pathController.initializeAllPaths(this.personController.getPeople(), dateFromTimestamp, prng);
+                let seed = that.resetTimestamp;
+                that.pathController.initializeAllPaths(this.personController.getPeople(), dateFromTimestamp, seed);
               } else {
                 console.log('Ignoring old reset.', seconds);
               }

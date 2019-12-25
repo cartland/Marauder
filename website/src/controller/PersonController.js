@@ -24,7 +24,7 @@ export class PersonController {
   }
 
   updatePerson = (person, currentTime) => {
-    let currentPath = person.firstPath();
+    let currentPath = person.currentPath();
     if (!currentPath) {
       return;
     }
