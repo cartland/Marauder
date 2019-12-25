@@ -54,9 +54,7 @@ export class PersonController {
 
   showPerson = (person) => {
     person.showName = true;
-    let hideTime = new Date();
-    hideTime.setSeconds(hideTime.getSeconds() + C.SHOW_NAME_DURATION_S);
-    person.hideNameTime = hideTime;
+    person.hideNameTime = new Date().getTime() + C.SHOW_NAME_DURATION_MS;
     this.hideNameOrReschedule(person);
   }
 
@@ -65,12 +63,12 @@ export class PersonController {
    * If not, then schedule a timeout to try again with the new time.
    */
   hideNameOrReschedule = (person) => {
-    let now = new Date();
+    let now = new Date().getTime();
     let hideTime = person.hideNameTime;
     if (now > hideTime) {
       person.showName = false;
     } else {
-      let delayMs = hideTime.getTime() - now.getTime();
+      let delayMs = hideTime - now;
       setTimeout(() => {
         this.hideNameOrReschedule(person);
       }, delayMs);

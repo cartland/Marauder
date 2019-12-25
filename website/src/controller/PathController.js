@@ -86,7 +86,7 @@ export class PathController {
     if ("width" in room) {
       let roomSpawnLocation = room.spawnLocation;
       person.setPaths([
-        new Path(room, roomSpawnLocation, roomSpawnLocation, C.STAND_STILL_DURATION_S * 1000, undefined)
+        new Path(room, roomSpawnLocation, roomSpawnLocation, C.STAND_STILL_DURATION_MS, undefined)
       ]);
       person.setRoom(room);
     }

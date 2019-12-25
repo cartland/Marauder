@@ -4,11 +4,11 @@ export const C = {
   // Left and right feet are offset by a factor of the STEP_DISTANCE.
   STEP_WIDTH_FACTOR: 0.25,
   // Time it takes for a step to fade in milliseconds.
-  STEP_FADE_DURATION: 7 * 1000, // 7 seconds.
+  STEP_FADE_DURATION_MS: 7 * 1000, // 7 seconds.
   // Time to stand still after tapping wand.
-  STAND_STILL_DURATION_S: 10,
+  STAND_STILL_DURATION_MS: 10 * 1000,
   // Time it takes for the name to disappear after wand tap.
-  SHOW_NAME_DURATION_S: 40, // Time in seconds
+  SHOW_NAME_DURATION_MS: 40 * 1000, // Time in seconds
   // Person ID to trigger a web page reset.
   RESET_LOGICAL_ID: 'reset',
   // Time between logic updates.

@@ -101,7 +101,6 @@ class Canvas extends Component {
 
   draw = () => {
     let currentTime = new Date().getTime();
-    console.log(currentTime);
 
     // Updates.
     this.footstepController.updateFootsteps(currentTime);

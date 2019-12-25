@@ -45,7 +45,7 @@ export class FootstepController {
       let distanceSinceStep = centerOfMassLocation.sub(stepLocation).size();
       let timeSinceStep = duration * distanceSinceStep / totalDistance;
 
-      if (timeSinceStep >= C.STEP_FADE_DURATION) {
+      if (timeSinceStep >= C.STEP_FADE_DURATION_MS) {
         continue;
       }
       let stepBeginTime = currentTime - timeSinceStep;
@@ -79,7 +79,7 @@ export class FootstepController {
     for (const [key, footstep] of Object.entries(this.footsteps)) {
       // Opacity is 1.0 if no time has passed fades to 0.0 if C.STEP_FADE_DURATION has passed.
       let timeSinceStep = currentTime - footstep.stepBeginTime;
-      let opacity = Math.max(0, C.STEP_FADE_DURATION - timeSinceStep) / C.STEP_FADE_DURATION; // 0-1.0
+      let opacity = Math.max(0, C.STEP_FADE_DURATION_MS - timeSinceStep) / C.STEP_FADE_DURATION_MS; // 0-1.0
       if (opacity <= 0) {
         this.deleteFootstep(key);
       }
