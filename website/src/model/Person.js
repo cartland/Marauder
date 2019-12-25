@@ -5,6 +5,7 @@ export class Person {
     if (!(firstRoom instanceof Room)) {
       throw new Error('Unexpected type: Expected Room');
     }
+    this.personKey = personKey;
     this.name = name;
     this.image = image;
     this.location = null;
