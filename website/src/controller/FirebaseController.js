@@ -18,6 +18,7 @@ export class FirebaseController {
             let roomKey = change.doc.get('nfcData').nfcReaderLocation;
             let personKey = change.doc.get('nfcData').nfcLogicalId;
             let timestamp = change.doc.get('timestamp');
+            const milliseconds = timestamp.seconds * 1000;
 
             // Check to see if this is a reset request.
             if (personKey === C.RESET_LOGICAL_ID) {
@@ -27,7 +28,7 @@ export class FirebaseController {
             this.pathController.wandTapped(
               this.roomController.getRoom(roomKey),
               this.personController.getPerson(personKey),
-              timestamp);
+              milliseconds);
           }
         });
       });
@@ -42,20 +43,17 @@ export class FirebaseController {
           if (change.type === "added") {
             let personKey = change.doc.get('nfcData').nfcLogicalId;
             let timestamp = change.doc.get('timestamp');
-
+            const milliseconds = timestamp.seconds * 1000;
             // // Check to see if this is a reset request.
             if (personKey === C.RESET_LOGICAL_ID) {
-              let seconds = timestamp.seconds;
-              if (seconds > that.resetTimestamp) {
-                console.log('Initialize with seed.', seconds);
-                that.resetTimestamp = seconds;
-                let milliseconds = this.resetTimestamp * 1000;
-                let dateFromTimestamp = new Date(milliseconds);
-                console.log('Initializing start time', dateFromTimestamp);
+              if (milliseconds > that.resetTimestamp) {
+                console.log('Initialize with seed.', milliseconds);
+                that.resetTimestamp = milliseconds;
+                console.log('Initializing start time', milliseconds);
                 let seed = that.resetTimestamp;
-                that.pathController.initializeAllPaths(this.personController.getPeople(), dateFromTimestamp, seed);
+                that.pathController.initializeAllPaths(this.personController.getPeople(), milliseconds, seed);
               } else {
-                console.log('Ignoring old reset.', seconds);
+                console.log('Ignoring old reset.', milliseconds);
               }
               return;
             }

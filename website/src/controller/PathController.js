@@ -11,7 +11,7 @@ export class PathController {
     this.lastLogicUpdateTime = 0;
   }
 
-  initializeAllPaths = (people, dateFromTimestamp, seed) => {
+  initializeAllPaths = (people, milliseconds, seed) => {
     if (typeof seed !== 'number') {
       throw new Error('Expected seed to be a number');
     }
@@ -20,19 +20,19 @@ export class PathController {
       const prng = new Random(seed + index);
       person.setPaths([]);
       this.addNRandomPathsToPerson(person, C.INITIAL_PATH_COUNT, prng);
-      if (dateFromTimestamp) {
-        person.setStartTime(dateFromTimestamp);
+      if (milliseconds) {
+        person.setStartTime(milliseconds);
       }
     });
   }
 
   updatePaths = (people, currentTime) => {
-    if (currentTime.getTime() - this.lastLogicUpdateTime > C.UPDATE_LOGIC_INTERVAL_MS) {
+    if (currentTime - this.lastLogicUpdateTime > C.UPDATE_LOGIC_INTERVAL_MS) {
       Object.keys(people).map(personKey => {
         this.updatePathForPerson(people[personKey], currentTime);
       })
     }
-    this.lastLogicUpdateTime = currentTime.getTime();
+    this.lastLogicUpdateTime = currentTime;
   }
 
   updatePathForPerson = (person, currentTime) => {
@@ -61,7 +61,7 @@ export class PathController {
     }
   }
 
-  wandTapped = (room, person, timestamp) => {
+  wandTapped = (room, person, milliseconds) => {
     if (!room) {
       console.log('Unknown Room for wand tap');
       return;
@@ -70,18 +70,16 @@ export class PathController {
       console.log('Unknown Person for wand tap');
       return;
     }
-    console.log('wandTapped', room.roomKey, person.personKey, timestamp);
-    this.movePerson(room, person, timestamp);
+    console.log('wandTapped', room.roomKey, person.personKey, milliseconds);
+    this.movePerson(room, person, milliseconds);
     this.personController.showPerson(person);
   }
 
-  movePerson = (room, person, timestamp) => {
-    const prng = new Random(timestamp.seconds);
+  movePerson = (room, person, milliseconds) => {
+    const prng = new Random(milliseconds);
     this.movePersonToRoom(person, room);
     this.addNRandomPathsToPerson(person, C.INITIAL_PATH_COUNT, prng);
-    let milliseconds = timestamp.seconds * 1000;
-    let dateFromTimestamp = new Date(milliseconds);
-    person.setStartTime(dateFromTimestamp);
+    person.setStartTime(milliseconds);
   }
 
   movePersonToRoom = (person, room) => {

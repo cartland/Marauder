@@ -94,11 +94,7 @@ export class Person {
     for (let i = 0; i < this.paths.length; i++) {
       let path = this.paths[i];
       path.startedAt = startedAt;
-
-      let nextTime = new Date(startedAt.getTime());
-      nextTime.setMilliseconds(startedAt.getMilliseconds() + path.duration);
-
-      startedAt = nextTime;
+      startedAt = startedAt + path.duration;
     }
   }
 }
