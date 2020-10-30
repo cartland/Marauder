@@ -1,18 +1,20 @@
-# Run The Website
+# Run and Deploy the Website
 
-@cartland tested on a Macbook Pro with [Homebrew](https://docs.brew.sh/Installation).
+Before you begin:
+* Install [Firebase CLI](https://firebase.google.com/docs/cli/#install-cli-mac-linux)
+  * Configure Firebase Hosting and Cloud Firestore
+* Install [Homebrew](https://docs.brew.sh/Installation)
+* Install Yarn with Homebrew.
+  * `brew install yarn`
 
-Install Yarn with Homebrew.
+Run the web server locally from the `website` directory.
+* `yarn start`
 
-`brew install yarn`
+Build the project from the `website` directory.
+* `yarn build`
 
-Open Termainal and enter the website source code directory.
-
-`cd website`
-
-Run the web server locally.
-
-`yarn start`
+Deploy the project from the project directory. This must be done after building the project, otherwise you will deploy an old version of the website.
+* `firebase deploy`
 
 ![Marauder Map Screenshot](MapScreenshot.jpg)
 

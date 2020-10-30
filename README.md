@@ -19,6 +19,8 @@ Additional photos and a video demonstration are available in this Google Photos 
 
 The experience is powered by a web app and an Android app. If you open the website or the Android app, you will see the Marauder's Map. If you touch an NFC tag to the Android app, it launches the NFC section of the app and registers the wand tap in a Firestore Database. The website listens for changes in the Firestore Database and updates the animation to match the wand location.
 
+* Firestore Datastore - [Firestore Documentation](https://firebase.google.com/docs/firestore)
+  * Database of all NFC tag updates from wands
 * [Website README](website/README.md)
   * Displays the map on an HTML5 canvas
   * Moves characters around the map based on a Firestore Database
@@ -28,6 +30,24 @@ The experience is powered by a web app and an Android app. If you open the websi
   * The app can be used to display the map on Android TV, Android phones, and Android tablets
 
 *Note*: One of the wands is configured with a "reset" value. When the "reset" wand is used, all of the Android webviews are reloaded. This helps during development, because you can deploy a new website and ensure that all of the Anrdoid devices receive the updated web app in a few seconds, without needing to remove any of the Android devices from their wall-moutned picture frames.
+
+# Firebase
+This project uses the following Firebase products:
+* [Firebase Hosting](https://firebase.google.com/docs/hosting)
+* [Cloud Firestore](https://firebase.google.com/docs/firestore)
+
+In order for the NFC tags to affect the map, you will need to configure Firebase. Create a Firebase project and configure Firebase Hosting and Cloud Firestore. You will need to use configuration files from the project to deploy your own app and website.
+* [Firebase Console](https://console.firebase.google.com/)
+
+Update the `firebaseConfig` in `index.js` of the website. This value comes from the *Project settings* -> *Web App* -> *Config*.
+* `website/src/index.js`
+
+Add `google-services.json` from the Firebase Console to the Android project. This value comes from the *Project settings* -> *Android App* -> *google-services.json*.
+* `android/Marauder/app/google-services.json`
+
+Update the `marauder-129.web.app` URL in the following Android files. Use the `PROJECT_ID.web.app` for your project.
+* `android/Marauder/app/src/main/AndroidManifest.xml`
+* `android/Marauder/app/src/main/res/values/strings.xml`
 
 # Party Setup
 

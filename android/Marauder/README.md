@@ -1,4 +1,4 @@
-# Marauder's Map
+# Marauder's Map Android App
 
   * NFC reader publishes wand information to a Firestore Database
   * The app also contains a webview so that Android devices display the HTML5 website
