@@ -23,10 +23,5 @@
         "value": "max-age=1"
       } ]
     } ]
-  },
-  "functions": {
-    "predeploy": [
-      "npm --prefix \"$RESOURCE_DIR\" run lint"
-    ]
   }
 }
