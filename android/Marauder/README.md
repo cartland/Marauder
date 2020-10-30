@@ -40,7 +40,7 @@ The app also supports the custom URI scheme `marauder://`.
   * Select the "Write" tab
   * Select "Add a record"
   * Select "Custom URL / URI"
-  * Type or past `https://marauder-129.web.app/?logicalid=test123`
+  * Type or paste `https://marauder-129.web.app/?logicalid=test123`
     * Replace `test123` with a unique identifier for the NFC tag
     * Replace `https://` with `marauder://` if you want to use the custom scheme
 1. Tap the NFC tag to the NFC sensor on the phone

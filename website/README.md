@@ -1,3 +1,23 @@
+# Run The Website
+
+@cartland tested on a Macbook Pro with [Homebrew](https://docs.brew.sh/Installation).
+
+Install Yarn with Homebrew.
+
+`brew install yarn`
+
+Open Termainal and enter the website source code directory.
+
+`cd website`
+
+Run the web server locally.
+
+`yarn start`
+
+![Marauder Map Screenshot](MapScreenshot.jpg)
+
+# Auto-generated README (@cartland did not use these instructions)
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
