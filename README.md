@@ -13,7 +13,7 @@ Marauder's Map inspired by the magical artifact made famous by Harry Potter.
 
 Additional photos and a video demonstration are available in this Google Photos album: https://photos.app.goo.gl/kNvyvE8LKf88RsGLA
 
-![Marauder Map Screenshot](website/MapScreenshot.jpg)
+![Marauder's Map Animation](MapAnimation.gif)
 
 # Technical Components
 
