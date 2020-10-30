@@ -35,36 +35,36 @@ ScabbersImg.src = ScabbersName;
 
 export function generatePeople(rooms) {
   let people = {
-    stromme: new Person(
-      'stromme',
+    willow: new Person(
+      'willow',
       'The Womping Willow',
       WompingWillowImg,
       [],
-      rooms['stromme_room']
+      rooms['willow_room']
     ),
-    alberto: new Person(
-      'alberto',
+    broom: new Person(
+      'broom',
       'Nimbus 2000',
       Nimbus2000Img,
       [],
-      rooms['alberto_room']
+      rooms['broom_room']
     ),
-    cartland: new Person(
-      'cartland',
+    snitch: new Person(
+      'snitch',
       'Golden Snitch',
       GoldenSnitchImg,
       [],
-      rooms['cartland_room']
+      rooms['snitch_room']
     ),
-    nick: new Person(
-      'nick',
+    portrait: new Person(
+      'portrait',
       'Moving Portrait',
       MovingPortraitImg,
       [],
-      rooms['nick_room']
+      rooms['portrait_room']
     ),
-    tal: new Person(
-      'tal',
+    dobby: new Person(
+      'dobby',
       'Dobby',
       DobbyImg,
       [],
